@@ -4,6 +4,7 @@ namespace HotelBooking.Models
 {
     public class State
     {
+        [Key]
         public int StateID { get; set; }
         [StringLength(50)]
         public string? StateName { get; set; }

@@ -1,16 +1,12 @@
-﻿using System.ComponentModel.DataAnnotations;
-
+﻿using Microsoft.AspNetCore.Identity;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace HotelBooking.Models
 {
-    public class User
+    public class CustomUser : IdentityUser<int>
     {
-        public int UserID { get; set; }
         public int RoleID { get; set; }
-        [StringLength(100)]
-        public string? Email { get; set; }
-        [StringLength(255)]
-        public string? PasswordHash { get; set; }
         public DateTime CreatedAt { get; set; }
         public DateTime? LastLogin { get; set; }
         public bool IsActive { get; set; }
@@ -20,6 +16,8 @@ namespace HotelBooking.Models
         [StringLength(100)]
         public string? ModifiedBy { get; set; }
         public DateTime? ModifiedDate { get; set; }
-        public UserRole? Role { get; set; }
+
+        [ForeignKey("RoleID")]
+        public CustomRole? Role { get; set; }
     }
 }

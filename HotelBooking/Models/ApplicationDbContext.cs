@@ -1,12 +1,11 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using HotelBooking.Models;
-using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
-using System.Diagnostics.Metrics;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+
 
 namespace HotelManagement.Data
 {
-    public class ApplicationDbContext : DbContext
+    public class ApplicationDbContext : IdentityDbContext<CustomUser, CustomRole, int>
     {
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
             : base(options)
@@ -14,8 +13,6 @@ namespace HotelManagement.Data
         }
 
         // DbSet properties for each tableShirtable
-        public DbSet<UserRole> UserRoles { get; set; }
-        public DbSet<User> Users { get; set; }
         public DbSet<Country> Countries { get; set; }
         public DbSet<State> States { get; set; }
         public DbSet<RoomType> RoomTypes { get; set; }
@@ -34,21 +31,39 @@ namespace HotelManagement.Data
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            // UserRoles
-            modelBuilder.Entity<UserRole>()
-                .Property(ur => ur.IsActive)
-                .HasDefaultValue(true);
+            base.OnModelCreating(modelBuilder);          
 
-            // Users
-            modelBuilder.Entity<User>()
+            // Map CustomUser to Users table
+            modelBuilder.Entity<CustomUser>()
+                .ToTable("Users")
+                .Property(u => u.Id)
+                .HasColumnName("UserID");
+            modelBuilder.Entity<CustomUser>()
                 .Property(u => u.CreatedAt)
                 .HasDefaultValueSql("GETDATE()");
-            modelBuilder.Entity<User>()
+            modelBuilder.Entity<CustomUser>()
                 .Property(u => u.IsActive)
                 .HasDefaultValue(true);
-            modelBuilder.Entity<User>()
+            modelBuilder.Entity<CustomUser>()
                 .Property(u => u.CreatedDate)
                 .HasDefaultValueSql("GETDATE()");
+            modelBuilder.Entity<CustomUser>()
+                .HasOne(u => u.Role)
+                .WithMany()
+                .HasForeignKey(u => u.RoleID)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            // Map CustomRole to UserRoles table
+            modelBuilder.Entity<CustomRole>()
+                .ToTable("UserRoles")
+                .Property(r => r.Id)
+                .HasColumnName("RoleID");
+            modelBuilder.Entity<CustomRole>()
+                .Property(r => r.IsActive)
+                .HasDefaultValue(true);
+
+            // Ignore IdentityUserRole<int> to prevent mapping to any table
+            //modelBuilder.Ignore<IdentityUserRole<int>>();
 
             // Countries
             modelBuilder.Entity<Country>()
@@ -59,6 +74,38 @@ namespace HotelManagement.Data
             modelBuilder.Entity<State>()
                 .Property(s => s.IsActive)
                 .HasDefaultValue(true);
+            modelBuilder.Entity<State>()
+                .HasOne(s => s.Country)
+                .WithMany()
+                .HasForeignKey(s => s.CountryID)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            // Guests
+            modelBuilder.Entity<Guest>()
+                .Property(g => g.AgeGroup)
+                .HasConversion<string>()
+                .IsRequired();
+            modelBuilder.Entity<Guest>()
+                .Property(g => g.CreatedDate)
+                .HasDefaultValueSql("GETDATE()");
+            modelBuilder.Entity<Guest>()
+                .ToTable(t => t.HasCheckConstraint("CK_Guests_AgeGroup",
+                    "AgeGroup IN ('Adult', 'Child', 'Infant')"));
+            modelBuilder.Entity<Guest>()
+                .HasOne(g => g.User)
+                .WithMany()
+                .HasForeignKey(g => g.UserID)
+                .OnDelete(DeleteBehavior.Restrict);
+            modelBuilder.Entity<Guest>()
+                .HasOne(g => g.Country)
+                .WithMany()
+                .HasForeignKey(g => g.CountryID)
+                .OnDelete(DeleteBehavior.Restrict);
+            modelBuilder.Entity<Guest>()
+                .HasOne(g => g.State)
+                .WithMany()
+                .HasForeignKey(g => g.StateID)
+                .OnDelete(DeleteBehavior.Restrict);
 
             // RoomTypes
             modelBuilder.Entity<RoomType>()
@@ -83,8 +130,8 @@ namespace HotelManagement.Data
                 .Property(r => r.CreatedDate)
                 .HasDefaultValueSql("GETDATE()");
             modelBuilder.Entity<Room>()
-                .ToTable(t => t.HasCheckConstraint("CK_Rooms_Status","Status IN ('Available', 'Under Maintenance', 'Occupied')"));
-
+                .ToTable(t => t.HasCheckConstraint("CK_Rooms_Status",
+                    "Status IN ('Available', 'Under Maintenance', 'Occupied')"));
 
             // Amenities
             modelBuilder.Entity<Amenity>()
@@ -97,18 +144,6 @@ namespace HotelManagement.Data
             // RoomAmenities (Composite Key)
             modelBuilder.Entity<RoomAmenity>()
                 .HasKey(ra => new { ra.RoomTypeID, ra.AmenityID });
-
-            // Guests
-            modelBuilder.Entity<Guest>()
-                .Property(g => g.AgeGroup)
-                .HasConversion<string>()
-                .IsRequired();
-            modelBuilder.Entity<Guest>()
-                .Property(g => g.CreatedDate)
-                .HasDefaultValueSql("GETDATE()");
-            modelBuilder.Entity<Guest>()
-                .ToTable(t => t.HasCheckConstraint("CK_Guests_AgeGroup","AgeGroup IN ('Adult', 'Child', 'Infant')"));
-
 
             // Reservations
             modelBuilder.Entity<Reservation>()
@@ -128,16 +163,28 @@ namespace HotelManagement.Data
                 .Property(r => r.CreatedDate)
                 .HasDefaultValueSql("GETDATE()");
             modelBuilder.Entity<Reservation>()
-                .ToTable(t => {
-                    t.HasCheckConstraint("CK_Reservations_Status","Status IN ('Reserved', 'Checked-in', 'Checked-out', 'Cancelled')");
-                    t.HasCheckConstraint("CK_Reservations_CheckOutDate","CheckOutDate > CheckInDate");
+                .ToTable(t =>
+                {
+                    t.HasCheckConstraint("CK_Reservations_Status",
+                        "Status IN ('Reserved', 'Checked-in', 'Checked-out', 'Cancelled')");
+                    t.HasCheckConstraint("CK_Reservations_CheckOutDate",
+                        "CheckOutDate > CheckInDate");
                 });
-
+            modelBuilder.Entity<Reservation>()
+                .HasOne(r => r.User)
+                .WithMany()
+                .HasForeignKey(r => r.UserID)
+                .OnDelete(DeleteBehavior.Restrict);
 
             // PaymentBatches
             modelBuilder.Entity<PaymentBatch>()
                 .Property(pb => pb.TotalAmount)
                 .HasColumnType("decimal(10,2)");
+            modelBuilder.Entity<PaymentBatch>()
+                .HasOne(pb => pb.User)
+                .WithMany()
+                .HasForeignKey(pb => pb.UserID)
+                .OnDelete(DeleteBehavior.Restrict);
 
             // Payments
             modelBuilder.Entity<Payment>()
@@ -156,8 +203,8 @@ namespace HotelManagement.Data
                 .Property(c => c.CreatedDate)
                 .HasDefaultValueSql("GETDATE()");
             modelBuilder.Entity<Cancellation>()
-                .ToTable(t => t.HasCheckConstraint("CK_Cancellations_CancellationStatus","CancellationStatus IN ('Pending', 'Approved', 'Denied')"));
-
+                .ToTable(t => t.HasCheckConstraint("CK_Cancellations_CancellationStatus",
+                    "CancellationStatus IN ('Pending', 'Approved', 'Denied')"));
 
             // RefundMethods
             modelBuilder.Entity<RefundMethod>()
@@ -171,13 +218,19 @@ namespace HotelManagement.Data
             modelBuilder.Entity<Refund>()
                 .Property(r => r.RefundDate)
                 .HasDefaultValueSql("GETDATE()");
+            modelBuilder.Entity<Refund>()
+                .HasOne(r => r.ProcessedByUser)
+                .WithMany()
+                .HasForeignKey(r => r.ProcessedByUserID)
+                .OnDelete(DeleteBehavior.Restrict);
 
             // Feedbacks
             modelBuilder.Entity<Feedback>()
                 .Property(f => f.Rating)
                 .IsRequired();
             modelBuilder.Entity<Feedback>()
-                .ToTable(t => t.HasCheckConstraint("CK_Feedbacks_Rating","Rating BETWEEN 1 AND 5"));
+                .ToTable(t => t.HasCheckConstraint("CK_Feedbacks_Rating",
+                    "Rating BETWEEN 1 AND 5"));
         }
     }
-}
+    }

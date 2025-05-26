@@ -19,6 +19,6 @@ namespace HotelBooking.Models
 
         public Payment? Payment { get; set; }
         public RefundMethod? RefundMethod { get; set; }
-        public User? ProcessedByUser { get; set; }
+        public CustomUser? ProcessedByUser { get; set; }
     }
 }

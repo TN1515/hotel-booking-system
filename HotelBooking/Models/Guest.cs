@@ -26,7 +26,7 @@ namespace HotelBooking.Models
         public string? ModifiedBy { get; set; }
         public DateTime? ModifiedDate { get; set; }
 
-        public User? User { get; set; }
+        public CustomUser? User { get; set; }
         public Country? Country { get; set; }
         public State? State { get; set; }
     }

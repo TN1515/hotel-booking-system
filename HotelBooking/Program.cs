@@ -1,3 +1,4 @@
+using HotelBooking.Models;
 using HotelManagement.Data;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -21,15 +22,9 @@ namespace ASPNETCoreIdentityDemo
                 options.UseSqlServer(connectionString));
 
             //Configuration Identity Services
-            builder.Services.AddIdentity<IdentityUser, IdentityRole>()
+            builder.Services.AddIdentity<CustomUser, CustomRole>()
                     .AddEntityFrameworkStores<ApplicationDbContext>();
-
-            // Configure the Application Cookie settings
-            builder.Services.ConfigureApplicationCookie(options =>
-            {
-                // If the LoginPath isn't set, ASP.NET Core defaults the path to /Account/Login.
-                options.LoginPath = "/Account/Login";
-            });
+       
 
             var app = builder.Build();
 

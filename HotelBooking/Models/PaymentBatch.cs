@@ -13,7 +13,7 @@ namespace HotelBooking.Models
         [StringLength(50)]
         public string? PaymentMethod { get; set; }
 
-        public User? User { get; set; }
+        public CustomUser? User { get; set; }
     }
 
 }
