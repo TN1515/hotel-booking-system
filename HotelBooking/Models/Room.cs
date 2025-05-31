@@ -25,5 +25,7 @@ namespace HotelBooking.Models
         public DateTime? ModifiedDate { get; set; }
 
         public RoomType? RoomType { get; set; }
+        public ICollection<RoomAmenity>? RoomAmenities { get; set; }
+        public ICollection<Reservation>? Reservations { get; set; }
     }
 }

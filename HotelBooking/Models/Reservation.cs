@@ -25,5 +25,7 @@ namespace HotelBooking.Models
 
         public CustomUser? User { get; set; }
         public Room? Room { get; set; }
+        public ICollection<ReservationGuest>? ReservationGuests { get; set; }
+        public ICollection<Payment>? Payments { get; set; }
     }
 }

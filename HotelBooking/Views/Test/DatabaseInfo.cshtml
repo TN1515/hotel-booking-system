@@ -1,0 +1,100 @@
+@{
+    ViewData["Title"] = "Database Connection Info";
+}
+
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-10">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h3 class="mb-0">
+                        <i class="fas fa-database me-2"></i>Database Connection Information
+                    </h3>
+                </div>
+                <div class="card-body">
+                    @if (ViewBag.Error != null)
+                    {
+                        <div class="alert alert-danger">
+                            <h5><i class="fas fa-exclamation-triangle me-2"></i>Error:</h5>
+                            <p>@ViewBag.Error</p>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="row">
+                            <div class="col-md-6">
+                                <h5><i class="fas fa-server me-2"></i>Connection Details</h5>
+                                <table class="table table-bordered">
+                                    <tr>
+                                        <td><strong>Server Name:</strong></td>
+                                        <td class="text-success">@ViewBag.ServerName</td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Database Name:</strong></td>
+                                        <td class="text-success">@ViewBag.DatabaseName</td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Connection Status:</strong></td>
+                                        <td>
+                                            @if (ViewBag.CanConnect)
+                                            {
+                                                <span class="badge bg-success">
+                                                    <i class="fas fa-check me-1"></i>Connected
+                                                </span>
+                                            }
+                                            else
+                                            {
+                                                <span class="badge bg-danger">
+                                                    <i class="fas fa-times me-1"></i>Disconnected
+                                                </span>
+                                            }
+                                        </td>
+                                    </tr>
+                                </table>
+                            </div>
+                            <div class="col-md-6">
+                                <h5><i class="fas fa-chart-bar me-2"></i>Data Statistics</h5>
+                                <table class="table table-bordered">
+                                    <tr>
+                                        <td><strong>Rooms:</strong></td>
+                                        <td class="text-info">@ViewBag.RoomCount records</td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Users:</strong></td>
+                                        <td class="text-info">@ViewBag.UserCount records</td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Roles:</strong></td>
+                                        <td class="text-info">@ViewBag.RoleCount records</td>
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>
+
+                        <div class="mt-4">
+                            <h5><i class="fas fa-link me-2"></i>Connection String</h5>
+                            <div class="alert alert-info">
+                                <code>@ViewBag.ConnectionString</code>
+                            </div>
+                        </div>
+
+                        <div class="mt-4">
+                            <h5><i class="fas fa-check-circle me-2"></i>Verification</h5>
+                            <div class="alert alert-success">
+                                <p class="mb-0">
+                                    <strong>✅ Confirmed:</strong> This application is successfully connected to your SQL Server database 
+                                    <strong>@ViewBag.ServerName\@ViewBag.DatabaseName</strong> and can read/write data.
+                                </p>
+                            </div>
+                        </div>
+                    }
+                </div>
+                <div class="card-footer">
+                    <a href="/" class="btn btn-primary">
+                        <i class="fas fa-home me-2"></i>Back to Home
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

@@ -19,5 +19,7 @@ namespace HotelBooking.Models
 
         [ForeignKey("RoleID")]
         public CustomRole? Role { get; set; }
+        public ICollection<UserRole>? UserRoles { get; set; }
+        public ICollection<Reservation>? Reservations { get; set; }
     }
 }

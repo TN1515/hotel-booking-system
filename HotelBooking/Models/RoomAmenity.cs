@@ -2,10 +2,10 @@
 {
     public class RoomAmenity
     {
-        public int RoomTypeID { get; set; }
+        public int RoomID { get; set; }
         public int AmenityID { get; set; }
 
-        public RoomType? RoomType { get; set; }
+        public Room? Room { get; set; }
         public Amenity? Amenity { get; set; }
     }
 }

@@ -6,7 +6,7 @@ namespace HotelBooking.Models
     {
         public int AmenityID { get; set; }
         [StringLength(100)]
-        public string? Name { get; set; }
+        public string? AmenityName { get; set; }
         [StringLength(255)]
         public string? Description { get; set; }
         public bool IsActive { get; set; }
@@ -16,5 +16,7 @@ namespace HotelBooking.Models
         [StringLength(100)]
         public string? ModifiedBy { get; set; }
         public DateTime? ModifiedDate { get; set; }
+
+        public ICollection<RoomAmenity>? RoomAmenities { get; set; }
     }
 }

@@ -3,13 +3,9 @@ using Microsoft.AspNetCore.Identity;
 
 namespace HotelBooking.Models
 {
-    public class UserRole
+    public class UserRole : IdentityUserRole<int>
     {
-        public int RoleID { get; set; }
-        [StringLength(50)]
-        public string? RoleName { get; set; }
-        public bool IsActive { get; set; }
-        [StringLength(255)]
-        public string? Description { get; set; }
+        public CustomUser? User { get; set; }
+        public CustomRole? Role { get; set; }
     }
 }

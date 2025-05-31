@@ -12,6 +12,8 @@ namespace HotelBooking.Models
         public string? Reason { get; set; }
         [Column(TypeName = "decimal(10,2)")]
         public decimal CancellationFee { get; set; }
+        [Column(TypeName = "decimal(10,2)")]
+        public decimal RefundAmount { get; set; }
         public string? CancellationStatus { get; set; }
         [StringLength(100)]
         public string? CreatedBy { get; set; }

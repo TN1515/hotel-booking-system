@@ -29,6 +29,7 @@ namespace HotelBooking.Models
         public CustomUser? User { get; set; }
         public Country? Country { get; set; }
         public State? State { get; set; }
+        public ICollection<ReservationGuest>? ReservationGuests { get; set; }
     }
 
 }
