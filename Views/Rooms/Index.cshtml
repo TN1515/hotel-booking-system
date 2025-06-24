@@ -1,0 +1,409 @@
+@model IEnumerable<HotelBooking.Models.Room>
+@{
+    ViewData["Title"] = "All Rooms";
+}
+
+<div class="container">
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <h1 class="display-5">All Rooms</h1>
+            <p class="lead">Browse our available rooms and find your perfect stay</p>
+        </div>
+        <div class="col-md-4 text-end">
+            @if (User.IsInRole("Admin") || User.IsInRole("Staff"))
+            {
+                <a asp-action="Create" class="btn btn-success btn-lg me-2">
+                    <i class="fas fa-plus"></i> Add Room
+                </a>
+            }
+            <a asp-action="Search" class="btn btn-primary btn-lg">
+                <i class="fas fa-search"></i> Advanced Search
+            </a>
+        </div>
+    </div>
+
+    <!-- Quick Search Form -->
+    <div class="card mb-4 shadow-sm">
+        <div class="card-body">
+            <form method="post" asp-action="Search" class="row g-3">
+                <div class="col-md-3">
+                    <label class="form-label fw-bold">Check-in Date</label>
+                    <input type="date" name="checkIn" class="form-control" value="@DateTime.Today.AddDays(1).ToString("yyyy-MM-dd")" required>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label fw-bold">Check-out Date</label>
+                    <input type="date" name="checkOut" class="form-control" value="@DateTime.Today.AddDays(2).ToString("yyyy-MM-dd")" required>
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label fw-bold">Guests</label>
+                    <select name="guests" class="form-select" required>
+                        <option value="1">1 Guest</option>
+                        <option value="2" selected>2 Guests</option>
+                        <option value="3">3 Guests</option>
+                        <option value="4">4 Guests</option>
+                        <option value="5">5+ Guests</option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label fw-bold">Max Price</label>
+                    <input type="number" name="maxPrice" class="form-control" placeholder="Any" min="0" step="10">
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label">&nbsp;</label>
+                    <button type="submit" class="btn btn-primary w-100">
+                        <i class="fas fa-search me-2"></i>Search
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Multiple Booking Section -->
+    @if (User.Identity!.IsAuthenticated)
+    {
+        <div class="alert alert-info d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <i class="fas fa-info-circle me-2"></i>
+                <strong>Booking Multiple Rooms?</strong> Select rooms below and use bulk booking feature.
+            </div>
+            <div>
+                <button type="button" class="btn btn-success" onclick="toggleMultipleBooking()">
+                    <i class="fas fa-check-square me-2"></i>Select Multiple Rooms
+                </button>
+                <button type="button" class="btn btn-primary ms-2" id="bookSelectedBtn" style="display:none;" onclick="bookSelectedRooms()">
+                    <i class="fas fa-calendar-plus me-2"></i>Book Selected (<span id="selectedCount">0</span>)
+                </button>
+            </div>
+        </div>
+    }
+
+    <div class="row" id="roomsContainer">
+        @foreach (var room in Model)
+        {
+            <div class="col-lg-4 col-md-6 mb-4">
+                <div class="card h-100 shadow-sm room-card" data-room-id="@room.RoomID" data-room-price="@room.Price">
+                    <!-- Multiple Selection Checkbox -->
+                    <!-- Room Image -->
+                    @if (room.RoomImages?.Any() == true)
+                    {
+                        var firstImage = room.RoomImages.First();
+                        <div class="room-image-container">
+                            @if (firstImage.ImageData != null)
+                            {
+                                <img src="data:image/jpeg;base64,@Convert.ToBase64String(firstImage.ImageData)"
+                                     alt="Room @room.RoomNumber" class="card-img-top room-image">
+                            }
+                            else if (!string.IsNullOrEmpty(firstImage.ImagePath))
+                            {
+                                <img src="@firstImage.ImagePath"
+                                     alt="Room @room.RoomNumber" class="card-img-top room-image">
+                            }
+                            else
+                            {
+                                <div class="no-image-placeholder">
+                                    <i class="fas fa-bed fa-3x text-muted"></i>
+                                    <p class="text-muted mt-2">No Image Available</p>
+                                </div>
+                            }
+                            @if (room.RoomImages.Count > 1)
+                            {
+                                <div class="image-count-badge">
+                                    <i class="fas fa-images"></i> @room.RoomImages.Count
+                                </div>
+                            }
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="room-image-container">
+                            <div class="no-image-placeholder">
+                                <i class="fas fa-bed fa-3x text-muted"></i>
+                                <p class="text-muted mt-2">No Image Available</p>
+                            </div>
+                        </div>
+                    }
+
+                    <!-- Multiple Selection Checkbox -->
+                    <div class="room-selection-checkbox" style="display:none;">
+                        <div class="position-absolute top-0 start-0 m-2">
+                            <input type="checkbox" class="form-check-input room-checkbox" value="@room.RoomID"
+                                   data-room-number="@room.RoomNumber" data-room-type="@room.RoomType?.TypeName"
+                                   data-room-price="@room.Price" style="transform: scale(1.5);">
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-start mb-3">
+                            <h5 class="card-title mb-0">Room @room.RoomNumber</h5>
+                            <span class="badge bg-success">@room.Status</span>
+                        </div>
+                        
+                        <h6 class="card-subtitle mb-3 text-primary">@room.RoomType?.TypeName</h6>
+                        
+                        <div class="room-details mb-3">
+                            <div class="row text-center">
+                                <div class="col-6">
+                                    <small class="text-muted d-block">Bed Type</small>
+                                    <strong>@room.BedType</strong>
+                                </div>
+                                <div class="col-6">
+                                    <small class="text-muted d-block">View</small>
+                                    <strong>@room.ViewType</strong>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <small class="text-muted">Max Occupancy</small>
+                            <div><strong>@room.RoomType?.MaxOccupancy guests</strong></div>
+                        </div>
+
+                        <div class="price-section mb-3">
+                            <span class="h4 text-primary fw-bold">$@room.Price</span>
+                            <small class="text-muted">per night</small>
+                        </div>
+                    </div>
+                    
+                    <div class="card-footer bg-transparent">
+                        <div class="d-grid gap-2">
+                            <a asp-action="Details" asp-route-id="@room.RoomID" class="btn btn-outline-primary">
+                                View Details
+                            </a>
+                            @if (User.IsInRole("Admin") || User.IsInRole("Staff"))
+                            {
+                                <div class="btn-group" role="group">
+                                    <a asp-action="Edit" asp-route-id="@room.RoomID" class="btn btn-warning btn-sm">
+                                        <i class="fas fa-edit"></i> Edit
+                                    </a>
+                                    @if (User.IsInRole("Admin"))
+                                    {
+                                        <a asp-action="Delete" asp-route-id="@room.RoomID" class="btn btn-danger btn-sm"
+                                           onclick="return confirm('Are you sure you want to delete this room?')">
+                                            <i class="fas fa-trash"></i> Delete
+                                        </a>
+                                    }
+                                </div>
+                            }
+                            @if (room.Status == "Available")
+                            {
+                                <a asp-action="Book" asp-route-id="@room.RoomID" class="btn btn-primary">
+                                    Book Now
+                                </a>
+                            }
+                            else
+                            {
+                                <button class="btn btn-secondary" disabled>Not Available</button>
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+
+    @if (!Model.Any())
+    {
+        <div class="text-center py-5">
+            <div class="mb-4">
+                <i class="fas fa-bed fa-3x text-muted"></i>
+            </div>
+            <h3 class="text-muted">No rooms available</h3>
+            <p class="text-muted">Please check back later or contact us for assistance.</p>
+            <a asp-controller="Home" asp-action="Index" class="btn btn-primary">Back to Home</a>
+        </div>
+    }
+</div>
+
+<style>
+.room-card {
+    transition: transform 0.2s ease-in-out;
+    overflow: hidden;
+}
+
+.room-card:hover {
+    transform: translateY(-5px);
+}
+
+.room-image-container {
+    position: relative;
+    height: 250px;
+    overflow: hidden;
+}
+
+.room-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.3s ease;
+}
+
+.room-card:hover .room-image {
+    transform: scale(1.05);
+}
+
+.no-image-placeholder {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+}
+
+.image-count-badge {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: rgba(0,0,0,0.7);
+    color: white;
+    padding: 5px 10px;
+    border-radius: 15px;
+    font-size: 0.8rem;
+    font-weight: 600;
+}
+
+.price-section {
+    border-top: 1px solid #dee2e6;
+    padding-top: 1rem;
+}
+
+.room-details {
+    background-color: #f8f9fa;
+    padding: 1rem;
+    border-radius: 0.375rem;
+}
+
+.room-card.selected {
+    border: 3px solid #007bff;
+    box-shadow: 0 0 15px rgba(0,123,255,0.3);
+}
+
+.multiple-booking-mode .room-card {
+    cursor: pointer;
+}
+
+.multiple-booking-mode .room-card:hover {
+    border-color: #007bff;
+}
+
+.room-selection-checkbox {
+    z-index: 10;
+}
+</style>
+
+<script>
+let multipleBookingMode = false;
+let selectedRooms = [];
+
+function toggleMultipleBooking() {
+    multipleBookingMode = !multipleBookingMode;
+    const checkboxes = document.querySelectorAll('.room-selection-checkbox');
+    const container = document.getElementById('roomsContainer');
+    const bookBtn = document.getElementById('bookSelectedBtn');
+
+    if (multipleBookingMode) {
+        checkboxes.forEach(cb => cb.style.display = 'block');
+        container.classList.add('multiple-booking-mode');
+        bookBtn.style.display = 'inline-block';
+        document.querySelector('button[onclick="toggleMultipleBooking()"]').innerHTML =
+            '<i class="fas fa-times me-2"></i>Cancel Selection';
+        document.querySelector('button[onclick="toggleMultipleBooking()"]').className = 'btn btn-secondary';
+    } else {
+        checkboxes.forEach(cb => cb.style.display = 'none');
+        container.classList.remove('multiple-booking-mode');
+        bookBtn.style.display = 'none';
+        selectedRooms = [];
+        updateSelectedCount();
+        document.querySelectorAll('.room-checkbox').forEach(cb => cb.checked = false);
+        document.querySelectorAll('.room-card').forEach(card => card.classList.remove('selected'));
+        document.querySelector('button[onclick="toggleMultipleBooking()"]').innerHTML =
+            '<i class="fas fa-check-square me-2"></i>Select Multiple Rooms';
+        document.querySelector('button[onclick="toggleMultipleBooking()"]').className = 'btn btn-success';
+    }
+}
+
+function updateSelectedCount() {
+    document.getElementById('selectedCount').textContent = selectedRooms.length;
+}
+
+function bookSelectedRooms() {
+    if (selectedRooms.length === 0) {
+        alert('Please select at least one room to book.');
+        return;
+    }
+
+    // Create a form to submit multiple room bookings
+    const form = document.createElement('form');
+    form.method = 'POST';
+    form.action = '@Url.Action("BookMultiple", "Rooms")';
+
+    // Add anti-forgery token
+    const token = document.querySelector('input[name="__RequestVerificationToken"]');
+    if (token) {
+        const tokenInput = document.createElement('input');
+        tokenInput.type = 'hidden';
+        tokenInput.name = '__RequestVerificationToken';
+        tokenInput.value = token.value;
+        form.appendChild(tokenInput);
+    }
+
+    // Add selected room IDs
+    selectedRooms.forEach((roomId, index) => {
+        const input = document.createElement('input');
+        input.type = 'hidden';
+        input.name = `roomIds[${index}]`;
+        input.value = roomId;
+        form.appendChild(input);
+    });
+
+    document.body.appendChild(form);
+    form.submit();
+}
+
+// Handle room card clicks in multiple booking mode
+document.addEventListener('DOMContentLoaded', function() {
+    document.querySelectorAll('.room-card').forEach(card => {
+        card.addEventListener('click', function(e) {
+            if (!multipleBookingMode) return;
+
+            const checkbox = this.querySelector('.room-checkbox');
+            const roomId = this.dataset.roomId;
+
+            if (e.target.type !== 'checkbox') {
+                checkbox.checked = !checkbox.checked;
+            }
+
+            if (checkbox.checked) {
+                this.classList.add('selected');
+                if (!selectedRooms.includes(roomId)) {
+                    selectedRooms.push(roomId);
+                }
+            } else {
+                this.classList.remove('selected');
+                selectedRooms = selectedRooms.filter(id => id !== roomId);
+            }
+
+            updateSelectedCount();
+        });
+    });
+
+    // Handle checkbox changes
+    document.querySelectorAll('.room-checkbox').forEach(checkbox => {
+        checkbox.addEventListener('change', function() {
+            const card = this.closest('.room-card');
+            const roomId = card.dataset.roomId;
+
+            if (this.checked) {
+                card.classList.add('selected');
+                if (!selectedRooms.includes(roomId)) {
+                    selectedRooms.push(roomId);
+                }
+            } else {
+                card.classList.remove('selected');
+                selectedRooms = selectedRooms.filter(id => id !== roomId);
+            }
+
+            updateSelectedCount();
+        });
+    });
+});
+</script>

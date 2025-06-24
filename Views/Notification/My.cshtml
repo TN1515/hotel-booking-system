@@ -1,0 +1,286 @@
+@model HotelBooking.Models.ViewModels.MyNotificationsViewModel
+@{
+    ViewData["Title"] = "My Notifications";
+}
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="card shadow-sm">
+                <div class="card-header bg-primary text-white">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h4 class="mb-0">
+                            <i class="fas fa-bell me-2"></i>My Notifications
+                        </h4>
+                        <div class="d-flex align-items-center">
+                            <span class="badge bg-warning text-dark me-2">
+                                @Model.UnreadCount Unread
+                            </span>
+                            <span class="badge bg-light text-dark">
+                                @Model.TotalNotifications Total
+                            </span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card-body">
+                    @if (Model.Notifications != null && Model.Notifications.Any())
+                    {
+                        <div class="notification-list">
+                            @foreach (var notification in Model.Notifications)
+                            {
+                                <div class="notification-item @(notification.IsRead ? "read" : "unread")" data-id="@notification.NotificationID">
+                                    <div class="d-flex">
+                                        <div class="notification-icon me-3">
+                                            @switch (notification.Type?.ToLower())
+                                            {
+                                                case "booking":
+                                                    <i class="fas fa-calendar-check text-success fa-2x"></i>
+                                                    break;
+                                                case "payment":
+                                                    <i class="fas fa-credit-card text-info fa-2x"></i>
+                                                    break;
+                                                case "system":
+                                                    <i class="fas fa-cog text-secondary fa-2x"></i>
+                                                    break;
+                                                case "promotion":
+                                                    <i class="fas fa-gift text-warning fa-2x"></i>
+                                                    break;
+                                                default:
+                                                    <i class="fas fa-bell text-primary fa-2x"></i>
+                                                    break;
+                                            }
+                                        </div>
+                                        <div class="notification-content flex-grow-1">
+                                            <div class="d-flex justify-content-between align-items-start">
+                                                <h6 class="notification-title mb-1">@notification.Title</h6>
+                                                <div class="notification-meta">
+                                                    <small class="text-muted">@notification.CreatedDate.ToString("MMM dd, yyyy HH:mm")</small>
+                                                    @if (!notification.IsRead)
+                                                    {
+                                                        <span class="badge bg-primary ms-2">New</span>
+                                                    }
+                                                </div>
+                                            </div>
+                                            <p class="notification-message mb-2">@notification.Message</p>
+                                            <div class="notification-actions">
+                                                @if (!notification.IsRead)
+                                                {
+                                                    <button class="btn btn-sm btn-outline-primary mark-read-btn" data-id="@notification.NotificationID">
+                                                        <i class="fas fa-check me-1"></i>Mark as Read
+                                                    </button>
+                                                }
+                                                <span class="badge bg-light text-dark ms-2">@notification.Type</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+
+                        <!-- Pagination -->
+                        @if (Model.TotalPages > 1)
+                        {
+                            <nav aria-label="Notifications pagination" class="mt-4">
+                                <ul class="pagination justify-content-center">
+                                    @if (Model.CurrentPage > 1)
+                                    {
+                                        <li class="page-item">
+                                            <a class="page-link" href="@Url.Action("My", new { page = Model.CurrentPage - 1 })">
+                                                <i class="fas fa-chevron-left"></i> Previous
+                                            </a>
+                                        </li>
+                                    }
+
+                                    @for (int i = Math.Max(1, Model.CurrentPage - 2); i <= Math.Min(Model.TotalPages, Model.CurrentPage + 2); i++)
+                                    {
+                                        <li class="page-item @(i == Model.CurrentPage ? "active" : "")">
+                                            <a class="page-link" href="@Url.Action("My", new { page = i })">@i</a>
+                                        </li>
+                                    }
+
+                                    @if (Model.CurrentPage < Model.TotalPages)
+                                    {
+                                        <li class="page-item">
+                                            <a class="page-link" href="@Url.Action("My", new { page = Model.CurrentPage + 1 })">
+                                                Next <i class="fas fa-chevron-right"></i>
+                                            </a>
+                                        </li>
+                                    }
+                                </ul>
+                            </nav>
+                        }
+                    }
+                    else
+                    {
+                        <div class="text-center py-5">
+                            <i class="fas fa-bell-slash fa-4x text-muted mb-3"></i>
+                            <h5 class="text-muted">No notifications yet</h5>
+                            <p class="text-muted">You'll see your notifications here when you receive them.</p>
+                            <a href="@Url.Action("Index", "Home")" class="btn btn-primary">
+                                <i class="fas fa-home me-2"></i>Go to Dashboard
+                            </a>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .notification-item {
+        border: 1px solid #e9ecef;
+        border-radius: 8px;
+        padding: 20px;
+        margin-bottom: 15px;
+        transition: all 0.3s ease;
+        cursor: pointer;
+    }
+
+    .notification-item:hover {
+        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        transform: translateY(-2px);
+    }
+
+    .notification-item.unread {
+        background-color: #f8f9ff;
+        border-left: 4px solid #007bff;
+    }
+
+    .notification-item.read {
+        background-color: #ffffff;
+        border-left: 4px solid #e9ecef;
+    }
+
+    .notification-title {
+        font-weight: 600;
+        color: #333;
+    }
+
+    .notification-message {
+        color: #666;
+        line-height: 1.5;
+    }
+
+    .notification-icon {
+        min-width: 60px;
+        text-align: center;
+    }
+
+    .notification-meta {
+        text-align: right;
+    }
+
+    .mark-read-btn {
+        transition: all 0.2s ease;
+    }
+
+    .mark-read-btn:hover {
+        transform: scale(1.05);
+    }
+
+    .notification-actions {
+        margin-top: 10px;
+    }
+
+    .badge {
+        font-size: 0.75em;
+    }
+
+    .pagination .page-link {
+        color: #007bff;
+        border: 1px solid #dee2e6;
+    }
+
+    .pagination .page-item.active .page-link {
+        background-color: #007bff;
+        border-color: #007bff;
+    }
+</style>
+
+<script>
+    $(document).ready(function() {
+        // Mark notification as read
+        $('.mark-read-btn').click(function(e) {
+            e.stopPropagation();
+            var notificationId = $(this).data('id');
+            var button = $(this);
+            var notificationItem = button.closest('.notification-item');
+
+            $.ajax({
+                url: '@Url.Action("MarkAsRead", "Notification")',
+                type: 'POST',
+                data: {
+                    id: notificationId,
+                    __RequestVerificationToken: $('input[name="__RequestVerificationToken"]').val()
+                },
+                success: function(response) {
+                    if (response.success) {
+                        // Update UI
+                        notificationItem.removeClass('unread').addClass('read');
+                        button.remove();
+                        
+                        // Update badge in header
+                        var currentCount = parseInt($('.notification-badge').text()) || 0;
+                        if (currentCount > 0) {
+                            $('.notification-badge').text(currentCount - 1);
+                            if (currentCount - 1 === 0) {
+                                $('.notification-badge').hide();
+                            }
+                        }
+                        
+                        // Update unread count on page
+                        var unreadBadge = $('.badge.bg-warning');
+                        var currentUnread = parseInt(unreadBadge.text().split(' ')[0]) || 0;
+                        if (currentUnread > 0) {
+                            unreadBadge.text((currentUnread - 1) + ' Unread');
+                        }
+                        
+                        // Show success message
+                        showToast('Notification marked as read', 'success');
+                    } else {
+                        showToast('Failed to mark notification as read', 'error');
+                    }
+                },
+                error: function() {
+                    showToast('An error occurred', 'error');
+                }
+            });
+        });
+
+        // Click on notification item to mark as read
+        $('.notification-item.unread').click(function() {
+            var markReadBtn = $(this).find('.mark-read-btn');
+            if (markReadBtn.length > 0) {
+                markReadBtn.click();
+            }
+        });
+    });
+
+    function showToast(message, type) {
+        var toastClass = type === 'success' ? 'bg-success' : 'bg-danger';
+        var toast = $(`
+            <div class="toast align-items-center text-white ${toastClass} border-0" role="alert" aria-live="assertive" aria-atomic="true">
+                <div class="d-flex">
+                    <div class="toast-body">
+                        ${message}
+                    </div>
+                    <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+                </div>
+            </div>
+        `);
+        
+        if ($('.toast-container').length === 0) {
+            $('body').append('<div class="toast-container position-fixed top-0 end-0 p-3"></div>');
+        }
+        
+        $('.toast-container').append(toast);
+        var bsToast = new bootstrap.Toast(toast[0]);
+        bsToast.show();
+    }
+</script>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+}

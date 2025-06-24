@@ -1,0 +1,342 @@
+@model SystemStatsViewModel
+@{
+    ViewData["Title"] = "System Statistics";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<div class="container-fluid">
+    <!-- Page Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h1 class="h3 mb-0 text-gray-800">
+                        <i class="fas fa-chart-pie me-2"></i>System Statistics
+                    </h1>
+                    <p class="text-muted mb-0">Comprehensive system performance and usage statistics</p>
+                </div>
+                <div>
+                    <button class="btn btn-primary" onclick="refreshStats()">
+                        <i class="fas fa-sync-alt me-2"></i>Refresh
+                    </button>
+                    <button class="btn btn-success" onclick="exportStats()">
+                        <i class="fas fa-download me-2"></i>Export
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Statistics Cards -->
+    <div class="row mb-4">
+        <!-- Users Statistics -->
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-primary shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                                Total Users
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">@Model.TotalUsers.ToString("N0")</div>
+                            <div class="text-xs text-success">
+                                <i class="fas fa-user-check me-1"></i>@Model.ActiveUsers Active
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-users fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Rooms Statistics -->
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-success shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
+                                Total Rooms
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">@Model.TotalRooms.ToString("N0")</div>
+                            <div class="text-xs text-info">
+                                <i class="fas fa-bed me-1"></i>@Model.AvailableRooms Available
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-bed fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Reservations Statistics -->
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-info shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-info text-uppercase mb-1">
+                                Total Reservations
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">@Model.TotalReservations.ToString("N0")</div>
+                            <div class="text-xs text-warning">
+                                <i class="fas fa-calendar-plus me-1"></i>@Model.TodayReservations Today
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-calendar-check fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Revenue Statistics -->
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-warning shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
+                                Total Revenue
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">@Model.TotalRevenue.ToString("C0")</div>
+                            <div class="text-xs text-success">
+                                <i class="fas fa-chart-line me-1"></i>@Model.MonthlyRevenue.ToString("C0") This Month
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-dollar-sign fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Detailed Statistics -->
+    <div class="row">
+        <!-- Services & Notifications -->
+        <div class="col-lg-6 mb-4">
+            <div class="card shadow">
+                <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                    <h6 class="m-0 font-weight-bold text-primary">Services & Notifications</h6>
+                    <div class="dropdown no-arrow">
+                        <a class="dropdown-toggle" href="#" role="button" id="dropdownMenuLink" data-bs-toggle="dropdown">
+                            <i class="fas fa-ellipsis-v fa-sm fa-fw text-gray-400"></i>
+                        </a>
+                        <div class="dropdown-menu dropdown-menu-right shadow">
+                            <a class="dropdown-item" href="@Url.Action("Index", "Services")">Manage Services</a>
+                            <a class="dropdown-item" href="@Url.Action("Index", "Notification")">Manage Notifications</a>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-6">
+                            <div class="text-center mb-4">
+                                <div class="text-primary mb-2">
+                                    <i class="fas fa-concierge-bell fa-3x"></i>
+                                </div>
+                                <h4 class="font-weight-bold text-primary">@Model.TotalServices</h4>
+                                <p class="text-muted mb-0">Total Services</p>
+                                <small class="text-success">@Model.ActiveServices Active</small>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="text-center mb-4">
+                                <div class="text-info mb-2">
+                                    <i class="fas fa-bell fa-3x"></i>
+                                </div>
+                                <h4 class="font-weight-bold text-info">@Model.TotalNotifications</h4>
+                                <p class="text-muted mb-0">Total Notifications</p>
+                                <small class="text-warning">@Model.UnreadNotifications Unread</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Payment Statistics -->
+        <div class="col-lg-6 mb-4">
+            <div class="card shadow">
+                <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                    <h6 class="m-0 font-weight-bold text-primary">Payment Statistics</h6>
+                    <div class="dropdown no-arrow">
+                        <a class="dropdown-toggle" href="#" role="button" id="dropdownMenuLink2" data-bs-toggle="dropdown">
+                            <i class="fas fa-ellipsis-v fa-sm fa-fw text-gray-400"></i>
+                        </a>
+                        <div class="dropdown-menu dropdown-menu-right shadow">
+                            <a class="dropdown-item" href="@Url.Action("PaymentManagement", "Admin")">Payment Management</a>
+                            <a class="dropdown-item" href="@Url.Action("Index", "QRPayment")">QR Payments</a>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-12 mb-3">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <span class="text-muted">Total Payments</span>
+                                <span class="font-weight-bold text-success">@Model.TotalPayments.ToString("C0")</span>
+                            </div>
+                            <div class="progress mt-2" style="height: 8px;">
+                                <div class="progress-bar bg-success" style="width: 100%"></div>
+                            </div>
+                        </div>
+                        <div class="col-12 mb-3">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <span class="text-muted">Completed Payments</span>
+                                <span class="font-weight-bold text-primary">@Model.CompletedPayments.ToString("C0")</span>
+                            </div>
+                            <div class="progress mt-2" style="height: 8px;">
+                                <div class="progress-bar bg-primary" style="width: @Model.PaymentCompletionRate.ToString("F0")%"></div>
+                            </div>
+                        </div>
+                        <div class="col-12">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <span class="text-muted">Pending Payments</span>
+                                <span class="font-weight-bold text-warning">@Model.PendingPayments.ToString("C0")</span>
+                            </div>
+                            <div class="progress mt-2" style="height: 8px;">
+                                <div class="progress-bar bg-warning" style="width: @((100 - Model.PaymentCompletionRate).ToString("F0"))%"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Performance Metrics -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card shadow">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Performance Metrics</h6>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-lg-3 col-md-6 mb-4">
+                            <div class="text-center">
+                                <div class="text-success mb-2">
+                                    <i class="fas fa-percentage fa-2x"></i>
+                                </div>
+                                <h4 class="font-weight-bold text-success">@Model.OccupancyRate.ToString("F1")%</h4>
+                                <p class="text-muted mb-0">Room Occupancy Rate</p>
+                            </div>
+                        </div>
+                        <div class="col-lg-3 col-md-6 mb-4">
+                            <div class="text-center">
+                                <div class="text-info mb-2">
+                                    <i class="fas fa-check-circle fa-2x"></i>
+                                </div>
+                                <h4 class="font-weight-bold text-info">@Model.PaymentCompletionRate.ToString("F1")%</h4>
+                                <p class="text-muted mb-0">Payment Completion Rate</p>
+                            </div>
+                        </div>
+                        <div class="col-lg-3 col-md-6 mb-4">
+                            <div class="text-center">
+                                <div class="text-warning mb-2">
+                                    <i class="fas fa-user-clock fa-2x"></i>
+                                </div>
+                                <h4 class="font-weight-bold text-warning">@((double)Model.ActiveUsers / Model.TotalUsers * 100).ToString("F1")%</h4>
+                                <p class="text-muted mb-0">User Activity Rate</p>
+                            </div>
+                        </div>
+                        <div class="col-lg-3 col-md-6 mb-4">
+                            <div class="text-center">
+                                <div class="text-primary mb-2">
+                                    <i class="fas fa-chart-line fa-2x"></i>
+                                </div>
+                                <h4 class="font-weight-bold text-primary">@(Model.TotalReservations > 0 ? (Model.TotalRevenue / Model.TotalReservations).ToString("C0") : "$0")</h4>
+                                <p class="text-muted mb-0">Average Revenue per Booking</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function refreshStats() {
+            // Show loading indicator
+            Swal.fire({
+                title: 'Refreshing Statistics...',
+                text: 'Please wait while we update the data',
+                allowOutsideClick: false,
+                showConfirmButton: false,
+                willOpen: () => {
+                    Swal.showLoading();
+                }
+            });
+
+            // Reload the page to get fresh data
+            setTimeout(() => {
+                location.reload();
+            }, 1000);
+        }
+
+        function exportStats() {
+            // Create CSV content
+            const stats = {
+                'Total Users': '@Model.TotalUsers',
+                'Active Users': '@Model.ActiveUsers',
+                'Total Rooms': '@Model.TotalRooms',
+                'Available Rooms': '@Model.AvailableRooms',
+                'Total Reservations': '@Model.TotalReservations',
+                'Today Reservations': '@Model.TodayReservations',
+                'Total Revenue': '@Model.TotalRevenue.ToString("F2")',
+                'Monthly Revenue': '@Model.MonthlyRevenue.ToString("F2")',
+                'Total Services': '@Model.TotalServices',
+                'Active Services': '@Model.ActiveServices',
+                'Total Notifications': '@Model.TotalNotifications',
+                'Unread Notifications': '@Model.UnreadNotifications',
+                'Total Payments': '@Model.TotalPayments.ToString("F2")',
+                'Pending Payments': '@Model.PendingPayments.ToString("F2")',
+                'Completed Payments': '@Model.CompletedPayments.ToString("F2")',
+                'Occupancy Rate': '@Model.OccupancyRate.ToString("F2")%',
+                'Payment Completion Rate': '@Model.PaymentCompletionRate.ToString("F2")%'
+            };
+
+            let csvContent = "Metric,Value\n";
+            for (const [key, value] of Object.entries(stats)) {
+                csvContent += `"${key}","${value}"\n`;
+            }
+
+            // Download CSV
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement("a");
+            const url = URL.createObjectURL(blob);
+            link.setAttribute("href", url);
+            link.setAttribute("download", `system_stats_${new Date().toISOString().split('T')[0]}.csv`);
+            link.style.visibility = 'hidden';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+
+            // Show success message
+            Swal.fire({
+                icon: 'success',
+                title: 'Export Successful!',
+                text: 'System statistics have been exported to CSV file.',
+                timer: 2000,
+                showConfirmButton: false
+            });
+        }
+
+        // Auto-refresh every 5 minutes
+        setInterval(function() {
+            if (document.visibilityState === 'visible') {
+                location.reload();
+            }
+        }, 300000); // 5 minutes
+    </script>
+}

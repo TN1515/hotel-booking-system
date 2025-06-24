@@ -1,0 +1,22 @@
+﻿@{
+    // Determine layout based on user role and current controller
+    var controller = ViewContext.RouteData.Values["controller"]?.ToString();
+    var isAdminArea = controller == "Admin" ||
+                     controller == "UserManagement" ||
+                     controller == "Settings" ||
+                     controller == "GuestProfile" ||
+                     controller == "PaymentProcess" ||
+                     controller == "FeedbackManagement" ||
+                     controller == "Report" ||
+                     controller == "Notification" ||
+                     controller == "Amenities";
+
+    if (User.IsInRole("Admin") && isAdminArea)
+    {
+        Layout = "_AdminLayout";
+    }
+    else
+    {
+        Layout = "_Layout";
+    }
+}

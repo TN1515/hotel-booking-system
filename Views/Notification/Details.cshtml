@@ -1,0 +1,436 @@
+@model HotelBooking.Models.ViewModels.NotificationViewModel
+@{
+    ViewData["Title"] = "Notification Details";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-lg-8 offset-lg-2">
+            <!-- Header -->
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h2 class="mb-1">
+                        <i class="fas fa-bell text-primary me-2"></i>
+                        Notification Details
+                    </h2>
+                    <p class="text-muted mb-0">View notification information and delivery status</p>
+                </div>
+                <div>
+                    <a href="@Url.Action("Index")" class="btn btn-outline-secondary">
+                        <i class="fas fa-arrow-left"></i> Back to List
+                    </a>
+                    @if (Model.Status == "Draft")
+                    {
+                        <button type="button" class="btn btn-success" onclick="sendNotification(@Model.NotificationID)">
+                            <i class="fas fa-paper-plane"></i> Send Now
+                        </button>
+                    }
+                </div>
+            </div>
+
+            <!-- Notification Card -->
+            <div class="card">
+                <div class="card-header">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">
+                            <i class="fas fa-envelope me-2"></i>
+                            @Model.Title
+                        </h5>
+                        <div>
+                            @switch (Model.Status)
+                            {
+                                case "Sent":
+                                    <span class="badge bg-success fs-6">
+                                        <i class="fas fa-check-circle me-1"></i>Sent
+                                    </span>
+                                    break;
+                                case "Draft":
+                                    <span class="badge bg-warning fs-6">
+                                        <i class="fas fa-edit me-1"></i>Draft
+                                    </span>
+                                    break;
+                                case "Scheduled":
+                                    <span class="badge bg-info fs-6">
+                                        <i class="fas fa-clock me-1"></i>Scheduled
+                                    </span>
+                                    break;
+                                case "Failed":
+                                    <span class="badge bg-danger fs-6">
+                                        <i class="fas fa-exclamation-triangle me-1"></i>Failed
+                                    </span>
+                                    break;
+                                default:
+                                    <span class="badge bg-secondary fs-6">@Model.Status</span>
+                                    break;
+                            }
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="card-body">
+                    <!-- Notification Content -->
+                    <div class="notification-content mb-4">
+                        <div class="alert alert-@(Model.Type == "Error" ? "danger" : Model.Type == "Warning" ? "warning" : Model.Type == "Success" ? "success" : "info") border-start border-4">
+                            <div class="d-flex align-items-start">
+                                <div class="me-3">
+                                    @switch (Model.Type)
+                                    {
+                                        case "Email":
+                                            <i class="fas fa-envelope fa-2x"></i>
+                                            break;
+                                        case "SMS":
+                                            <i class="fas fa-sms fa-2x"></i>
+                                            break;
+                                        case "Push":
+                                            <i class="fas fa-mobile-alt fa-2x"></i>
+                                            break;
+                                        case "System":
+                                            <i class="fas fa-desktop fa-2x"></i>
+                                            break;
+                                        default:
+                                            <i class="fas fa-bell fa-2x"></i>
+                                            break;
+                                    }
+                                </div>
+                                <div class="flex-grow-1">
+                                    <h6 class="alert-heading mb-2">@Model.Title</h6>
+                                    <p class="mb-0">@Model.Message</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Notification Details -->
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="card bg-light">
+                                <div class="card-body">
+                                    <h6 class="card-title">
+                                        <i class="fas fa-info-circle text-primary me-2"></i>
+                                        Notification Information
+                                    </h6>
+                                    <div class="detail-row">
+                                        <span class="label">Notification ID:</span>
+                                        <span class="value">#@Model.NotificationID</span>
+                                    </div>
+                                    <div class="detail-row">
+                                        <span class="label">Type:</span>
+                                        <span class="badge bg-secondary">@Model.Type</span>
+                                    </div>
+                                    <div class="detail-row">
+                                        <span class="label">Status:</span>
+                                        <span class="value">@Model.Status</span>
+                                    </div>
+                                    <div class="detail-row">
+                                        <span class="label">Created Date:</span>
+                                        <span class="value">@Model.CreatedDate.ToString("dd/MM/yyyy HH:mm")</span>
+                                    </div>
+                                    @if (Model.SentDate.HasValue)
+                                    {
+                                        <div class="detail-row">
+                                            <span class="label">Sent Date:</span>
+                                            <span class="value">@Model.SentDate.Value.ToString("dd/MM/yyyy HH:mm")</span>
+                                        </div>
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <div class="card bg-light">
+                                <div class="card-body">
+                                    <h6 class="card-title">
+                                        <i class="fas fa-user text-info me-2"></i>
+                                        Recipient Information
+                                    </h6>
+                                    <div class="detail-row">
+                                        <span class="label">User ID:</span>
+                                        <span class="value">#@Model.UserID</span>
+                                    </div>
+                                    <div class="detail-row">
+                                        <span class="label">Username:</span>
+                                        <span class="value">@(Model.UserName ?? "N/A")</span>
+                                    </div>
+                                    <div class="detail-row">
+                                        <span class="label">Email:</span>
+                                        <span class="value">@(Model.UserEmail ?? "N/A")</span>
+                                    </div>
+                                    <div class="detail-row">
+                                        <span class="label">Read Status:</span>
+                                        @if (Model.IsRead)
+                                        {
+                                            <span class="badge bg-success">
+                                                <i class="fas fa-check me-1"></i>Read
+                                            </span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-warning">
+                                                <i class="fas fa-envelope me-1"></i>Unread
+                                            </span>
+                                        }
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Delivery Timeline -->
+                    @if (Model.Status == "Sent" || Model.SentDate.HasValue)
+                    {
+                        <div class="card mt-4">
+                            <div class="card-header">
+                                <h6 class="mb-0">
+                                    <i class="fas fa-timeline me-2"></i>
+                                    Delivery Timeline
+                                </h6>
+                            </div>
+                            <div class="card-body">
+                                <div class="timeline">
+                                    <div class="timeline-item completed">
+                                        <div class="timeline-marker bg-primary"></div>
+                                        <div class="timeline-content">
+                                            <h6 class="mb-1">Notification Created</h6>
+                                            <p class="text-muted mb-0">@Model.CreatedDate.ToString("dd/MM/yyyy HH:mm")</p>
+                                        </div>
+                                    </div>
+                                    
+                                    @if (Model.SentDate.HasValue)
+                                    {
+                                        <div class="timeline-item completed">
+                                            <div class="timeline-marker bg-success"></div>
+                                            <div class="timeline-content">
+                                                <h6 class="mb-1">Notification Sent</h6>
+                                                <p class="text-muted mb-0">@Model.SentDate.Value.ToString("dd/MM/yyyy HH:mm")</p>
+                                            </div>
+                                        </div>
+                                    }
+                                    
+                                    @if (Model.IsRead)
+                                    {
+                                        <div class="timeline-item completed">
+                                            <div class="timeline-marker bg-info"></div>
+                                            <div class="timeline-content">
+                                                <h6 class="mb-1">Notification Read</h6>
+                                                <p class="text-muted mb-0">Read by recipient</p>
+                                            </div>
+                                        </div>
+                                    }
+                                    else if (Model.SentDate.HasValue)
+                                    {
+                                        <div class="timeline-item pending">
+                                            <div class="timeline-marker bg-warning"></div>
+                                            <div class="timeline-content">
+                                                <h6 class="mb-1">Awaiting Read</h6>
+                                                <p class="text-muted mb-0">Notification delivered but not yet read</p>
+                                            </div>
+                                        </div>
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                    }
+
+                    <!-- Actions -->
+                    <div class="card mt-4">
+                        <div class="card-header">
+                            <h6 class="mb-0">
+                                <i class="fas fa-cogs me-2"></i>
+                                Actions
+                            </h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="btn-group" role="group">
+                                @if (Model.Status == "Draft")
+                                {
+                                    <button type="button" class="btn btn-success" onclick="sendNotification(@Model.NotificationID)">
+                                        <i class="fas fa-paper-plane"></i> Send Now
+                                    </button>
+                                    <a href="@Url.Action("Edit", new { id = Model.NotificationID })" class="btn btn-warning">
+                                        <i class="fas fa-edit"></i> Edit
+                                    </a>
+                                }
+                                else if (Model.Status == "Sent")
+                                {
+                                    <button type="button" class="btn btn-info" onclick="resendNotification(@Model.NotificationID)">
+                                        <i class="fas fa-redo"></i> Resend
+                                    </button>
+                                }
+                                
+                                <button type="button" class="btn btn-secondary" onclick="duplicateNotification(@Model.NotificationID)">
+                                    <i class="fas fa-copy"></i> Duplicate
+                                </button>
+                                
+                                @if (Model.Status == "Draft")
+                                {
+                                    <button type="button" class="btn btn-danger" onclick="deleteNotification(@Model.NotificationID)">
+                                        <i class="fas fa-trash"></i> Delete
+                                    </button>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function sendNotification(id) {
+            if (confirm('Are you sure you want to send this notification?')) {
+                $.ajax({
+                    url: '@Url.Action("Send", "Notification")',
+                    type: 'POST',
+                    data: { id: id },
+                    success: function(response) {
+                        if (response.success) {
+                            location.reload();
+                        } else {
+                            alert('Error: ' + response.message);
+                        }
+                    },
+                    error: function() {
+                        alert('An error occurred while sending the notification.');
+                    }
+                });
+            }
+        }
+
+        function resendNotification(id) {
+            if (confirm('Are you sure you want to resend this notification?')) {
+                $.ajax({
+                    url: '@Url.Action("Resend", "Notification")',
+                    type: 'POST',
+                    data: { id: id },
+                    success: function(response) {
+                        if (response.success) {
+                            alert('Notification resent successfully!');
+                            location.reload();
+                        } else {
+                            alert('Error: ' + response.message);
+                        }
+                    },
+                    error: function() {
+                        alert('An error occurred while resending the notification.');
+                    }
+                });
+            }
+        }
+
+        function duplicateNotification(id) {
+            if (confirm('Create a copy of this notification?')) {
+                window.location.href = '@Url.Action("Send")' + '?duplicate=' + id;
+            }
+        }
+
+        function deleteNotification(id) {
+            if (confirm('Are you sure you want to delete this notification? This action cannot be undone.')) {
+                $.ajax({
+                    url: '@Url.Action("Delete", "Notification")',
+                    type: 'POST',
+                    data: { id: id },
+                    success: function(response) {
+                        if (response.success) {
+                            window.location.href = '@Url.Action("Index")';
+                        } else {
+                            alert('Error: ' + response.message);
+                        }
+                    },
+                    error: function() {
+                        alert('An error occurred while deleting the notification.');
+                    }
+                });
+            }
+        }
+    </script>
+}
+
+<style>
+    .detail-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 8px 0;
+        border-bottom: 1px solid #eee;
+    }
+    
+    .detail-row:last-child {
+        border-bottom: none;
+    }
+    
+    .label {
+        font-weight: 500;
+        color: #6c757d;
+    }
+    
+    .value {
+        font-weight: 600;
+        color: #212529;
+    }
+    
+    .notification-content .alert {
+        border-left-width: 4px !important;
+    }
+    
+    .timeline {
+        position: relative;
+        padding-left: 30px;
+    }
+    
+    .timeline::before {
+        content: '';
+        position: absolute;
+        left: 15px;
+        top: 0;
+        bottom: 0;
+        width: 2px;
+        background: #dee2e6;
+    }
+    
+    .timeline-item {
+        position: relative;
+        margin-bottom: 20px;
+    }
+    
+    .timeline-marker {
+        position: absolute;
+        left: -22px;
+        top: 5px;
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        border: 2px solid #fff;
+        box-shadow: 0 0 0 2px #dee2e6;
+    }
+    
+    .timeline-item.completed .timeline-marker {
+        box-shadow: 0 0 0 2px #28a745;
+    }
+    
+    .timeline-item.pending .timeline-marker {
+        box-shadow: 0 0 0 2px #ffc107;
+    }
+    
+    .timeline-content {
+        background: #f8f9fa;
+        padding: 15px;
+        border-radius: 8px;
+        border-left: 3px solid #007bff;
+    }
+    
+    .timeline-item.completed .timeline-content {
+        border-left-color: #28a745;
+    }
+    
+    .timeline-item.pending .timeline-content {
+        border-left-color: #ffc107;
+    }
+    
+    .card {
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        border: none;
+    }
+</style>

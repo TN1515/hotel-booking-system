@@ -1,0 +1,144 @@
+@model HotelBooking.Models.ViewModels.GuestProfileViewModel
+@{
+    ViewData["Title"] = "Edit Guest Profile";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">Edit Guest Profile</h3>
+                    <div class="card-tools">
+                        <a href="@Url.Action("Index")" class="btn btn-secondary">
+                            <i class="fas fa-arrow-left"></i> Back to List
+                        </a>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <form asp-action="Edit" method="post">
+                        <input asp-for="GuestID" type="hidden" />
+                        <input asp-for="UserID" type="hidden" />
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <h5>Personal Information</h5>
+                                
+                                <div class="form-group">
+                                    <label asp-for="FirstName" class="control-label"></label>
+                                    <input asp-for="FirstName" class="form-control" />
+                                    <span asp-validation-for="FirstName" class="text-danger"></span>
+                                </div>
+
+                                <div class="form-group">
+                                    <label asp-for="LastName" class="control-label"></label>
+                                    <input asp-for="LastName" class="form-control" />
+                                    <span asp-validation-for="LastName" class="text-danger"></span>
+                                </div>
+
+                                <div class="form-group">
+                                    <label asp-for="Email" class="control-label"></label>
+                                    <input asp-for="Email" class="form-control" type="email" />
+                                    <span asp-validation-for="Email" class="text-danger"></span>
+                                </div>
+
+                                <div class="form-group">
+                                    <label asp-for="Phone" class="control-label"></label>
+                                    <input asp-for="Phone" class="form-control" />
+                                    <span asp-validation-for="Phone" class="text-danger"></span>
+                                </div>
+
+                                <div class="form-group">
+                                    <label asp-for="AgeGroup" class="control-label"></label>
+                                    <select asp-for="AgeGroup" class="form-control">
+                                        <option value="">Select Age Group</option>
+                                        <option value="Child">Child (0-12)</option>
+                                        <option value="Teen">Teen (13-17)</option>
+                                        <option value="Adult">Adult (18-64)</option>
+                                        <option value="Senior">Senior (65+)</option>
+                                    </select>
+                                    <span asp-validation-for="AgeGroup" class="text-danger"></span>
+                                </div>
+                            </div>
+
+                            <div class="col-md-6">
+                                <h5>Address Information</h5>
+                                
+                                <div class="form-group">
+                                    <label asp-for="Address" class="control-label"></label>
+                                    <textarea asp-for="Address" class="form-control" rows="3"></textarea>
+                                    <span asp-validation-for="Address" class="text-danger"></span>
+                                </div>
+
+                                <div class="form-group">
+                                    <label asp-for="CountryID" class="control-label"></label>
+                                    <select asp-for="CountryID" class="form-control" id="countrySelect">
+                                        <option value="">Select Country</option>
+                                        @if (Model.Countries != null)
+                                        {
+                                            @foreach (var country in Model.Countries)
+                                            {
+                                                <option value="@country.CountryID">@country.CountryName</option>
+                                            }
+                                        }
+                                    </select>
+                                    <span asp-validation-for="CountryID" class="text-danger"></span>
+                                </div>
+
+                                <div class="form-group">
+                                    <label asp-for="StateID" class="control-label"></label>
+                                    <select asp-for="StateID" class="form-control" id="stateSelect">
+                                        <option value="">Select State</option>
+                                        @if (Model.States != null)
+                                        {
+                                            @foreach (var state in Model.States.Where(s => s.CountryID == Model.CountryID))
+                                            {
+                                                <option value="@state.StateID">@state.StateName</option>
+                                            }
+                                        }
+                                    </select>
+                                    <span asp-validation-for="StateID" class="text-danger"></span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-group mt-3">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save"></i> Save Changes
+                            </button>
+                            <a href="@Url.Action("Details", new { id = Model.GuestID })" class="btn btn-secondary">
+                                <i class="fas fa-times"></i> Cancel
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    
+    <script>
+        $(document).ready(function() {
+            // Handle country change to load states
+            $('#countrySelect').change(function() {
+                var countryId = $(this).val();
+                var stateSelect = $('#stateSelect');
+                
+                stateSelect.empty();
+                stateSelect.append('<option value="">Select State</option>');
+                
+                if (countryId) {
+                    $.get('@Url.Action("GetStatesByCountry")', { countryId: countryId }, function(data) {
+                        $.each(data, function(index, state) {
+                            stateSelect.append('<option value="' + state.stateID + '">' + state.stateName + '</option>');
+                        });
+                    });
+                }
+            });
+        });
+    </script>
+}

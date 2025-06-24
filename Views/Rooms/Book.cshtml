@@ -1,0 +1,263 @@
+@model HotelBooking.Models.BookingViewModel
+@{
+    ViewData["Title"] = "Book Room";
+}
+
+<div class="container-fluid py-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card shadow-lg border-0">
+                <div class="card-header bg-primary text-white">
+                    <h2 class="card-title mb-0">
+                        <i class="fas fa-calendar-plus me-2"></i>Book Your Room
+                    </h2>
+                </div>
+                <div class="card-body p-4">
+                    @if (!User.Identity!.IsAuthenticated)
+                    {
+                        <div class="alert alert-warning" role="alert">
+                            <i class="fas fa-sign-in-alt me-2"></i>
+                            <strong>Please log in to book this room.</strong>
+                            <a asp-controller="Account" asp-action="Login" asp-route-returnUrl="@Context.Request.Path@Context.Request.QueryString" class="btn btn-primary ms-3">
+                                <i class="fas fa-sign-in-alt me-2"></i>Login
+                            </a>
+                            <span class="ms-2">or</span>
+                            <a asp-controller="Account" asp-action="Register" class="btn btn-outline-primary ms-2">
+                                <i class="fas fa-user-plus me-2"></i>Register
+                            </a>
+                        </div>
+                    }
+
+                    @if (Model.Room != null)
+                    {
+                        <!-- Room Information -->
+                        <div class="row mb-4">
+                            <div class="col-md-4">
+                                <div class="room-image-placeholder bg-light rounded d-flex align-items-center justify-content-center" style="height: 200px;">
+                                    <i class="fas fa-bed fa-3x text-muted"></i>
+                                </div>
+                            </div>
+                            <div class="col-md-8">
+                                <h3 class="text-primary">@Model.Room.RoomNumber</h3>
+                                <p class="text-muted mb-2">
+                                    <i class="fas fa-tag me-2"></i>@Model.Room.RoomType?.TypeName
+                                </p>
+                                <p class="h4 text-success mb-2">
+                                    <i class="fas fa-dollar-sign me-1"></i>@Model.Room.Price.ToString("C") / night
+                                </p>
+                                @if (!string.IsNullOrEmpty(Model.Room.Description))
+                                {
+                                    <p class="text-muted">@Model.Room.Description</p>
+                                }
+                            </div>
+                        </div>
+
+                        <hr class="my-4">
+
+                        <!-- Booking Form -->
+                        <form asp-action="Book" method="post" class="needs-validation" novalidate>
+                            <input type="hidden" asp-for="RoomID" />
+                            
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label asp-for="CheckInDate" class="form-label fw-bold">
+                                        <i class="fas fa-calendar-alt me-2"></i>Check-in Date
+                                    </label>
+                                    <input asp-for="CheckInDate" class="form-control form-control-lg" type="date" required />
+                                    <span asp-validation-for="CheckInDate" class="text-danger"></span>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label asp-for="CheckOutDate" class="form-label fw-bold">
+                                        <i class="fas fa-calendar-alt me-2"></i>Check-out Date
+                                    </label>
+                                    <input asp-for="CheckOutDate" class="form-control form-control-lg" type="date" required />
+                                    <span asp-validation-for="CheckOutDate" class="text-danger"></span>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label asp-for="NumberOfGuests" class="form-label fw-bold">
+                                        <i class="fas fa-users me-2"></i>Number of Guests
+                                    </label>
+                                    <select asp-for="NumberOfGuests" class="form-select form-select-lg" required>
+                                        <option value="">Select guests</option>
+                                        @for (int i = 1; i <= 10; i++)
+                                        {
+                                            <option value="@i">@i Guest@(i > 1 ? "s" : "")</option>
+                                        }
+                                    </select>
+                                    <span asp-validation-for="NumberOfGuests" class="text-danger"></span>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label fw-bold">
+                                        <i class="fas fa-moon me-2"></i>Number of Nights
+                                    </label>
+                                    <input type="text" class="form-control form-control-lg" id="numberOfNights" readonly />
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label asp-for="SpecialRequests" class="form-label fw-bold">
+                                    <i class="fas fa-comment me-2"></i>Special Requests (Optional)
+                                </label>
+                                <textarea asp-for="SpecialRequests" class="form-control" rows="3" placeholder="Any special requests or preferences..."></textarea>
+                                <span asp-validation-for="SpecialRequests" class="text-danger"></span>
+                            </div>
+
+                            <!-- Price Summary -->
+                            <div class="card bg-light mb-4">
+                                <div class="card-body">
+                                    <h5 class="card-title">
+                                        <i class="fas fa-calculator me-2"></i>Price Summary
+                                    </h5>
+                                    <div class="row">
+                                        <div class="col-6">
+                                            <p class="mb-1">Room Rate per Night:</p>
+                                            <p class="mb-1">Number of Nights:</p>
+                                            <hr class="my-2">
+                                            <p class="mb-0 fw-bold">Total Amount:</p>
+                                        </div>
+                                        <div class="col-6 text-end">
+                                            <p class="mb-1">@Model.Room.Price.ToString("C", new System.Globalization.CultureInfo("vi-VN"))</p>
+                                            <p class="mb-1" id="nightsDisplay">-</p>
+                                            <hr class="my-2">
+                                            <p class="mb-0 fw-bold text-success h5" id="totalPrice">0 ₫</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Payment Information -->
+                            <div class="card border-info mb-4">
+                                <div class="card-header bg-info text-white">
+                                    <h5 class="mb-0">
+                                        <i class="fas fa-credit-card me-2"></i>Payment Information
+                                    </h5>
+                                </div>
+                                <div class="card-body">
+                                    <div class="alert alert-info">
+                                        <i class="fas fa-info-circle me-2"></i>
+                                        <strong>Payment Options:</strong> After booking confirmation, you can pay using:
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <div class="payment-method mb-3">
+                                                <div class="d-flex align-items-center">
+                                                    <i class="fas fa-qrcode fa-2x text-success me-3"></i>
+                                                    <div>
+                                                        <h6 class="mb-1">QR Code Payment</h6>
+                                                        <small class="text-muted">VietinBank QR Code - Instant payment</small>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="payment-method mb-3">
+                                                <div class="d-flex align-items-center">
+                                                    <i class="fas fa-credit-card fa-2x text-primary me-3"></i>
+                                                    <div>
+                                                        <h6 class="mb-1">Credit/Debit Card</h6>
+                                                        <small class="text-muted">Visa, Mastercard, JCB</small>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <div class="payment-method mb-3">
+                                                <div class="d-flex align-items-center">
+                                                    <i class="fas fa-university fa-2x text-warning me-3"></i>
+                                                    <div>
+                                                        <h6 class="mb-1">Bank Transfer</h6>
+                                                        <small class="text-muted">Direct bank transfer</small>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="payment-method mb-3">
+                                                <div class="d-flex align-items-center">
+                                                    <i class="fas fa-money-bill-wave fa-2x text-success me-3"></i>
+                                                    <div>
+                                                        <h6 class="mb-1">Cash Payment</h6>
+                                                        <small class="text-muted">Pay at hotel reception</small>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Action Buttons -->
+                            <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                                <a asp-controller="Rooms" asp-action="Index" class="btn btn-outline-secondary btn-lg me-md-2">
+                                    <i class="fas fa-arrow-left me-2"></i>Back to Rooms
+                                </a>
+                                <button type="submit" class="btn btn-primary btn-lg">
+                                    <i class="fas fa-check me-2"></i>Confirm Booking
+                                </button>
+                            </div>
+                        </form>
+                    }
+                    else
+                    {
+                        <div class="alert alert-danger">
+                            <i class="fas fa-exclamation-triangle me-2"></i>
+                            Room information not found.
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    
+    <script>
+        $(document).ready(function() {
+            const roomPrice = @Model.Room?.Price ?? 0;
+            
+            function calculateTotal() {
+                const checkIn = new Date($('#CheckInDate').val());
+                const checkOut = new Date($('#CheckOutDate').val());
+                
+                if (checkIn && checkOut && checkOut > checkIn) {
+                    const timeDiff = checkOut.getTime() - checkIn.getTime();
+                    const nights = Math.ceil(timeDiff / (1000 * 3600 * 24));
+                    const total = nights * roomPrice;
+                    
+                    $('#numberOfNights').val(nights);
+                    $('#nightsDisplay').text(nights);
+                    $('#totalPrice').text(total.toLocaleString('vi-VN') + ' ₫');
+                } else {
+                    $('#numberOfNights').val('');
+                    $('#nightsDisplay').text('-');
+                    $('#totalPrice').text('0 ₫');
+                }
+            }
+            
+            $('#CheckInDate, #CheckOutDate').on('change', calculateTotal);
+            
+            // Set minimum dates
+            const today = new Date().toISOString().split('T')[0];
+            $('#CheckInDate').attr('min', today);
+            
+            $('#CheckInDate').on('change', function() {
+                const checkInDate = $(this).val();
+                if (checkInDate) {
+                    const nextDay = new Date(checkInDate);
+                    nextDay.setDate(nextDay.getDate() + 1);
+                    $('#CheckOutDate').attr('min', nextDay.toISOString().split('T')[0]);
+                }
+            });
+            
+            // Initial calculation
+            calculateTotal();
+        });
+    </script>
+}

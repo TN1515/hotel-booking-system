@@ -1,0 +1,200 @@
+@model HotelBooking.Models.MultipleBookingViewModel
+@{
+    ViewData["Title"] = "Book Multiple Rooms";
+}
+
+<div class="container-fluid py-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-10">
+            <div class="card shadow-lg border-0">
+                <div class="card-header bg-success text-white">
+                    <h2 class="card-title mb-0">
+                        <i class="fas fa-calendar-plus me-2"></i>Book Multiple Rooms
+                    </h2>
+                </div>
+                <div class="card-body p-4">
+                    @if (Model.SelectedRooms?.Any() == true)
+                    {
+                        <!-- Selected Rooms Summary -->
+                        <div class="alert alert-info mb-4">
+                            <i class="fas fa-info-circle me-2"></i>
+                            <strong>You have selected @Model.NumberOfRooms room(s) for booking.</strong>
+                        </div>
+
+                        <!-- Selected Rooms Display -->
+                        <div class="row mb-4">
+                            @foreach (var room in Model.SelectedRooms)
+                            {
+                                <div class="col-lg-4 col-md-6 mb-3">
+                                    <div class="card border-success">
+                                        <div class="card-body">
+                                            <div class="d-flex justify-content-between align-items-start mb-2">
+                                                <h6 class="card-title mb-0">Room @room.RoomNumber</h6>
+                                                <span class="badge bg-success">Selected</span>
+                                            </div>
+                                            <p class="text-muted mb-2">
+                                                <i class="fas fa-tag me-2"></i>@room.RoomType?.TypeName
+                                            </p>
+                                            <p class="h6 text-success mb-0">
+                                                <i class="fas fa-dollar-sign me-1"></i>@room.Price.ToString("C") / night
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+
+                        <hr class="my-4">
+
+                        <!-- Booking Form -->
+                        <form asp-action="ConfirmMultipleBooking" method="post" class="needs-validation" novalidate>
+                            @foreach (var room in Model.SelectedRooms)
+                            {
+                                <input type="hidden" name="SelectedRoomIds" value="@room.RoomID" />
+                            }
+                            
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label asp-for="CheckInDate" class="form-label fw-bold">
+                                        <i class="fas fa-calendar-alt me-2"></i>Check-in Date
+                                    </label>
+                                    <input asp-for="CheckInDate" class="form-control form-control-lg" type="date" required />
+                                    <span asp-validation-for="CheckInDate" class="text-danger"></span>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label asp-for="CheckOutDate" class="form-label fw-bold">
+                                        <i class="fas fa-calendar-alt me-2"></i>Check-out Date
+                                    </label>
+                                    <input asp-for="CheckOutDate" class="form-control form-control-lg" type="date" required />
+                                    <span asp-validation-for="CheckOutDate" class="text-danger"></span>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label asp-for="NumberOfGuests" class="form-label fw-bold">
+                                        <i class="fas fa-users me-2"></i>Number of Guests (per room)
+                                    </label>
+                                    <select asp-for="NumberOfGuests" class="form-select form-select-lg" required>
+                                        <option value="">Select guests</option>
+                                        @for (int i = 1; i <= 10; i++)
+                                        {
+                                            <option value="@i">@i Guest@(i > 1 ? "s" : "")</option>
+                                        }
+                                    </select>
+                                    <span asp-validation-for="NumberOfGuests" class="text-danger"></span>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label fw-bold">
+                                        <i class="fas fa-moon me-2"></i>Number of Nights
+                                    </label>
+                                    <input type="text" class="form-control form-control-lg" id="numberOfNights" readonly />
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label asp-for="SpecialRequests" class="form-label fw-bold">
+                                    <i class="fas fa-comment me-2"></i>Special Requests (Optional)
+                                </label>
+                                <textarea asp-for="SpecialRequests" class="form-control" rows="3" placeholder="Any special requests or preferences for all rooms..."></textarea>
+                                <span asp-validation-for="SpecialRequests" class="text-danger"></span>
+                            </div>
+
+                            <!-- Price Summary -->
+                            <div class="card bg-light mb-4">
+                                <div class="card-body">
+                                    <h5 class="card-title">
+                                        <i class="fas fa-calculator me-2"></i>Booking Summary
+                                    </h5>
+                                    <div class="row">
+                                        <div class="col-6">
+                                            <p class="mb-1">Number of Rooms:</p>
+                                            <p class="mb-1">Price per Night (all rooms):</p>
+                                            <p class="mb-1">Number of Nights:</p>
+                                            <hr class="my-2">
+                                            <p class="mb-0 fw-bold">Total Amount:</p>
+                                        </div>
+                                        <div class="col-6 text-end">
+                                            <p class="mb-1">@Model.NumberOfRooms</p>
+                                            <p class="mb-1">@Model.SelectedRooms.Sum(r => r.Price).ToString("C")</p>
+                                            <p class="mb-1" id="nightsDisplay">-</p>
+                                            <hr class="my-2">
+                                            <p class="mb-0 fw-bold text-success h5" id="totalPrice">$0.00</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Action Buttons -->
+                            <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                                <a asp-controller="Rooms" asp-action="Index" class="btn btn-outline-secondary btn-lg me-md-2">
+                                    <i class="fas fa-arrow-left me-2"></i>Back to Rooms
+                                </a>
+                                <button type="submit" class="btn btn-success btn-lg">
+                                    <i class="fas fa-check me-2"></i>Confirm All Bookings
+                                </button>
+                            </div>
+                        </form>
+                    }
+                    else
+                    {
+                        <div class="alert alert-danger">
+                            <i class="fas fa-exclamation-triangle me-2"></i>
+                            No rooms selected for booking.
+                        </div>
+                        <a asp-action="Index" class="btn btn-primary">
+                            <i class="fas fa-arrow-left me-2"></i>Back to Rooms
+                        </a>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    
+    <script>
+        $(document).ready(function() {
+            const totalRoomPrice = @(Model.SelectedRooms?.Sum(r => r.Price) ?? 0);
+            
+            function calculateTotal() {
+                const checkIn = new Date($('#CheckInDate').val());
+                const checkOut = new Date($('#CheckOutDate').val());
+                
+                if (checkIn && checkOut && checkOut > checkIn) {
+                    const timeDiff = checkOut.getTime() - checkIn.getTime();
+                    const nights = Math.ceil(timeDiff / (1000 * 3600 * 24));
+                    const total = nights * totalRoomPrice;
+                    
+                    $('#numberOfNights').val(nights);
+                    $('#nightsDisplay').text(nights);
+                    $('#totalPrice').text('$' + total.toFixed(2));
+                } else {
+                    $('#numberOfNights').val('');
+                    $('#nightsDisplay').text('-');
+                    $('#totalPrice').text('$0.00');
+                }
+            }
+            
+            $('#CheckInDate, #CheckOutDate').on('change', calculateTotal);
+            
+            // Set minimum dates
+            const today = new Date().toISOString().split('T')[0];
+            $('#CheckInDate').attr('min', today);
+            
+            $('#CheckInDate').on('change', function() {
+                const checkInDate = $(this).val();
+                if (checkInDate) {
+                    const nextDay = new Date(checkInDate);
+                    nextDay.setDate(nextDay.getDate() + 1);
+                    $('#CheckOutDate').attr('min', nextDay.toISOString().split('T')[0]);
+                }
+            });
+            
+            // Initial calculation
+            calculateTotal();
+        });
+    </script>
+}

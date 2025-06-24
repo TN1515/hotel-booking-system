@@ -1,0 +1,149 @@
+@model HotelBooking.Models.Room
+@{
+    ViewData["Title"] = "Delete Room";
+}
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-md-8 offset-md-2">
+            <div class="card border-danger">
+                <div class="card-header bg-danger text-white">
+                    <h3 class="card-title">
+                        <i class="fas fa-exclamation-triangle"></i> Delete Room
+                    </h3>
+                </div>
+
+                <div class="card-body">
+                    <div class="alert alert-danger">
+                        <h5><i class="fas fa-exclamation-triangle"></i> Warning!</h5>
+                        Are you sure you want to delete this room? This action cannot be undone.
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <dl class="row">
+                                <dt class="col-sm-4">Room Number:</dt>
+                                <dd class="col-sm-8"><strong>@Model.RoomNumber</strong></dd>
+
+                                <dt class="col-sm-4">Room Type:</dt>
+                                <dd class="col-sm-8">@Model.RoomType?.TypeName</dd>
+
+                                <dt class="col-sm-4">Price per Night:</dt>
+                                <dd class="col-sm-8">$@Model.Price</dd>
+
+                                <dt class="col-sm-4">Status:</dt>
+                                <dd class="col-sm-8">
+                                    <span class="badge badge-@(Model.Status == "Available" ? "success" : Model.Status == "Occupied" ? "warning" : "danger")">
+                                        @Model.Status
+                                    </span>
+                                </dd>
+
+                                <dt class="col-sm-4">Active:</dt>
+                                <dd class="col-sm-8">
+                                    @if (Model.IsActive)
+                                    {
+                                        <span class="badge badge-success">Active</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge badge-danger">Inactive</span>
+                                    }
+                                </dd>
+                            </dl>
+                        </div>
+                        <div class="col-md-6">
+                            <dl class="row">
+                                <dt class="col-sm-4">Description:</dt>
+                                <dd class="col-sm-8">
+                                    @if (!string.IsNullOrEmpty(Model.Description))
+                                    {
+                                        @Model.Description
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted">No description</span>
+                                    }
+                                </dd>
+
+                                <dt class="col-sm-4">Max Occupancy:</dt>
+                                <dd class="col-sm-8">@Model.RoomType?.MaxOccupancy guests</dd>
+
+                                <dt class="col-sm-4">Created Date:</dt>
+                                <dd class="col-sm-8">@Model.CreatedDate.ToString("dd/MM/yyyy HH:mm")</dd>
+
+                                <dt class="col-sm-4">Created By:</dt>
+                                <dd class="col-sm-8">@(Model.CreatedBy ?? "System")</dd>
+                            </dl>
+                        </div>
+                    </div>
+
+                    @if (Model.RoomAmenities != null && Model.RoomAmenities.Any())
+                    {
+                        <hr />
+                        <h6><i class="fas fa-star"></i> Room Amenities</h6>
+                        <div class="row">
+                            @foreach (var roomAmenity in Model.RoomAmenities)
+                            {
+                                <div class="col-md-4 mb-1">
+                                    @if (!string.IsNullOrEmpty(roomAmenity.Amenity?.Icon))
+                                    {
+                                        <i class="@roomAmenity.Amenity.Icon"></i>
+                                    }
+                                    @roomAmenity.Amenity?.AmenityName
+                                </div>
+                            }
+                        </div>
+                    }
+
+                    <hr />
+                    <div class="alert alert-warning">
+                        <h6><i class="fas fa-exclamation-triangle"></i> Impact Assessment</h6>
+                        <p><strong>Before deleting this room, please note:</strong></p>
+                        <ul class="mb-0">
+                            <li>All future reservations for this room will be cancelled</li>
+                            <li>Historical reservation data will remain in the system</li>
+                            <li>Room amenity assignments will be removed</li>
+                            <li>This action cannot be undone</li>
+                        </ul>
+                    </div>
+
+                    @if (Model.Status == "Occupied")
+                    {
+                        <div class="alert alert-danger">
+                            <h6><i class="fas fa-ban"></i> Cannot Delete</h6>
+                            <p class="mb-0">
+                                This room is currently <strong>Occupied</strong> and cannot be deleted. 
+                                Please wait until the guest checks out or change the room status first.
+                            </p>
+                        </div>
+                    }
+                </div>
+
+                <div class="card-footer">
+                    @if (Model.Status != "Occupied")
+                    {
+                        <form asp-action="Delete" method="post" class="d-inline">
+                            <input type="hidden" asp-for="RoomID" />
+                            <button type="submit" class="btn btn-danger" 
+                                    onclick="return confirm('Are you absolutely sure you want to delete Room @Model.RoomNumber? This action cannot be undone and may affect existing reservations.')">
+                                <i class="fas fa-trash"></i> Yes, Delete Room
+                            </button>
+                        </form>
+                    }
+                    else
+                    {
+                        <button class="btn btn-danger" disabled>
+                            <i class="fas fa-ban"></i> Cannot Delete (Room Occupied)
+                        </button>
+                    }
+                    <a href="@Url.Action("Details", new { id = Model.RoomID })" class="btn btn-info">
+                        <i class="fas fa-eye"></i> View Details
+                    </a>
+                    <a href="@Url.Action("Index")" class="btn btn-secondary">
+                        <i class="fas fa-arrow-left"></i> Cancel & Back to List
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

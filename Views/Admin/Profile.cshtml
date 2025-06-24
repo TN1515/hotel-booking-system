@@ -1,0 +1,231 @@
+@model HotelBooking.Models.CustomUser
+@{
+    ViewData["Title"] = "Admin Profile";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<div class="container-fluid py-4">
+    <div class="row">
+        <div class="col-12">
+            <!-- Header -->
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h2 class="mb-1">
+                        <i class="fas fa-user-shield text-primary me-2"></i>
+                        Admin Profile
+                    </h2>
+                    <p class="text-muted mb-0">Manage your administrator account settings</p>
+                </div>
+                <div>
+                    <a href="@Url.Action("Dashboard")" class="btn btn-outline-secondary">
+                        <i class="fas fa-arrow-left me-2"></i>Back to Dashboard
+                    </a>
+                </div>
+            </div>
+
+            <div class="row">
+                <!-- Profile Information -->
+                <div class="col-lg-8 mb-4">
+                    <div class="card border-0 shadow-sm">
+                        <div class="card-header bg-primary text-white">
+                            <h5 class="mb-0">
+                                <i class="fas fa-user me-2"></i>Profile Information
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label fw-bold">Username</label>
+                                    <div class="form-control-plaintext">@Model.UserName</div>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label fw-bold">Email</label>
+                                    <div class="form-control-plaintext">@Model.Email</div>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label fw-bold">Phone Number</label>
+                                    <div class="form-control-plaintext">@(Model.PhoneNumber ?? "Not provided")</div>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label fw-bold">Account Status</label>
+                                    <div>
+                                        <span class="badge bg-@(Model.IsActive ? "success" : "danger") fs-6">
+                                            @(Model.IsActive ? "Active" : "Inactive")
+                                        </span>
+                                    </div>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label fw-bold">Email Confirmed</label>
+                                    <div>
+                                        <span class="badge bg-@(Model.EmailConfirmed ? "success" : "warning") fs-6">
+                                            @(Model.EmailConfirmed ? "Verified" : "Pending")
+                                        </span>
+                                    </div>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label fw-bold">Last Login</label>
+                                    <div class="form-control-plaintext">@(Model.LastLogin?.ToString("MMM dd, yyyy HH:mm") ?? "Never")</div>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label fw-bold">Account Created</label>
+                                    <div class="form-control-plaintext">@Model.CreatedDate.ToString("MMM dd, yyyy")</div>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label fw-bold">Created By</label>
+                                    <div class="form-control-plaintext">@(Model.CreatedBy ?? "System")</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Quick Stats -->
+                <div class="col-lg-4 mb-4">
+                    <div class="card border-0 shadow-sm">
+                        <div class="card-header bg-success text-white">
+                            <h5 class="mb-0">
+                                <i class="fas fa-chart-line me-2"></i>Quick Stats
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="text-center mb-3">
+                                <div class="text-success mb-2">
+                                    <i class="fas fa-calendar-check fa-2x"></i>
+                                </div>
+                                <h4 class="fw-bold" id="totalReservations">-</h4>
+                                <p class="text-muted mb-0">Total Reservations</p>
+                            </div>
+                            <hr>
+                            <div class="text-center mb-3">
+                                <div class="text-info mb-2">
+                                    <i class="fas fa-users fa-2x"></i>
+                                </div>
+                                <h4 class="fw-bold" id="totalUsers">-</h4>
+                                <p class="text-muted mb-0">Total Users</p>
+                            </div>
+                            <hr>
+                            <div class="text-center">
+                                <div class="text-warning mb-2">
+                                    <i class="fas fa-dollar-sign fa-2x"></i>
+                                </div>
+                                <h4 class="fw-bold" id="totalRevenue">-</h4>
+                                <p class="text-muted mb-0">Total Revenue</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Admin Actions -->
+            <div class="row">
+                <div class="col-12">
+                    <div class="card border-0 shadow-sm">
+                        <div class="card-header bg-dark text-white">
+                            <h5 class="mb-0">
+                                <i class="fas fa-tools me-2"></i>Admin Actions
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-3 mb-3">
+                                    <a href="@Url.Action("Index", "UserManagement")" class="btn btn-outline-primary w-100">
+                                        <i class="fas fa-users me-2"></i>Manage Users
+                                    </a>
+                                </div>
+                                <div class="col-md-3 mb-3">
+                                    <a href="@Url.Action("Index", "Settings")" class="btn btn-outline-success w-100">
+                                        <i class="fas fa-cogs me-2"></i>System Settings
+                                    </a>
+                                </div>
+                                <div class="col-md-3 mb-3">
+                                    <a href="@Url.Action("Index", "Report")" class="btn btn-outline-info w-100">
+                                        <i class="fas fa-chart-bar me-2"></i>View Reports
+                                    </a>
+                                </div>
+                                <div class="col-md-3 mb-3">
+                                    <a href="@Url.Action("Index", "Notification")" class="btn btn-outline-warning w-100">
+                                        <i class="fas fa-bell me-2"></i>Send Notifications
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Security Information -->
+            <div class="row mt-4">
+                <div class="col-12">
+                    <div class="card border-0 shadow-sm">
+                        <div class="card-header bg-warning text-dark">
+                            <h5 class="mb-0">
+                                <i class="fas fa-shield-alt me-2"></i>Security Information
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <h6>Account Security:</h6>
+                                    <ul class="list-unstyled">
+                                        <li><i class="fas fa-check text-success me-2"></i>Two-factor authentication: Enabled</li>
+                                        <li><i class="fas fa-check text-success me-2"></i>Strong password policy: Active</li>
+                                        <li><i class="fas fa-check text-success me-2"></i>Session timeout: 30 minutes</li>
+                                        <li><i class="fas fa-check text-success me-2"></i>Login monitoring: Active</li>
+                                    </ul>
+                                </div>
+                                <div class="col-md-6">
+                                    <h6>Admin Privileges:</h6>
+                                    <ul class="list-unstyled">
+                                        <li><i class="fas fa-star text-warning me-2"></i>Full system access</li>
+                                        <li><i class="fas fa-star text-warning me-2"></i>User management</li>
+                                        <li><i class="fas fa-star text-warning me-2"></i>System configuration</li>
+                                        <li><i class="fas fa-star text-warning me-2"></i>Data export/import</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function() {
+            // Load system stats
+            loadSystemStats();
+        });
+
+        function loadSystemStats() {
+            $.get('@Url.Action("SystemStatsApi")', function(data) {
+                $('#totalReservations').text(data.totalReservations.toLocaleString());
+                $('#totalUsers').text(data.totalUsers.toLocaleString());
+                $('#totalRevenue').text('$' + data.totalRevenue.toLocaleString());
+            }).fail(function() {
+                $('#totalReservations').text('Error');
+                $('#totalUsers').text('Error');
+                $('#totalRevenue').text('Error');
+            });
+        }
+    </script>
+}
+
+<style>
+.card {
+    border-radius: 12px;
+}
+
+.card-header {
+    border-radius: 12px 12px 0 0 !important;
+}
+
+.form-control-plaintext {
+    padding: 0.375rem 0;
+    border: 1px solid transparent;
+    background-color: #f8f9fa;
+    border-radius: 0.375rem;
+    padding-left: 0.75rem;
+}
+</style>

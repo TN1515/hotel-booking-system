@@ -1,0 +1,155 @@
+@model HotelBooking.Models.ViewModels.AssignAmenityViewModel
+@{
+    ViewData["Title"] = "Assign Amenity to Rooms";
+}
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">
+                        <i class="fas fa-link"></i> Assign "@Model.AmenityName" to Rooms
+                    </h3>
+                </div>
+
+                <form asp-action="AssignToRoom" method="post">
+                    <div class="card-body">
+                        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                        
+                        <input type="hidden" asp-for="AmenityID" />
+
+                        <div class="alert alert-info">
+                            <i class="fas fa-info-circle"></i>
+                            Select the rooms where this amenity should be available. 
+                            You can select multiple rooms by checking the boxes.
+                        </div>
+
+                        <!-- Select All / Deselect All -->
+                        <div class="mb-3">
+                            <button type="button" class="btn btn-sm btn-outline-primary" onclick="selectAll()">
+                                <i class="fas fa-check-square"></i> Select All
+                            </button>
+                            <button type="button" class="btn btn-sm btn-outline-secondary" onclick="deselectAll()">
+                                <i class="fas fa-square"></i> Deselect All
+                            </button>
+                            <span class="ml-3 text-muted">
+                                <span id="selectedCount">@Model.AssignedRoomIds.Count</span> of @Model.Rooms.Count rooms selected
+                            </span>
+                        </div>
+
+                        <!-- Rooms Grid -->
+                        <div class="row">
+                            @foreach (var room in Model.Rooms.OrderBy(r => r.RoomNumber))
+                            {
+                                var isAssigned = Model.AssignedRoomIds.Contains(room.RoomID);
+                                <div class="col-md-4 col-lg-3 mb-3">
+                                    <div class="card @(isAssigned ? "border-primary" : "")">
+                                        <div class="card-body p-3">
+                                            <div class="form-check">
+                                                <input type="checkbox" 
+                                                       name="SelectedRoomIds" 
+                                                       value="@room.RoomID" 
+                                                       class="form-check-input room-checkbox" 
+                                                       id="room_@room.RoomID"
+                                                       @(isAssigned ? "checked" : "") />
+                                                <label class="form-check-label w-100" for="room_@room.RoomID">
+                                                    <div class="d-flex justify-content-between align-items-start">
+                                                        <div>
+                                                            <h6 class="card-title mb-1">
+                                                                Room @room.RoomNumber
+                                                            </h6>
+                                                            <p class="card-text small mb-1">
+                                                                <strong>Type:</strong> @room.RoomType?.TypeName<br>
+                                                                <strong>Price:</strong> $@room.Price<br>
+                                                                <strong>Status:</strong> 
+                                                                <span class="badge badge-@(room.Status == "Available" ? "success" : room.Status == "Occupied" ? "warning" : "danger") badge-sm">
+                                                                    @room.Status
+                                                                </span>
+                                                            </p>
+                                                        </div>
+                                                        @if (isAssigned)
+                                                        {
+                                                            <i class="fas fa-check-circle text-primary"></i>
+                                                        }
+                                                    </div>
+                                                </label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+
+                        @if (!Model.Rooms.Any())
+                        {
+                            <div class="alert alert-warning">
+                                <i class="fas fa-exclamation-triangle"></i>
+                                No active rooms found. Please create some rooms first.
+                            </div>
+                        }
+                    </div>
+
+                    <div class="card-footer">
+                        @if (Model.Rooms.Any())
+                        {
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save"></i> Save Assignments
+                            </button>
+                        }
+                        <a href="@Url.Action("Details", new { id = Model.AmenityID })" class="btn btn-info">
+                            <i class="fas fa-eye"></i> View Amenity Details
+                        </a>
+                        <a href="@Url.Action("Index")" class="btn btn-secondary">
+                            <i class="fas fa-arrow-left"></i> Back to List
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    
+    <script>
+        function selectAll() {
+            $('.room-checkbox').prop('checked', true);
+            updateSelectedCount();
+            updateCardStyles();
+        }
+
+        function deselectAll() {
+            $('.room-checkbox').prop('checked', false);
+            updateSelectedCount();
+            updateCardStyles();
+        }
+
+        function updateSelectedCount() {
+            const selectedCount = $('.room-checkbox:checked').length;
+            $('#selectedCount').text(selectedCount);
+        }
+
+        function updateCardStyles() {
+            $('.room-checkbox').each(function() {
+                const card = $(this).closest('.card');
+                if ($(this).is(':checked')) {
+                    card.addClass('border-primary');
+                } else {
+                    card.removeClass('border-primary');
+                }
+            });
+        }
+
+        $(document).ready(function() {
+            $('.room-checkbox').change(function() {
+                updateSelectedCount();
+                updateCardStyles();
+            });
+
+            // Initialize count
+            updateSelectedCount();
+        });
+    </script>
+}

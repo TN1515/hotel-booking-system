@@ -1,0 +1,179 @@
+@model HotelBooking.Models.ViewModels.AmenityViewModel
+@{
+    ViewData["Title"] = "Edit Amenity";
+}
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-md-8 offset-md-2">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">
+                        <i class="fas fa-edit"></i> Edit Amenity
+                    </h3>
+                </div>
+
+                <form asp-action="Edit" method="post">
+                    <div class="card-body">
+                        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                        
+                        <input type="hidden" asp-for="AmenityID" />
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label asp-for="AmenityName" class="control-label"></label>
+                                    <input asp-for="AmenityName" class="form-control" />
+                                    <span asp-validation-for="AmenityName" class="text-danger"></span>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label asp-for="Category" class="control-label"></label>
+                                    <select asp-for="Category" class="form-control">
+                                        <option value="">Select Category</option>
+                                        @foreach (var category in Model.Categories)
+                                        {
+                                            <option value="@category" selected="@(Model.Category == category)">
+                                                @category
+                                            </option>
+                                        }
+                                    </select>
+                                    <span asp-validation-for="Category" class="text-danger"></span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label asp-for="Description" class="control-label"></label>
+                            <textarea asp-for="Description" class="form-control" rows="3"></textarea>
+                            <span asp-validation-for="Description" class="text-danger"></span>
+                        </div>
+
+                        <div class="form-group">
+                            <label asp-for="Icon" class="control-label"></label>
+                            <div class="input-group">
+                                <input asp-for="Icon" class="form-control" placeholder="e.g., fas fa-wifi" id="iconInput" />
+                                <div class="input-group-append">
+                                    <span class="input-group-text" id="iconPreview">
+                                        @if (!string.IsNullOrEmpty(Model.Icon))
+                                        {
+                                            <i class="@Model.Icon"></i>
+                                        }
+                                        else
+                                        {
+                                            <i class="fas fa-star"></i>
+                                        }
+                                    </span>
+                                </div>
+                            </div>
+                            <span asp-validation-for="Icon" class="text-danger"></span>
+                            <small class="form-text text-muted">
+                                Use FontAwesome icon classes. 
+                                <a href="https://fontawesome.com/icons" target="_blank">Browse icons</a>
+                            </small>
+                        </div>
+
+                        <div class="form-group">
+                            <div class="form-check">
+                                <input asp-for="IsActive" class="form-check-input" type="checkbox" />
+                                <label asp-for="IsActive" class="form-check-label"></label>
+                            </div>
+                        </div>
+
+                        <!-- Icon Examples -->
+                        <div class="card card-outline card-info">
+                            <div class="card-header">
+                                <h6 class="card-title">Common Amenity Icons</h6>
+                            </div>
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-md-3">
+                                        <button type="button" class="btn btn-sm btn-outline-secondary mb-1" 
+                                                onclick="setIcon('fas fa-wifi')">
+                                            <i class="fas fa-wifi"></i> WiFi
+                                        </button>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <button type="button" class="btn btn-sm btn-outline-secondary mb-1" 
+                                                onclick="setIcon('fas fa-swimming-pool')">
+                                            <i class="fas fa-swimming-pool"></i> Pool
+                                        </button>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <button type="button" class="btn btn-sm btn-outline-secondary mb-1" 
+                                                onclick="setIcon('fas fa-car')">
+                                            <i class="fas fa-car"></i> Parking
+                                        </button>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <button type="button" class="btn btn-sm btn-outline-secondary mb-1" 
+                                                onclick="setIcon('fas fa-tv')">
+                                            <i class="fas fa-tv"></i> TV
+                                        </button>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <button type="button" class="btn btn-sm btn-outline-secondary mb-1" 
+                                                onclick="setIcon('fas fa-snowflake')">
+                                            <i class="fas fa-snowflake"></i> AC
+                                        </button>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <button type="button" class="btn btn-sm btn-outline-secondary mb-1" 
+                                                onclick="setIcon('fas fa-utensils')">
+                                            <i class="fas fa-utensils"></i> Restaurant
+                                        </button>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <button type="button" class="btn btn-sm btn-outline-secondary mb-1" 
+                                                onclick="setIcon('fas fa-dumbbell')">
+                                            <i class="fas fa-dumbbell"></i> Gym
+                                        </button>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <button type="button" class="btn btn-sm btn-outline-secondary mb-1" 
+                                                onclick="setIcon('fas fa-spa')">
+                                            <i class="fas fa-spa"></i> Spa
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card-footer">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save"></i> Update Amenity
+                        </button>
+                        <a href="@Url.Action("Details", new { id = Model.AmenityID })" class="btn btn-info">
+                            <i class="fas fa-eye"></i> View Details
+                        </a>
+                        <a href="@Url.Action("Index")" class="btn btn-secondary">
+                            <i class="fas fa-arrow-left"></i> Back to List
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    
+    <script>
+        function setIcon(iconClass) {
+            $('#iconInput').val(iconClass);
+            $('#iconPreview').html('<i class="' + iconClass + '"></i>');
+        }
+
+        $('#iconInput').on('input', function() {
+            const iconClass = $(this).val();
+            if (iconClass) {
+                $('#iconPreview').html('<i class="' + iconClass + '"></i>');
+            } else {
+                $('#iconPreview').html('<i class="fas fa-star"></i>');
+            }
+        });
+    </script>
+}

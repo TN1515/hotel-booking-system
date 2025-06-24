@@ -1,0 +1,132 @@
+@{
+    ViewData["Title"] = "About Us";
+}
+
+<div class="container py-5">
+    <!-- Hero Section -->
+    <div class="row mb-5">
+        <div class="col-12 text-center">
+            <h1 class="display-4 fw-bold text-primary mb-4">About HotelPro</h1>
+            <p class="lead text-muted">Professional Hotel Management System for Modern Hospitality</p>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="row">
+        <div class="col-lg-8 mx-auto">
+            <div class="card shadow-lg border-0">
+                <div class="card-body p-5">
+                    <h2 class="text-primary mb-4">Our Story</h2>
+                    <p class="mb-4">
+                        HotelPro is a comprehensive hotel booking and management system designed to streamline 
+                        the hospitality industry. Built with modern technology and user experience in mind, 
+                        we provide a complete solution for hotels, staff, and guests.
+                    </p>
+
+                    <h3 class="text-primary mb-3">What We Offer</h3>
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <ul class="list-unstyled">
+                                <li class="mb-2"><i class="fas fa-check text-success me-2"></i>Easy Room Booking</li>
+                                <li class="mb-2"><i class="fas fa-check text-success me-2"></i>QR Code Payments</li>
+                                <li class="mb-2"><i class="fas fa-check text-success me-2"></i>Customer Management</li>
+                                <li class="mb-2"><i class="fas fa-check text-success me-2"></i>Real-time Analytics</li>
+                            </ul>
+                        </div>
+                        <div class="col-md-6">
+                            <ul class="list-unstyled">
+                                <li class="mb-2"><i class="fas fa-check text-success me-2"></i>Admin Dashboard</li>
+                                <li class="mb-2"><i class="fas fa-check text-success me-2"></i>Staff Management</li>
+                                <li class="mb-2"><i class="fas fa-check text-success me-2"></i>Responsive Design</li>
+                                <li class="mb-2"><i class="fas fa-check text-success me-2"></i>24/7 Support</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <h3 class="text-primary mb-3">Technology Stack</h3>
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <div class="card bg-light">
+                                <div class="card-body">
+                                    <h5 class="card-title">Backend</h5>
+                                    <ul class="list-unstyled mb-0">
+                                        <li>ASP.NET Core MVC 8.0</li>
+                                        <li>Entity Framework Core</li>
+                                        <li>SQL Server Database</li>
+                                        <li>ASP.NET Core Identity</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="card bg-light">
+                                <div class="card-body">
+                                    <h5 class="card-title">Frontend</h5>
+                                    <ul class="list-unstyled mb-0">
+                                        <li>Bootstrap 5</li>
+                                        <li>Font Awesome Icons</li>
+                                        <li>Chart.js for Analytics</li>
+                                        <li>Responsive Design</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <h3 class="text-primary mb-3">Our Mission</h3>
+                    <p class="mb-4">
+                        To provide hotels with a powerful, easy-to-use management system that enhances 
+                        guest experience while streamlining operations. We believe in technology that 
+                        brings people together and creates memorable experiences.
+                    </p>
+
+                    <div class="text-center">
+                        <a href="@Url.Action("Index", "Rooms")" class="btn btn-primary btn-lg me-3">
+                            <i class="fas fa-bed me-2"></i>Browse Rooms
+                        </a>
+                        <a href="@Url.Action("Contact")" class="btn btn-outline-primary btn-lg">
+                            <i class="fas fa-envelope me-2"></i>Contact Us
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Statistics Section -->
+    <div class="row mt-5">
+        <div class="col-12">
+            <div class="card bg-primary text-white">
+                <div class="card-body py-5">
+                    <div class="row text-center">
+                        <div class="col-md-3">
+                            <h3 class="display-6 fw-bold">34</h3>
+                            <p class="mb-0">Database Tables</p>
+                        </div>
+                        <div class="col-md-3">
+                            <h3 class="display-6 fw-bold">19</h3>
+                            <p class="mb-0">Controllers</p>
+                        </div>
+                        <div class="col-md-3">
+                            <h3 class="display-6 fw-bold">100+</h3>
+                            <p class="mb-0">Views & Features</p>
+                        </div>
+                        <div class="col-md-3">
+                            <h3 class="display-6 fw-bold">100%</h3>
+                            <p class="mb-0">Functionality</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .card {
+        border-radius: 15px;
+    }
+    .display-6 {
+        font-size: 2.5rem;
+    }
+</style>

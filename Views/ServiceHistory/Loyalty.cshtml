@@ -1,0 +1,187 @@
+@model HotelBooking.Models.CustomerLoyalty
+@{
+    ViewData["Title"] = "Loyalty Program";
+    var loyaltyPoints = ViewBag.LoyaltyPoints as List<HotelBooking.Models.LoyaltyPoint>;
+}
+
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card shadow">
+                <div class="card-header bg-warning text-dark">
+                    <h4 class="mb-0">
+                        <i class="fas fa-star me-2"></i>Loyalty Program
+                    </h4>
+                </div>
+                <div class="card-body">
+                    <!-- Current Status -->
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <div class="card border-warning">
+                                <div class="card-header bg-warning text-dark">
+                                    <h5 class="mb-0">
+                                        <i class="fas fa-crown me-2"></i>Current Status
+                                    </h5>
+                                </div>
+                                <div class="card-body">
+                                    <div class="text-center">
+                                        <h2 class="text-warning">@Model.LoyaltyTier?.TierName</h2>
+                                        <p class="mb-2"><strong>Current Points:</strong> @Model.CurrentPoints</p>
+                                        <p class="mb-2"><strong>Total Earned:</strong> @Model.TotalPointsEarned</p>
+                                        <p class="mb-2"><strong>Total Spent:</strong> $@Model.TotalAmountSpent.ToString("F2")</p>
+                                        <p class="mb-0"><strong>Member Since:</strong> @Model.JoinDate.ToString("MMM yyyy")</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="card border-info">
+                                <div class="card-header bg-info text-white">
+                                    <h5 class="mb-0">
+                                        <i class="fas fa-gift me-2"></i>Current Benefits
+                                    </h5>
+                                </div>
+                                <div class="card-body">
+                                    <p><strong>Discount:</strong> @Model.LoyaltyTier?.DiscountPercentage%</p>
+                                    <p><strong>Point Multiplier:</strong> @Model.LoyaltyTier?.PointMultiplier x</p>
+                                    <p class="mb-0"><strong>Benefits:</strong></p>
+                                    <small>@Model.LoyaltyTier?.Benefits</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Tier Progress -->
+                    <div class="card mb-4">
+                        <div class="card-header">
+                            <h5 class="mb-0">
+                                <i class="fas fa-chart-line me-2"></i>Tier Progress
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="row text-center">
+                                <div class="col-md-3">
+                                    <div class="tier-item @(Model.LoyaltyTier?.TierName == "Bronze" ? "active" : "")">
+                                        <i class="fas fa-medal fa-2x text-warning"></i>
+                                        <h6>Bronze</h6>
+                                        <small>0 - 999 points</small>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="tier-item @(Model.LoyaltyTier?.TierName == "Silver" ? "active" : "")">
+                                        <i class="fas fa-medal fa-2x text-secondary"></i>
+                                        <h6>Silver</h6>
+                                        <small>1,000 - 4,999 points</small>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="tier-item @(Model.LoyaltyTier?.TierName == "Gold" ? "active" : "")">
+                                        <i class="fas fa-medal fa-2x text-warning"></i>
+                                        <h6>Gold</h6>
+                                        <small>5,000 - 14,999 points</small>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="tier-item @(Model.LoyaltyTier?.TierName == "Platinum" ? "active" : "")">
+                                        <i class="fas fa-crown fa-2x text-primary"></i>
+                                        <h6>Platinum</h6>
+                                        <small>15,000+ points</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Points History -->
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="mb-0">
+                                <i class="fas fa-history me-2"></i>Points History
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            @if (loyaltyPoints != null && loyaltyPoints.Any())
+                            {
+                                <div class="table-responsive">
+                                    <table class="table table-sm">
+                                        <thead>
+                                            <tr>
+                                                <th>Date</th>
+                                                <th>Type</th>
+                                                <th>Description</th>
+                                                <th>Points Earned</th>
+                                                <th>Points Used</th>
+                                                <th>Amount</th>
+                                                <th>Status</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            @foreach (var point in loyaltyPoints.Take(10))
+                                            {
+                                                <tr>
+                                                    <td>@point.EarnedDate.ToString("MMM dd, yyyy")</td>
+                                                    <td>
+                                                        <span class="badge bg-@(point.PointType == "Room" ? "primary" : point.PointType == "Service" ? "success" : "warning")">
+                                                            @point.PointType
+                                                        </span>
+                                                    </td>
+                                                    <td>@point.Description</td>
+                                                    <td class="text-success">
+                                                        @if (point.PointsEarned > 0)
+                                                        {
+                                                            <span>+@point.PointsEarned</span>
+                                                        }
+                                                    </td>
+                                                    <td class="text-danger">
+                                                        @if (point.PointsUsed > 0)
+                                                        {
+                                                            <span>-@point.PointsUsed</span>
+                                                        }
+                                                    </td>
+                                                    <td>$@point.AmountSpent.ToString("F2")</td>
+                                                    <td>
+                                                        <span class="badge bg-@(point.Status == "Active" ? "success" : "secondary")">
+                                                            @point.Status
+                                                        </span>
+                                                    </td>
+                                                </tr>
+                                            }
+                                        </tbody>
+                                    </table>
+                                </div>
+                            }
+                            else
+                            {
+                                <p class="text-muted text-center">No points history available.</p>
+                            }
+                        </div>
+                    </div>
+
+                    <div class="text-center mt-4">
+                        <a href="@Url.Action("Index")" class="btn btn-secondary">
+                            <i class="fas fa-arrow-left me-2"></i>Back to Service History
+                        </a>
+                        <a href="@Url.Action("Index", "Reservations")" class="btn btn-primary">
+                            <i class="fas fa-plus me-2"></i>Book More & Earn Points
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .tier-item {
+        padding: 15px;
+        border-radius: 10px;
+        transition: all 0.3s;
+    }
+    .tier-item.active {
+        background-color: #fff3cd;
+        border: 2px solid #ffc107;
+    }
+    .tier-item:not(.active) {
+        opacity: 0.6;
+    }
+</style>

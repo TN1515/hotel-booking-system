@@ -1,0 +1,221 @@
+@model HotelBooking.Models.ViewModels.RefundProcessViewModel
+@{
+    ViewData["Title"] = "Process Refund";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<div class="admin-content">
+    <!-- Header Section -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="h2 mb-1 fw-bold">Process Refund</h1>
+            <p class="text-muted mb-0">Process refund for payment transaction</p>
+        </div>
+        <a asp-action="Index" class="btn btn-outline-secondary">
+            <i class="fas fa-arrow-left me-2"></i>Back to Payments
+        </a>
+    </div>
+
+    <!-- Refund Form -->
+    <div class="row">
+        <div class="col-lg-8">
+            <div class="card shadow-sm">
+                <div class="card-header bg-warning text-dark">
+                    <h5 class="mb-0">
+                        <i class="fas fa-undo me-2"></i>Refund Details
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <form asp-action="Refund" method="post" class="needs-validation" novalidate>
+                        <input type="hidden" asp-for="PaymentID" />
+                        
+                        <!-- Payment Information -->
+                        <div class="row mb-4">
+                            <div class="col-md-6">
+                                <h6 class="text-muted mb-3">Payment Information</h6>
+                                <dl class="row">
+                                    <dt class="col-sm-5">Guest Name:</dt>
+                                    <dd class="col-sm-7">@Model.GuestName</dd>
+                                    
+                                    <dt class="col-sm-5">Room Number:</dt>
+                                    <dd class="col-sm-7">@Model.RoomNumber</dd>
+                                    
+                                    <dt class="col-sm-5">Payment Date:</dt>
+                                    <dd class="col-sm-7">@Model.PaymentDate.ToString("MMM dd, yyyy")</dd>
+                                    
+                                    <dt class="col-sm-5">Original Amount:</dt>
+                                    <dd class="col-sm-7 text-success fw-bold">@Model.OriginalAmount.ToString("C")</dd>
+                                </dl>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="alert alert-warning">
+                                    <i class="fas fa-exclamation-triangle me-2"></i>
+                                    <strong>Warning:</strong> This action will process a refund and cannot be undone.
+                                </div>
+                            </div>
+                        </div>
+
+                        <hr class="my-4">
+
+                        <!-- Refund Form Fields -->
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label asp-for="RefundAmount" class="form-label fw-bold">
+                                    <i class="fas fa-dollar-sign me-2"></i>Refund Amount
+                                </label>
+                                <div class="input-group">
+                                    <span class="input-group-text">$</span>
+                                    <input asp-for="RefundAmount" class="form-control form-control-lg" type="number" step="0.01" min="0.01" max="@Model.OriginalAmount" required />
+                                </div>
+                                <span asp-validation-for="RefundAmount" class="text-danger"></span>
+                                <small class="form-text text-muted">Maximum refund: @Model.OriginalAmount.ToString("C")</small>
+                            </div>
+                            
+                            <div class="col-md-6 mb-3">
+                                <label asp-for="RefundMethodID" class="form-label fw-bold">
+                                    <i class="fas fa-credit-card me-2"></i>Refund Method
+                                </label>
+                                <select asp-for="RefundMethodID" class="form-select form-select-lg" required>
+                                    <option value="">Select refund method</option>
+                                    @if (Model.RefundMethods != null)
+                                    {
+                                        @foreach (var method in Model.RefundMethods)
+                                        {
+                                            <option value="@method.MethodID">@method.MethodName</option>
+                                        }
+                                    }
+                                </select>
+                                <span asp-validation-for="RefundMethodID" class="text-danger"></span>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="RefundReason" class="form-label fw-bold">
+                                <i class="fas fa-comment me-2"></i>Refund Reason
+                            </label>
+                            <textarea asp-for="RefundReason" class="form-control" rows="4" placeholder="Please provide a detailed reason for this refund..." required></textarea>
+                            <span asp-validation-for="RefundReason" class="text-danger"></span>
+                        </div>
+
+                        <!-- Confirmation -->
+                        <div class="form-check mb-4">
+                            <input class="form-check-input" type="checkbox" id="confirmRefund" required>
+                            <label class="form-check-label fw-bold" for="confirmRefund">
+                                I confirm that this refund is authorized and accurate
+                            </label>
+                        </div>
+
+                        <!-- Action Buttons -->
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                            <a asp-action="Index" class="btn btn-outline-secondary btn-lg me-md-2">
+                                <i class="fas fa-times me-2"></i>Cancel
+                            </a>
+                            <button type="submit" class="btn btn-warning btn-lg" id="processRefundBtn" disabled>
+                                <i class="fas fa-undo me-2"></i>Process Refund
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Refund Summary -->
+        <div class="col-lg-4">
+            <div class="card shadow-sm">
+                <div class="card-header bg-light">
+                    <h6 class="mb-0">
+                        <i class="fas fa-calculator me-2"></i>Refund Summary
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <dl class="row mb-0">
+                        <dt class="col-6">Original Payment:</dt>
+                        <dd class="col-6 text-end">@Model.OriginalAmount.ToString("C")</dd>
+                        
+                        <dt class="col-6">Refund Amount:</dt>
+                        <dd class="col-6 text-end text-warning fw-bold" id="refundAmountDisplay">$0.00</dd>
+                        
+                        <hr class="my-2">
+                        
+                        <dt class="col-6">Remaining:</dt>
+                        <dd class="col-6 text-end text-success fw-bold" id="remainingAmountDisplay">@Model.OriginalAmount.ToString("C")</dd>
+                    </dl>
+                </div>
+            </div>
+
+            <!-- Refund Policy -->
+            <div class="card shadow-sm mt-3">
+                <div class="card-header bg-light">
+                    <h6 class="mb-0">
+                        <i class="fas fa-info-circle me-2"></i>Refund Policy
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <ul class="list-unstyled mb-0">
+                        <li class="mb-2">
+                            <i class="fas fa-check text-success me-2"></i>
+                            Refunds are processed within 3-5 business days
+                        </li>
+                        <li class="mb-2">
+                            <i class="fas fa-check text-success me-2"></i>
+                            Partial refunds are allowed
+                        </li>
+                        <li class="mb-2">
+                            <i class="fas fa-exclamation-triangle text-warning me-2"></i>
+                            All refunds require manager approval
+                        </li>
+                        <li class="mb-0">
+                            <i class="fas fa-info text-info me-2"></i>
+                            Refund notifications are sent automatically
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    
+    <script>
+        $(document).ready(function() {
+            const originalAmount = @Model.OriginalAmount;
+            
+            // Enable/disable process button based on checkbox
+            $('#confirmRefund').on('change', function() {
+                $('#processRefundBtn').prop('disabled', !this.checked);
+            });
+            
+            // Update refund summary when amount changes
+            $('#RefundAmount').on('input', function() {
+                const refundAmount = parseFloat($(this).val()) || 0;
+                const remaining = originalAmount - refundAmount;
+                
+                $('#refundAmountDisplay').text('$' + refundAmount.toFixed(2));
+                $('#remainingAmountDisplay').text('$' + remaining.toFixed(2));
+                
+                // Validate amount
+                if (refundAmount > originalAmount) {
+                    $(this).addClass('is-invalid');
+                    $('#processRefundBtn').prop('disabled', true);
+                } else {
+                    $(this).removeClass('is-invalid');
+                    $('#processRefundBtn').prop('disabled', !$('#confirmRefund').is(':checked'));
+                }
+            });
+            
+            // Confirmation before submitting
+            $('form').on('submit', function(e) {
+                const refundAmount = $('#RefundAmount').val();
+                if (!confirm(`Are you sure you want to process a refund of $${refundAmount}? This action cannot be undone.`)) {
+                    e.preventDefault();
+                    return false;
+                }
+            });
+            
+            // Initial calculation
+            $('#RefundAmount').trigger('input');
+        });
+    </script>
+}

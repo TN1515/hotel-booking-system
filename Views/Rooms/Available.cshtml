@@ -1,0 +1,275 @@
+@model IEnumerable<HotelBooking.Models.Room>
+@{
+    ViewData["Title"] = "Available Rooms";
+    var checkIn = ViewBag.CheckIn as string;
+    var checkOut = ViewBag.CheckOut as string;
+    var guests = ViewBag.Guests as int?;
+}
+
+<div class="container">
+    <!-- Header Section -->
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <h1 class="display-5 text-primary">Available Rooms</h1>
+            <p class="lead">Perfect rooms for your stay</p>
+        </div>
+        <div class="col-md-4 text-end">
+            <a href="@Url.Action("Search")" class="btn btn-outline-primary btn-lg">
+                <i class="fas fa-search me-2"></i>Refine Search
+            </a>
+        </div>
+    </div>
+
+    <!-- Search Summary -->
+    @if (!string.IsNullOrEmpty(checkIn) || !string.IsNullOrEmpty(checkOut) || guests.HasValue)
+    {
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card bg-light border-0">
+                    <div class="card-body">
+                        <h5 class="card-title mb-3">
+                            <i class="fas fa-filter text-primary me-2"></i>Search Criteria
+                        </h5>
+                        <div class="row">
+                            @if (!string.IsNullOrEmpty(checkIn) && !string.IsNullOrEmpty(checkOut))
+                            {
+                                <div class="col-md-4">
+                                    <div class="d-flex align-items-center">
+                                        <i class="fas fa-calendar-alt text-success me-2"></i>
+                                        <div>
+                                            <small class="text-muted">Check-in / Check-out</small>
+                                            <div class="fw-bold">@DateTime.Parse(checkIn).ToString("MMM dd") - @DateTime.Parse(checkOut).ToString("MMM dd, yyyy")</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                            @if (guests.HasValue)
+                            {
+                                <div class="col-md-4">
+                                    <div class="d-flex align-items-center">
+                                        <i class="fas fa-users text-info me-2"></i>
+                                        <div>
+                                            <small class="text-muted">Guests</small>
+                                            <div class="fw-bold">@guests.Value @(guests.Value == 1 ? "Guest" : "Guests")</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                            <div class="col-md-4">
+                                <div class="d-flex align-items-center">
+                                    <i class="fas fa-bed text-warning me-2"></i>
+                                    <div>
+                                        <small class="text-muted">Available Rooms</small>
+                                        <div class="fw-bold">@Model.Count() @(Model.Count() == 1 ? "Room" : "Rooms")</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+
+    <!-- Rooms Grid -->
+    @if (Model.Any())
+    {
+        <div class="row">
+            @foreach (var room in Model)
+            {
+                <div class="col-lg-6 col-xl-4 mb-4">
+                    <div class="card h-100 shadow-sm border-0 room-card">
+                        <!-- Room Image -->
+                        <div class="position-relative">
+                            @if (room.RoomImages != null && room.RoomImages.Any())
+                            {
+                                var firstImage = room.RoomImages.First();
+                                @if (firstImage.ImageData != null)
+                                {
+                                    <img src="data:image/jpeg;base64,@Convert.ToBase64String(firstImage.ImageData)" class="card-img-top room-image" alt="Room @room.RoomNumber">
+                                }
+                                else if (!string.IsNullOrEmpty(firstImage.ImagePath))
+                                {
+                                    <img src="@firstImage.ImagePath" class="card-img-top room-image" alt="Room @room.RoomNumber">
+                                }
+                                else
+                                {
+                                    <div class="card-img-top room-image bg-light d-flex align-items-center justify-content-center">
+                                        <i class="fas fa-image fa-3x text-muted"></i>
+                                    </div>
+                                }
+                            }
+                            else
+                            {
+                                <div class="card-img-top room-image bg-light d-flex align-items-center justify-content-center">
+                                    <i class="fas fa-bed fa-3x text-muted"></i>
+                                </div>
+                            }
+                            <div class="position-absolute top-0 end-0 m-2">
+                                <span class="badge bg-success">Available</span>
+                            </div>
+                        </div>
+
+                        <div class="card-body d-flex flex-column">
+                            <!-- Room Header -->
+                            <div class="d-flex justify-content-between align-items-start mb-2">
+                                <h5 class="card-title mb-0">Room @room.RoomNumber</h5>
+                                <div class="text-end">
+                                    <div class="h5 text-primary mb-0">@room.Price.ToString("C", new System.Globalization.CultureInfo("vi-VN"))</div>
+                                    <small class="text-muted">per night</small>
+                                </div>
+                            </div>
+
+                            <h6 class="card-subtitle mb-3 text-primary">@room.RoomType?.TypeName</h6>
+
+                            <!-- Room Features -->
+                            <div class="room-features mb-3">
+                                <div class="row g-2">
+                                    <div class="col-6">
+                                        <div class="feature-item">
+                                            <i class="fas fa-bed text-muted me-1"></i>
+                                            <small>@room.BedType</small>
+                                        </div>
+                                    </div>
+                                    <div class="col-6">
+                                        <div class="feature-item">
+                                            <i class="fas fa-eye text-muted me-1"></i>
+                                            <small>@room.ViewType</small>
+                                        </div>
+                                    </div>
+                                    <div class="col-6">
+                                        <div class="feature-item">
+                                            <i class="fas fa-users text-muted me-1"></i>
+                                            <small>Up to @room.RoomType?.MaxOccupancy guests</small>
+                                        </div>
+                                    </div>
+                                    <div class="col-6">
+                                        <div class="feature-item">
+                                            <i class="fas fa-ruler-combined text-muted me-1"></i>
+                                            <small>@room.RoomType?.TypeName</small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Room Description -->
+                            @if (!string.IsNullOrEmpty(room.Description))
+                            {
+                                <p class="card-text text-muted small mb-3">@room.Description</p>
+                            }
+
+                            <!-- Action Buttons -->
+                            <div class="mt-auto">
+                                <div class="d-grid gap-2">
+                                    <a href="@Url.Action("Details", new { id = room.RoomID })" class="btn btn-outline-primary">
+                                        <i class="fas fa-info-circle me-1"></i>View Details
+                                    </a>
+                                    @if (!string.IsNullOrEmpty(checkIn) && !string.IsNullOrEmpty(checkOut))
+                                    {
+                                        <a href="@Url.Action("Book", new { id = room.RoomID, checkIn = checkIn, checkOut = checkOut, guests = guests })"
+                                           class="btn btn-success">
+                                            <i class="fas fa-calendar-check me-1"></i>Book Now
+                                        </a>
+                                    }
+                                    else
+                                    {
+                                        <a href="@Url.Action("Book", new { id = room.RoomID })" class="btn btn-success">
+                                            <i class="fas fa-calendar-check me-1"></i>Book Now
+                                        </a>
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+
+        <!-- Pagination would go here if needed -->
+        <div class="row mt-4">
+            <div class="col-12 text-center">
+                <p class="text-muted">Showing @Model.Count() available rooms</p>
+            </div>
+        </div>
+    }
+    else
+    {
+        <!-- No Results -->
+        <div class="text-center py-5">
+            <div class="mb-4">
+                <i class="fas fa-bed fa-4x text-muted"></i>
+            </div>
+            <h3 class="text-muted">No Available Rooms</h3>
+            <p class="text-muted mb-4">
+                Sorry, no rooms are available for your selected criteria. Please try different dates or contact us for assistance.
+            </p>
+            <div class="d-grid gap-2 d-md-flex justify-content-md-center">
+                <a href="@Url.Action("Search")" class="btn btn-primary">
+                    <i class="fas fa-search me-1"></i>Search Again
+                </a>
+                <a href="@Url.Action("Index")" class="btn btn-outline-secondary">
+                    <i class="fas fa-list me-1"></i>View All Rooms
+                </a>
+                <a href="@Url.Action("Contact", "Home")" class="btn btn-outline-info">
+                    <i class="fas fa-phone me-1"></i>Contact Us
+                </a>
+            </div>
+        </div>
+    }
+</div>
+
+<style>
+    .room-card {
+        transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+        border-radius: 15px;
+        overflow: hidden;
+    }
+
+    .room-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 25px rgba(0,0,0,0.15) !important;
+    }
+
+    .room-image {
+        height: 200px;
+        object-fit: cover;
+        background-color: #f8f9fa;
+    }
+
+    .room-features {
+        background-color: #f8f9fa;
+        padding: 0.75rem;
+        border-radius: 8px;
+        font-size: 0.85rem;
+    }
+
+    .feature-item {
+        display: flex;
+        align-items-center;
+        margin-bottom: 0.25rem;
+    }
+
+    .feature-item:last-child {
+        margin-bottom: 0;
+    }
+
+    .card-title {
+        font-size: 1.1rem;
+        font-weight: 600;
+    }
+
+    .card-subtitle {
+        font-size: 0.95rem;
+        font-weight: 500;
+    }
+
+    @@media (max-width: 768px) {
+        .room-image {
+            height: 180px;
+        }
+
+        .display-5 {
+            font-size: 2rem;
+        }
+    }
+</style>

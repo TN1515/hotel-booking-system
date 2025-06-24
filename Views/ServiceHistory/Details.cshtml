@@ -1,0 +1,498 @@
+@model HotelBooking.Models.ViewModels.ServiceHistoryDetailsViewModel
+@{
+    ViewData["Title"] = "Service History Details";
+}
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <!-- Header -->
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h2 class="mb-1">
+                        <i class="fas fa-history text-primary me-2"></i>
+                        Service History Details
+                    </h2>
+                    <p class="text-muted mb-0">Detailed view of service usage and history</p>
+                </div>
+                <div>
+                    <a href="@Url.Action("Index")" class="btn btn-outline-secondary">
+                        <i class="fas fa-arrow-left"></i> Back to List
+                    </a>
+                    <button type="button" class="btn btn-primary" onclick="printDetails()">
+                        <i class="fas fa-print"></i> Print
+                    </button>
+                </div>
+            </div>
+
+            <!-- Service Summary -->
+            <div class="row mb-4">
+                <div class="col-md-8">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="mb-0">
+                                <i class="fas fa-info-circle"></i> Service Information
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label class="form-label text-muted">Service Name</label>
+                                        <h6 class="mb-0">@Model.ServiceName</h6>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label text-muted">Category</label>
+                                        <span class="badge bg-info">@Model.ServiceCategory</span>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label text-muted">Guest Name</label>
+                                        <h6 class="mb-0">@Model.GuestName</h6>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label class="form-label text-muted">Room Number</label>
+                                        <h6 class="mb-0">@Model.RoomNumber</h6>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label text-muted">Service Date</label>
+                                        <h6 class="mb-0">@Model.ServiceDate.ToString("dd/MM/yyyy HH:mm")</h6>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label text-muted">Status</label>
+                                        @switch (Model.Status)
+                                        {
+                                            case "Completed":
+                                                <span class="badge bg-success">@Model.Status</span>
+                                                break;
+                                            case "Pending":
+                                                <span class="badge bg-warning">@Model.Status</span>
+                                                break;
+                                            case "Cancelled":
+                                                <span class="badge bg-danger">@Model.Status</span>
+                                                break;
+                                            default:
+                                                <span class="badge bg-secondary">@Model.Status</span>
+                                                break;
+                                        }
+                                    </div>
+                                </div>
+                            </div>
+
+                            @if (!string.IsNullOrEmpty(Model.Description))
+                            {
+                                <div class="mt-3">
+                                    <label class="form-label text-muted">Description</label>
+                                    <div class="bg-light p-3 rounded">
+                                        @Model.Description
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Cost Summary -->
+                <div class="col-md-4">
+                    <div class="card">
+                        <div class="card-header">
+                            <h6 class="mb-0">
+                                <i class="fas fa-calculator"></i> Cost Summary
+                            </h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between mb-2">
+                                <span>Quantity:</span>
+                                <strong>@Model.Quantity</strong>
+                            </div>
+                            <div class="d-flex justify-content-between mb-2">
+                                <span>Unit Price:</span>
+                                <strong>@Model.UnitPrice.ToString("C", new System.Globalization.CultureInfo("vi-VN"))</strong>
+                            </div>
+                            <hr>
+                            <div class="d-flex justify-content-between">
+                                <span><strong>Total Amount:</strong></span>
+                                <strong class="text-primary">@Model.TotalAmount.ToString("C", new System.Globalization.CultureInfo("vi-VN"))</strong>
+                            </div>
+
+                            @if (Model.DiscountAmount > 0)
+                            {
+                                <div class="mt-2">
+                                    <div class="d-flex justify-content-between text-success">
+                                        <span>Discount:</span>
+                                        <strong>-@Model.DiscountAmount.ToString("C", new System.Globalization.CultureInfo("vi-VN"))</strong>
+                                    </div>
+                                    <hr>
+                                    <div class="d-flex justify-content-between">
+                                        <span><strong>Final Amount:</strong></span>
+                                        <strong class="text-success">@((Model.TotalAmount - Model.DiscountAmount).ToString("C", new System.Globalization.CultureInfo("vi-VN")))</strong>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    </div>
+
+                    <!-- Payment Status -->
+                    <div class="card mt-3">
+                        <div class="card-header">
+                            <h6 class="mb-0">
+                                <i class="fas fa-credit-card"></i> Payment Status
+                            </h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="text-center">
+                                @if (Model.IsPaid)
+                                {
+                                    <i class="fas fa-check-circle fa-3x text-success mb-2"></i>
+                                    <h6 class="text-success">Paid</h6>
+                                    <small class="text-muted">Payment Date: @Model.PaymentDate?.ToString("dd/MM/yyyy")</small>
+                                }
+                                else
+                                {
+                                    <i class="fas fa-clock fa-3x text-warning mb-2"></i>
+                                    <h6 class="text-warning">Pending Payment</h6>
+                                    <button type="button" class="btn btn-sm btn-success mt-2">
+                                        <i class="fas fa-credit-card"></i> Mark as Paid
+                                    </button>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Service Timeline -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-timeline"></i> Service Timeline
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="timeline">
+                        <div class="timeline-item">
+                            <div class="timeline-marker bg-primary"></div>
+                            <div class="timeline-content">
+                                <h6 class="mb-1">Service Requested</h6>
+                                <p class="text-muted mb-1">@Model.RequestedDate.ToString("dd/MM/yyyy HH:mm")</p>
+                                <small class="text-muted">Requested by: @Model.RequestedBy</small>
+                            </div>
+                        </div>
+
+                        @if (Model.ConfirmedDate.HasValue)
+                        {
+                            <div class="timeline-item">
+                                <div class="timeline-marker bg-info"></div>
+                                <div class="timeline-content">
+                                    <h6 class="mb-1">Service Confirmed</h6>
+                                    <p class="text-muted mb-1">@Model.ConfirmedDate.Value.ToString("dd/MM/yyyy HH:mm")</p>
+                                    <small class="text-muted">Confirmed by: @Model.ConfirmedBy</small>
+                                </div>
+                            </div>
+                        }
+
+                        @if (Model.StartedDate.HasValue)
+                        {
+                            <div class="timeline-item">
+                                <div class="timeline-marker bg-warning"></div>
+                                <div class="timeline-content">
+                                    <h6 class="mb-1">Service Started</h6>
+                                    <p class="text-muted mb-1">@Model.StartedDate.Value.ToString("dd/MM/yyyy HH:mm")</p>
+                                    <small class="text-muted">Started by: @Model.ServiceProvider</small>
+                                </div>
+                            </div>
+                        }
+
+                        @if (Model.CompletedDate.HasValue)
+                        {
+                            <div class="timeline-item">
+                                <div class="timeline-marker bg-success"></div>
+                                <div class="timeline-content">
+                                    <h6 class="mb-1">Service Completed</h6>
+                                    <p class="text-muted mb-1">@Model.CompletedDate.Value.ToString("dd/MM/yyyy HH:mm")</p>
+                                    <small class="text-muted">Completed by: @Model.ServiceProvider</small>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+
+            <!-- Additional Notes -->
+            @if (!string.IsNullOrEmpty(Model.Notes))
+            {
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h6 class="mb-0">
+                            <i class="fas fa-sticky-note"></i> Additional Notes
+                        </h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="bg-light p-3 rounded">
+                            @Model.Notes
+                        </div>
+                    </div>
+                </div>
+            }
+
+            <!-- Guest Feedback -->
+            @if (!string.IsNullOrEmpty(Model.GuestFeedback))
+            {
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h6 class="mb-0">
+                            <i class="fas fa-comment"></i> Guest Feedback
+                        </h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="d-flex align-items-start">
+                            <div class="me-3">
+                                @if (Model.Rating.HasValue)
+                                {
+                                    <div class="mb-2">
+                                        @for (int i = 1; i <= 5; i++)
+                                        {
+                                            if (i <= Model.Rating.Value)
+                                            {
+                                                <i class="fas fa-star text-warning"></i>
+                                            }
+                                            else
+                                            {
+                                                <i class="far fa-star text-muted"></i>
+                                            }
+                                        }
+                                        <span class="ms-2">(@Model.Rating.Value/5)</span>
+                                    </div>
+                                }
+                            </div>
+                            <div class="flex-grow-1">
+                                <div class="bg-light p-3 rounded">
+                                    @Model.GuestFeedback
+                                </div>
+                                @if (Model.FeedbackDate.HasValue)
+                                {
+                                    <small class="text-muted">Feedback given on: @Model.FeedbackDate.Value.ToString("dd/MM/yyyy HH:mm")</small>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+
+            <!-- Actions -->
+            <div class="card">
+                <div class="card-header">
+                    <h6 class="mb-0">
+                        <i class="fas fa-cogs"></i> Actions
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="btn-group" role="group">
+                        @if (Model.Status == "Pending")
+                        {
+                            <button type="button" class="btn btn-success" onclick="updateStatus('Confirmed')">
+                                <i class="fas fa-check"></i> Confirm Service
+                            </button>
+                            <button type="button" class="btn btn-danger" onclick="updateStatus('Cancelled')">
+                                <i class="fas fa-times"></i> Cancel Service
+                            </button>
+                        }
+                        else if (Model.Status == "Confirmed")
+                        {
+                            <button type="button" class="btn btn-warning" onclick="updateStatus('In Progress')">
+                                <i class="fas fa-play"></i> Start Service
+                            </button>
+                        }
+                        else if (Model.Status == "In Progress")
+                        {
+                            <button type="button" class="btn btn-success" onclick="updateStatus('Completed')">
+                                <i class="fas fa-check-circle"></i> Complete Service
+                            </button>
+                        }
+
+                        <button type="button" class="btn btn-info" data-bs-toggle="modal" data-bs-target="#addNoteModal">
+                            <i class="fas fa-plus"></i> Add Note
+                        </button>
+
+                        @if (!Model.IsPaid && Model.Status == "Completed")
+                        {
+                            <button type="button" class="btn btn-primary" onclick="processPayment()">
+                                <i class="fas fa-credit-card"></i> Process Payment
+                            </button>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Add Note Modal -->
+<div class="modal fade" id="addNoteModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Add Note</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form id="addNoteForm">
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="noteText" class="form-label">Note</label>
+                        <textarea class="form-control" id="noteText" rows="4" required></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label for="noteType" class="form-label">Note Type</label>
+                        <select class="form-select" id="noteType">
+                            <option value="General">General</option>
+                            <option value="Issue">Issue</option>
+                            <option value="Improvement">Improvement</option>
+                            <option value="Follow-up">Follow-up Required</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Add Note</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function updateStatus(newStatus) {
+            if (confirm(`Are you sure you want to change the status to "${newStatus}"?`)) {
+                $.ajax({
+                    url: '@Url.Action("UpdateStatus", "ServiceHistory")',
+                    type: 'POST',
+                    data: {
+                        id: @Model.ServiceHistoryID,
+                        status: newStatus
+                    },
+                    success: function(response) {
+                        if (response.success) {
+                            location.reload();
+                        } else {
+                            alert('Error: ' + response.message);
+                        }
+                    },
+                    error: function() {
+                        alert('An error occurred while updating the status.');
+                    }
+                });
+            }
+        }
+
+        function processPayment() {
+            if (confirm('Mark this service as paid?')) {
+                $.ajax({
+                    url: '@Url.Action("ProcessPayment", "ServiceHistory")',
+                    type: 'POST',
+                    data: {
+                        id: @Model.ServiceHistoryID
+                    },
+                    success: function(response) {
+                        if (response.success) {
+                            location.reload();
+                        } else {
+                            alert('Error: ' + response.message);
+                        }
+                    },
+                    error: function() {
+                        alert('An error occurred while processing the payment.');
+                    }
+                });
+            }
+        }
+
+        function printDetails() {
+            window.print();
+        }
+
+        $('#addNoteForm').on('submit', function(e) {
+            e.preventDefault();
+
+            var formData = {
+                serviceHistoryId: @Model.ServiceHistoryID,
+                note: $('#noteText').val(),
+                noteType: $('#noteType').val()
+            };
+
+            $.ajax({
+                url: '@Url.Action("AddNote", "ServiceHistory")',
+                type: 'POST',
+                data: formData,
+                success: function(response) {
+                    if (response.success) {
+                        $('#addNoteModal').modal('hide');
+                        location.reload();
+                    } else {
+                        alert('Error: ' + response.message);
+                    }
+                },
+                error: function() {
+                    alert('An error occurred while adding the note.');
+                }
+            });
+        });
+    </script>
+}
+
+<style>
+    .timeline {
+        position: relative;
+        padding-left: 30px;
+    }
+
+    .timeline::before {
+        content: '';
+        position: absolute;
+        left: 15px;
+        top: 0;
+        bottom: 0;
+        width: 2px;
+        background: #dee2e6;
+    }
+
+    .timeline-item {
+        position: relative;
+        margin-bottom: 20px;
+    }
+
+    .timeline-marker {
+        position: absolute;
+        left: -22px;
+        top: 5px;
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        border: 2px solid #fff;
+        box-shadow: 0 0 0 2px #dee2e6;
+    }
+
+    .timeline-content {
+        background: #f8f9fa;
+        padding: 15px;
+        border-radius: 8px;
+        border-left: 3px solid #007bff;
+    }
+
+    .card {
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        border: none;
+    }
+
+    @@media print {
+        .btn, .modal, .card-header .btn {
+            display: none !important;
+        }
+
+        .card {
+            box-shadow: none;
+            border: 1px solid #dee2e6;
+        }
+    }
+</style>

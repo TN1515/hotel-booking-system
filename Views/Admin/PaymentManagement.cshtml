@@ -1,0 +1,292 @@
+@model IEnumerable<HotelBooking.Models.QRPayment>
+@{
+    ViewData["Title"] = "Payment Management";
+    Layout = "_AdminLayout";
+}
+
+<div class="admin-content">
+    <!-- Header Section -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="h2 mb-1 fw-bold">Payment Management</h1>
+            <p class="text-muted mb-0">Monitor and manage all payment transactions.</p>
+        </div>
+        <div class="d-flex gap-2">
+            <button class="btn btn-outline-primary" onclick="refreshPayments()">
+                <i class="fas fa-sync-alt me-2"></i>Refresh
+            </button>
+            <button class="btn btn-primary" onclick="exportPayments()">
+                <i class="fas fa-download me-2"></i>Export Report
+            </button>
+        </div>
+    </div>
+
+    <!-- Payment Statistics -->
+    <div class="row mb-4">
+        <div class="col-lg-3 col-md-6 mb-3">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body">
+                    <div class="d-flex align-items-center justify-content-between">
+                        <div>
+                            <h6 class="text-muted mb-1">Total Payments</h6>
+                            <h4 class="mb-0 fw-bold text-primary">@ViewBag.PaymentStats.TotalPayments.ToString("C", new System.Globalization.CultureInfo("vi-VN"))</h4>
+                            <small class="text-muted">@ViewBag.PaymentStats.TotalTransactions transactions</small>
+                        </div>
+                        <div class="text-primary">
+                            <i class="fas fa-credit-card fa-2x"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-3 col-md-6 mb-3">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body">
+                    <div class="d-flex align-items-center justify-content-between">
+                        <div>
+                            <h6 class="text-muted mb-1">Completed</h6>
+                            <h4 class="mb-0 fw-bold text-success">@ViewBag.PaymentStats.CompletedPayments.ToString("C", new System.Globalization.CultureInfo("vi-VN"))</h4>
+                            <small class="text-muted">@ViewBag.PaymentStats.CompletedTransactions transactions</small>
+                        </div>
+                        <div class="text-success">
+                            <i class="fas fa-check-circle fa-2x"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-3 col-md-6 mb-3">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body">
+                    <div class="d-flex align-items-center justify-content-between">
+                        <div>
+                            <h6 class="text-muted mb-1">Pending</h6>
+                            <h4 class="mb-0 fw-bold text-warning">@ViewBag.PaymentStats.PendingPayments.ToString("C", new System.Globalization.CultureInfo("vi-VN"))</h4>
+                            <small class="text-muted">@ViewBag.PaymentStats.PendingTransactions transactions</small>
+                        </div>
+                        <div class="text-warning">
+                            <i class="fas fa-clock fa-2x"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-3 col-md-6 mb-3">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body">
+                    <div class="d-flex align-items-center justify-content-between">
+                        <div>
+                            <h6 class="text-muted mb-1">Success Rate</h6>
+                            @{
+                                var successRate = ViewBag.PaymentStats.TotalTransactions > 0 ? 
+                                    (decimal)ViewBag.PaymentStats.CompletedTransactions / ViewBag.PaymentStats.TotalTransactions * 100 : 0;
+                            }
+                            <h4 class="mb-0 fw-bold text-info">@successRate.ToString("F1")%</h4>
+                            <small class="text-muted">Payment success rate</small>
+                        </div>
+                        <div class="text-info">
+                            <i class="fas fa-chart-pie fa-2x"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filters -->
+    <div class="card border-0 shadow-sm mb-4">
+        <div class="card-body">
+            <form method="get" class="row g-3">
+                <div class="col-md-3">
+                    <label class="form-label">Status</label>
+                    <select name="status" class="form-select">
+                        <option value="">All Status</option>
+                        <option value="Pending">Pending</option>
+                        <option value="Paid">Paid</option>
+                        <option value="Expired">Expired</option>
+                        <option value="Cancelled">Cancelled</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">Date From</label>
+                    <input type="date" name="dateFrom" class="form-control">
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">Date To</label>
+                    <input type="date" name="dateTo" class="form-control">
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">&nbsp;</label>
+                    <div class="d-grid">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-filter me-2"></i>Filter
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Payments List -->
+    <div class="card border-0 shadow-sm">
+        <div class="card-header bg-white">
+            <h5 class="mb-0">Payment Transactions</h5>
+        </div>
+        <div class="card-body p-0">
+            @if (Model.Any())
+            {
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Transaction ID</th>
+                                <th>Customer</th>
+                                <th>Room</th>
+                                <th>Amount</th>
+                                <th>Status</th>
+                                <th>Created Date</th>
+                                <th>Paid Date</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var payment in Model)
+                            {
+                                <tr>
+                                    <td>
+                                        <strong>@payment.TransactionReference</strong>
+                                        <br>
+                                        <small class="text-muted">@payment.BankCode</small>
+                                    </td>
+                                    <td>
+                                        <div>
+                                            <strong>@payment.Reservation?.User?.UserName</strong>
+                                            <br>
+                                            <small class="text-muted">@payment.Reservation?.User?.Email</small>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <strong>@payment.Reservation?.Room?.RoomNumber</strong>
+                                        <br>
+                                        <small class="text-muted">Reservation #@payment.ReservationID</small>
+                                    </td>
+                                    <td>
+                                        <strong class="text-success">@payment.Amount.ToString("C", new System.Globalization.CultureInfo("vi-VN"))</strong>
+                                    </td>
+                                    <td>
+                                        <span class="badge @(payment.Status == "Paid" ? "bg-success" : 
+                                                              payment.Status == "Pending" ? "bg-warning" : 
+                                                              payment.Status == "Expired" ? "bg-danger" : "bg-secondary")">
+                                            @(payment.Status == "Pending" ? "Chờ thanh toán" : 
+                                              payment.Status == "Paid" ? "Đã thanh toán" : 
+                                              payment.Status == "Expired" ? "Hết hạn" : "Đã hủy")
+                                        </span>
+                                    </td>
+                                    <td>
+                                        @payment.CreatedDate.ToString("dd/MM/yyyy HH:mm")
+                                    </td>
+                                    <td>
+                                        @(payment.PaidDate?.ToString("dd/MM/yyyy HH:mm") ?? "-")
+                                    </td>
+                                    <td>
+                                        <div class="btn-group" role="group">
+                                            <a href="@Url.Action("Display", "QRPayment", new { id = payment.QRPaymentID })" 
+                                               class="btn btn-sm btn-outline-primary" title="View QR Code">
+                                                <i class="fas fa-qrcode"></i>
+                                            </a>
+                                            @if (payment.Status == "Pending")
+                                            {
+                                                <button class="btn btn-sm btn-outline-success" 
+                                                        onclick="markAsPaid(@payment.QRPaymentID)" title="Mark as Paid">
+                                                    <i class="fas fa-check"></i>
+                                                </button>
+                                                <button class="btn btn-sm btn-outline-danger" 
+                                                        onclick="cancelPayment(@payment.QRPaymentID)" title="Cancel">
+                                                    <i class="fas fa-times"></i>
+                                                </button>
+                                            }
+                                            <a href="@Url.Action("Details", "Reservations", new { id = payment.ReservationID })" 
+                                               class="btn btn-sm btn-outline-info" title="View Reservation">
+                                                <i class="fas fa-eye"></i>
+                                            </a>
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+            else
+            {
+                <div class="text-center py-5">
+                    <i class="fas fa-credit-card fa-3x text-muted mb-3"></i>
+                    <h5 class="text-muted">No payment transactions found</h5>
+                    <p class="text-muted">Payment transactions will appear here once customers start making payments.</p>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function refreshPayments() {
+            location.reload();
+        }
+
+        function exportPayments() {
+            alert('Export functionality will be implemented');
+        }
+
+        function markAsPaid(paymentId) {
+            if (confirm('Are you sure you want to mark this payment as paid?')) {
+                // In real implementation, make AJAX call to update payment status
+                fetch(`/Admin/MarkPaymentAsPaid/${paymentId}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'RequestVerificationToken': $('input[name="__RequestVerificationToken"]').val()
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        location.reload();
+                    } else {
+                        alert('Error updating payment status');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('Error updating payment status');
+                });
+            }
+        }
+
+        function cancelPayment(paymentId) {
+            if (confirm('Are you sure you want to cancel this payment?')) {
+                // In real implementation, make AJAX call to cancel payment
+                fetch(`/Admin/CancelPayment/${paymentId}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'RequestVerificationToken': $('input[name="__RequestVerificationToken"]').val()
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        location.reload();
+                    } else {
+                        alert('Error cancelling payment');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('Error cancelling payment');
+                });
+            }
+        }
+    </script>
+}

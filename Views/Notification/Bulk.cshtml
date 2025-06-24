@@ -1,0 +1,232 @@
+@model HotelBooking.Models.ViewModels.BulkNotificationViewModel
+@{
+    ViewData["Title"] = "Send Bulk Notification";
+}
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-md-8 offset-md-2">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">
+                        <i class="fas fa-bullhorn"></i> Send Bulk Notification
+                    </h3>
+                </div>
+
+                <form asp-action="Bulk" method="post">
+                    <div class="card-body">
+                        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+                        <div class="alert alert-info">
+                            <i class="fas fa-info-circle"></i>
+                            Send notifications to multiple users at once by selecting user roles or specific criteria.
+                        </div>
+
+                        <div class="form-group">
+                            <label asp-for="Title" class="control-label"></label>
+                            <input asp-for="Title" class="form-control" placeholder="Enter notification title" />
+                            <span asp-validation-for="Title" class="text-danger"></span>
+                        </div>
+
+                        <div class="form-group">
+                            <label asp-for="Message" class="control-label"></label>
+                            <textarea asp-for="Message" class="form-control" rows="5" 
+                                      placeholder="Enter your notification message here..."></textarea>
+                            <span asp-validation-for="Message" class="text-danger"></span>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label asp-for="NotificationType" class="control-label"></label>
+                                    <select asp-for="NotificationType" class="form-control">
+                                        <option value="Info">Information</option>
+                                        <option value="Warning">Warning</option>
+                                        <option value="Success">Success</option>
+                                        <option value="Error">Error</option>
+                                        <option value="Promotion">Promotion</option>
+                                        <option value="Maintenance">Maintenance</option>
+                                    </select>
+                                    <span asp-validation-for="NotificationType" class="text-danger"></span>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label asp-for="Priority" class="control-label"></label>
+                                    <select asp-for="Priority" class="form-control">
+                                        <option value="Low">Low</option>
+                                        <option value="Normal" selected>Normal</option>
+                                        <option value="High">High</option>
+                                        <option value="Urgent">Urgent</option>
+                                    </select>
+                                    <span asp-validation-for="Priority" class="text-danger"></span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="control-label">Target Audience</label>
+                            <div class="card card-outline card-info">
+                                <div class="card-header">
+                                    <h6 class="card-title">Select who should receive this notification</h6>
+                                </div>
+                                <div class="card-body">
+                                    <div class="form-check mb-2">
+                                        <input type="checkbox" class="form-check-input" id="selectAllRoles" />
+                                        <label class="form-check-label font-weight-bold" for="selectAllRoles">
+                                            Select All Users
+                                        </label>
+                                    </div>
+                                    <hr />
+                                    @if (Model.Roles != null)
+                                    {
+                                        @foreach (var role in Model.Roles)
+                                        {
+                                            <div class="form-check">
+                                                <input type="checkbox"
+                                                       name="SelectedRoleIds"
+                                                       value="@role.Id"
+                                                       class="form-check-input role-checkbox"
+                                                       id="role_@role.Id" />
+                                                <label class="form-check-label" for="role_@role.Id">
+                                                    <i class="fas fa-users"></i> @(role?.RoleName ?? "Unknown Role")
+                                                    <small class="text-muted">(All users with this role)</small>
+                                                </label>
+                                            </div>
+                                        }
+                                    }
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <div class="form-check">
+                                <input asp-for="SendEmail" class="form-check-input" type="checkbox" />
+                                <label asp-for="SendEmail" class="form-check-label"></label>
+                                <small class="form-text text-muted">
+                                    Also send this notification via email (if email addresses are available)
+                                </small>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <div class="form-check">
+                                <input asp-for="SendSMS" class="form-check-input" type="checkbox" />
+                                <label asp-for="SendSMS" class="form-check-label"></label>
+                                <small class="form-text text-muted">
+                                    Also send this notification via SMS (if phone numbers are available)
+                                </small>
+                            </div>
+                        </div>
+
+                        <!-- Preview Section -->
+                        <div class="card card-outline card-secondary">
+                            <div class="card-header">
+                                <h6 class="card-title">Notification Preview</h6>
+                            </div>
+                            <div class="card-body">
+                                <div class="notification-preview">
+                                    <div class="alert alert-info mb-0">
+                                        <h6 id="previewTitle">Your notification title will appear here</h6>
+                                        <p id="previewMessage" class="mb-0">Your notification message will appear here</p>
+                                        <small class="text-muted">
+                                            Type: <span id="previewType">Info</span> | 
+                                            Priority: <span id="previewPriority">Normal</span>
+                                        </small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card-footer">
+                        <button type="submit" class="btn btn-primary" id="sendButton">
+                            <i class="fas fa-paper-plane"></i> Send Bulk Notification
+                        </button>
+                        <a href="@Url.Action("Index")" class="btn btn-secondary">
+                            <i class="fas fa-arrow-left"></i> Back to Notifications
+                        </a>
+                        <button type="button" class="btn btn-info" onclick="previewNotification()">
+                            <i class="fas fa-eye"></i> Preview
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    
+    <script>
+        $(document).ready(function() {
+            // Select all functionality
+            $('#selectAllRoles').change(function() {
+                $('.role-checkbox').prop('checked', $(this).is(':checked'));
+                updateSendButton();
+            });
+
+            $('.role-checkbox').change(function() {
+                updateSendButton();
+                
+                // Update select all checkbox
+                const totalRoles = $('.role-checkbox').length;
+                const checkedRoles = $('.role-checkbox:checked').length;
+                $('#selectAllRoles').prop('checked', totalRoles === checkedRoles);
+            });
+
+            // Live preview
+            $('#Title, #Message, #NotificationType, #Priority').on('input change', function() {
+                updatePreview();
+            });
+
+            // Initial preview update
+            updatePreview();
+            updateSendButton();
+        });
+
+        function updatePreview() {
+            const title = $('#Title').val() || 'Your notification title will appear here';
+            const message = $('#Message').val() || 'Your notification message will appear here';
+            const type = $('#NotificationType').val();
+            const priority = $('#Priority').val();
+
+            $('#previewTitle').text(title);
+            $('#previewMessage').text(message);
+            $('#previewType').text(type);
+            $('#previewPriority').text(priority);
+
+            // Update alert class based on type
+            const alertClass = getAlertClass(type);
+            $('.notification-preview .alert').removeClass('alert-info alert-warning alert-success alert-danger')
+                                              .addClass(alertClass);
+        }
+
+        function getAlertClass(type) {
+            switch(type) {
+                case 'Warning': return 'alert-warning';
+                case 'Success': return 'alert-success';
+                case 'Error': return 'alert-danger';
+                default: return 'alert-info';
+            }
+        }
+
+        function updateSendButton() {
+            const hasSelectedRoles = $('.role-checkbox:checked').length > 0;
+            $('#sendButton').prop('disabled', !hasSelectedRoles);
+            
+            if (!hasSelectedRoles) {
+                $('#sendButton').html('<i class="fas fa-paper-plane"></i> Select Recipients First');
+            } else {
+                const count = $('.role-checkbox:checked').length;
+                $('#sendButton').html('<i class="fas fa-paper-plane"></i> Send to ' + count + ' Role(s)');
+            }
+        }
+
+        function previewNotification() {
+            updatePreview();
+            // Could add modal preview here if needed
+        }
+    </script>
+}

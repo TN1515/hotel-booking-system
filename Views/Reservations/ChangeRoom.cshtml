@@ -1,0 +1,170 @@
+@model HotelBooking.Models.ViewModels.RoomChangeViewModel
+@{
+    ViewData["Title"] = "Change Room";
+}
+
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-10">
+            <div class="card shadow">
+                <div class="card-header bg-warning text-dark">
+                    <h4 class="mb-0">
+                        <i class="fas fa-exchange-alt me-2"></i>Change Room
+                    </h4>
+                </div>
+                <div class="card-body">
+                    <!-- Current Room Info -->
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <div class="card bg-light">
+                                <div class="card-body">
+                                    <h6 class="card-title text-primary">Current Room</h6>
+                                    <p class="mb-1"><strong>Room:</strong> @Model.CurrentRoomNumber</p>
+                                    <p class="mb-1"><strong>Type:</strong> @Model.CurrentRoomType</p>
+                                    <p class="mb-1"><strong>Price:</strong> $@Model.CurrentRoomPrice/night</p>
+                                    <p class="mb-0"><strong>Stay Period:</strong> @Model.CheckInDate.ToString("MMM dd") - @Model.CheckOutDate.ToString("MMM dd, yyyy")</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="alert alert-info">
+                                <h6><i class="fas fa-info-circle me-2"></i>Room Change Policy</h6>
+                                <ul class="mb-0 small">
+                                    <li>Room changes are subject to availability</li>
+                                    <li>Price difference will be calculated automatically</li>
+                                    <li>Changes take effect from the selected date</li>
+                                    <li>Additional charges will be added to your bill</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Change Room Form -->
+                    <form asp-action="ChangeRoom" method="post">
+                        <input type="hidden" asp-for="ReservationID" />
+                        <input type="hidden" asp-for="CurrentRoomID" />
+                        <input type="hidden" asp-for="CheckInDate" />
+                        <input type="hidden" asp-for="CheckOutDate" />
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label asp-for="ChangeDate" class="form-label fw-bold">Change Date:</label>
+                                    <input asp-for="ChangeDate" class="form-control" type="date" min="@DateTime.Today.ToString("yyyy-MM-dd")" max="@Model.CheckOutDate.AddDays(-1).ToString("yyyy-MM-dd")" />
+                                    <span asp-validation-for="ChangeDate" class="text-danger"></span>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label asp-for="NewRoomID" class="form-label fw-bold">Select New Room:</label>
+                                    <select asp-for="NewRoomID" class="form-select" id="roomSelect">
+                                        <option value="">-- Select a room --</option>
+                                        @if (Model.AvailableRooms != null)
+                                        {
+                                            @foreach (var room in Model.AvailableRooms)
+                                            {
+                                                <option value="@room.RoomID" data-price="@room.Price">
+                                                    Room @room.RoomNumber - @room.RoomType?.TypeName ($@room.Price/night)
+                                                </option>
+                                            }
+                                        }
+                                    </select>
+                                    <span asp-validation-for="NewRoomID" class="text-danger"></span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="Reason" class="form-label fw-bold">Reason for Change:</label>
+                            <textarea asp-for="Reason" class="form-control" rows="3" placeholder="Please explain why you want to change rooms..."></textarea>
+                            <span asp-validation-for="Reason" class="text-danger"></span>
+                        </div>
+
+                        <!-- Price Calculation Display -->
+                        <div class="card bg-light mb-3" id="priceCalculation" style="display: none;">
+                            <div class="card-body">
+                                <h6 class="card-title">Price Calculation</h6>
+                                <div class="row">
+                                    <div class="col-md-4">
+                                        <p class="mb-1"><strong>Remaining Nights:</strong> <span id="remainingNights">0</span></p>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <p class="mb-1"><strong>Current Room Cost:</strong> $<span id="currentCost">0</span></p>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <p class="mb-1"><strong>New Room Cost:</strong> $<span id="newCost">0</span></p>
+                                    </div>
+                                </div>
+                                <hr>
+                                <p class="mb-0 fw-bold">
+                                    <strong>Price Difference:</strong> 
+                                    <span id="priceDifference" class="text-success">$0</span>
+                                </p>
+                            </div>
+                        </div>
+
+                        <div class="text-center">
+                            <button type="submit" class="btn btn-warning btn-lg">
+                                <i class="fas fa-exchange-alt me-2"></i>Change Room
+                            </button>
+                            <a href="@Url.Action("Details", new { id = Model.ReservationID })" class="btn btn-secondary btn-lg ms-2">
+                                <i class="fas fa-arrow-left me-2"></i>Cancel
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const changeDateInput = document.getElementById('ChangeDate');
+        const roomSelect = document.getElementById('roomSelect');
+        const priceCalculation = document.getElementById('priceCalculation');
+        const currentRoomPrice = @Model.CurrentRoomPrice;
+        const checkOutDate = new Date('@Model.CheckOutDate.ToString("yyyy-MM-dd")');
+
+        function calculatePrice() {
+            const changeDate = new Date(changeDateInput.value);
+            const selectedOption = roomSelect.options[roomSelect.selectedIndex];
+            
+            if (changeDateInput.value && selectedOption.value) {
+                const newRoomPrice = parseFloat(selectedOption.dataset.price);
+                const remainingNights = Math.ceil((checkOutDate - changeDate) / (1000 * 60 * 60 * 24));
+                
+                const currentCost = currentRoomPrice * remainingNights;
+                const newCost = newRoomPrice * remainingNights;
+                const priceDifference = newCost - currentCost;
+                
+                document.getElementById('remainingNights').textContent = remainingNights;
+                document.getElementById('currentCost').textContent = currentCost.toFixed(2);
+                document.getElementById('newCost').textContent = newCost.toFixed(2);
+                
+                const diffElement = document.getElementById('priceDifference');
+                if (priceDifference > 0) {
+                    diffElement.textContent = '+$' + priceDifference.toFixed(2);
+                    diffElement.className = 'text-danger';
+                } else if (priceDifference < 0) {
+                    diffElement.textContent = '-$' + Math.abs(priceDifference).toFixed(2);
+                    diffElement.className = 'text-success';
+                } else {
+                    diffElement.textContent = '$0';
+                    diffElement.className = 'text-muted';
+                }
+                
+                priceCalculation.style.display = 'block';
+            } else {
+                priceCalculation.style.display = 'none';
+            }
+        }
+
+        changeDateInput.addEventListener('change', calculatePrice);
+        roomSelect.addEventListener('change', calculatePrice);
+    });
+</script>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

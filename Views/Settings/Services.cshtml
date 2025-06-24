@@ -1,0 +1,262 @@
+@model IEnumerable<HotelBooking.Models.Service>
+@{
+    ViewData["Title"] = "Services Management";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<div class="container-fluid py-4">
+    <div class="row">
+        <div class="col-12">
+            <!-- Header -->
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h2 class="mb-1">
+                        <i class="fas fa-concierge-bell text-success me-2"></i>
+                        Hotel Services Management
+                    </h2>
+                    <p class="text-muted mb-0">Manage additional hotel services and amenities</p>
+                </div>
+                <div>
+                    <a href="@Url.Action("Index")" class="btn btn-outline-secondary">
+                        <i class="fas fa-arrow-left me-2"></i>Back to Settings
+                    </a>
+                </div>
+            </div>
+
+            <div class="row">
+                <!-- Add New Service -->
+                <div class="col-lg-4 mb-4">
+                    <div class="card border-0 shadow-sm">
+                        <div class="card-header bg-success text-white">
+                            <h5 class="mb-0">
+                                <i class="fas fa-plus me-2"></i>Add New Service
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <form asp-action="CreateService" method="post">
+                                <div class="mb-3">
+                                    <label for="serviceName" class="form-label">Service Name</label>
+                                    <input type="text" class="form-control" id="serviceName" name="serviceName" placeholder="Room Service, Spa, Laundry..." required>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="description" class="form-label">Description</label>
+                                    <textarea class="form-control" id="description" name="description" rows="3" placeholder="Detailed description of the service..."></textarea>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="category" class="form-label">Category</label>
+                                    <select class="form-control" id="category" name="category" required>
+                                        <option value="">Select Category</option>
+                                        <option value="Food & Beverage">Food & Beverage</option>
+                                        <option value="Spa & Wellness">Spa & Wellness</option>
+                                        <option value="Transportation">Transportation</option>
+                                        <option value="Entertainment">Entertainment</option>
+                                        <option value="Business">Business</option>
+                                        <option value="Laundry">Laundry</option>
+                                        <option value="Concierge">Concierge</option>
+                                        <option value="Other">Other</option>
+                                    </select>
+                                </div>
+                                <button type="submit" class="btn btn-success w-100">
+                                    <i class="fas fa-save me-2"></i>Create Service
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Existing Services -->
+                <div class="col-lg-8">
+                    <div class="card border-0 shadow-sm">
+                        <div class="card-header bg-light">
+                            <h5 class="mb-0">
+                                <i class="fas fa-list me-2"></i>Existing Services
+                            </h5>
+                        </div>
+                        <div class="card-body p-0">
+                            @if (Model.Any())
+                            {
+                                <div class="table-responsive">
+                                    <table class="table table-hover mb-0">
+                                        <thead class="table-light">
+                                            <tr>
+                                                <th>Service Name</th>
+                                                <th>Category</th>
+                                                <th>Description</th>
+                                                <th>Status</th>
+                                                <th>Actions</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            @foreach (var service in Model)
+                                            {
+                                                <tr>
+                                                    <td>
+                                                        <div class="d-flex align-items-center">
+                                                            <i class="fas fa-concierge-bell text-success me-2"></i>
+                                                            <strong>@service.ServiceName</strong>
+                                                        </div>
+                                                    </td>
+                                                    <td>
+                                                        @{
+                                                            var categoryClass = service.Category switch
+                                                            {
+                                                                "Food & Beverage" => "bg-warning",
+                                                                "Spa & Wellness" => "bg-info",
+                                                                "Transportation" => "bg-primary",
+                                                                "Entertainment" => "bg-success",
+                                                                "Business" => "bg-dark",
+                                                                "Laundry" => "bg-secondary",
+                                                                "Concierge" => "bg-danger",
+                                                                _ => "bg-light text-dark"
+                                                            };
+                                                        }
+                                                        <span class="badge @categoryClass">@service.Category</span>
+                                                    </td>
+                                                    <td>
+                                                        <small class="text-muted">@(service.Description ?? "No description")</small>
+                                                    </td>
+                                                    <td>
+                                                        <span class="badge bg-@(service.IsActive ? "success" : "secondary")">
+                                                            @(service.IsActive ? "Active" : "Inactive")
+                                                        </span>
+                                                    </td>
+                                                    <td>
+                                                        <div class="btn-group btn-group-sm">
+                                                            <button type="button" 
+                                                                    class="btn btn-outline-@(service.IsActive ? "warning" : "success")"
+                                                                    onclick="toggleStatus('service', @service.ServiceID)">
+                                                                <i class="fas fa-@(service.IsActive ? "pause" : "play") me-1"></i>
+                                                                @(service.IsActive ? "Deactivate" : "Activate")
+                                                            </button>
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                            }
+                                        </tbody>
+                                    </table>
+                                </div>
+                            }
+                            else
+                            {
+                                <div class="text-center py-5">
+                                    <i class="fas fa-concierge-bell fa-3x text-muted mb-3"></i>
+                                    <h5 class="text-muted">No Services Found</h5>
+                                    <p class="text-muted">Create your first service to get started.</p>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Service Categories Info -->
+            <div class="row mt-4">
+                <div class="col-12">
+                    <div class="card border-0 shadow-sm">
+                        <div class="card-header bg-info text-white">
+                            <h5 class="mb-0">
+                                <i class="fas fa-info-circle me-2"></i>Service Categories
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-3 mb-3">
+                                    <div class="d-flex align-items-center">
+                                        <span class="badge bg-warning me-2">Food & Beverage</span>
+                                        <small>Room service, restaurant, bar</small>
+                                    </div>
+                                </div>
+                                <div class="col-md-3 mb-3">
+                                    <div class="d-flex align-items-center">
+                                        <span class="badge bg-info me-2">Spa & Wellness</span>
+                                        <small>Massage, fitness, pool</small>
+                                    </div>
+                                </div>
+                                <div class="col-md-3 mb-3">
+                                    <div class="d-flex align-items-center">
+                                        <span class="badge bg-primary me-2">Transportation</span>
+                                        <small>Airport shuttle, taxi</small>
+                                    </div>
+                                </div>
+                                <div class="col-md-3 mb-3">
+                                    <div class="d-flex align-items-center">
+                                        <span class="badge bg-success me-2">Entertainment</span>
+                                        <small>Tours, activities, events</small>
+                                    </div>
+                                </div>
+                                <div class="col-md-3 mb-3">
+                                    <div class="d-flex align-items-center">
+                                        <span class="badge bg-dark me-2">Business</span>
+                                        <small>Meeting rooms, printing</small>
+                                    </div>
+                                </div>
+                                <div class="col-md-3 mb-3">
+                                    <div class="d-flex align-items-center">
+                                        <span class="badge bg-secondary me-2">Laundry</span>
+                                        <small>Cleaning, dry cleaning</small>
+                                    </div>
+                                </div>
+                                <div class="col-md-3 mb-3">
+                                    <div class="d-flex align-items-center">
+                                        <span class="badge bg-danger me-2">Concierge</span>
+                                        <small>Personal assistance</small>
+                                    </div>
+                                </div>
+                                <div class="col-md-3 mb-3">
+                                    <div class="d-flex align-items-center">
+                                        <span class="badge bg-light text-dark me-2">Other</span>
+                                        <small>Miscellaneous services</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function toggleStatus(entityType, id) {
+            if (confirm('Are you sure you want to change the status of this item?')) {
+                $.post('@Url.Action("ToggleStatus")', {
+                    entityType: entityType,
+                    id: id
+                }, function(response) {
+                    if (response.success) {
+                        location.reload();
+                    } else {
+                        alert('Error: ' + response.message);
+                    }
+                });
+            }
+        }
+
+        // Show success message if exists
+        @if (TempData["SuccessMessage"] != null)
+        {
+            <text>
+            $(document).ready(function() {
+                showSuccessMessage('@TempData["SuccessMessage"]');
+            });
+            </text>
+        }
+
+        function showSuccessMessage(message) {
+            const alertHtml = `
+                <div class="alert alert-success alert-dismissible fade show" role="alert">
+                    <i class="fas fa-check-circle me-2"></i>${message}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            `;
+            $('.container-fluid').prepend(alertHtml);
+            
+            // Auto dismiss after 5 seconds
+            setTimeout(function() {
+                $('.alert').alert('close');
+            }, 5000);
+        }
+    </script>
+}

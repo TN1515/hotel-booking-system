@@ -1,0 +1,339 @@
+@model HotelBooking.Models.ViewModels.BookingReportViewModel
+@{
+    ViewData["Title"] = "Booking Report";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2><i class="fas fa-chart-bar me-2"></i>Booking Report</h2>
+                <div>
+                    <button onclick="window.print()" class="btn btn-secondary me-2">
+                        <i class="fas fa-print me-2"></i>Print Report
+                    </button>
+                    <a href="@Url.Action("Index", "Report")" class="btn btn-primary">
+                        <i class="fas fa-arrow-left me-2"></i>Back to Reports
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Summary Cards -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card bg-primary text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h4 class="card-title">@Model.TotalBookings</h4>
+                            <p class="card-text">Total Bookings</p>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="fas fa-calendar-check fa-2x"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-success text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h4 class="card-title">@Model.ConfirmedBookings</h4>
+                            <p class="card-text">Confirmed</p>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="fas fa-check-circle fa-2x"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-warning text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h4 class="card-title">@Model.PendingBookings</h4>
+                            <p class="card-text">Pending</p>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="fas fa-clock fa-2x"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-danger text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h4 class="card-title">@Model.CancelledBookings</h4>
+                            <p class="card-text">Cancelled</p>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="fas fa-times-circle fa-2x"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Revenue Cards -->
+    <div class="row mb-4">
+        <div class="col-md-4">
+            <div class="card bg-info text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h4 class="card-title">$@Model.TotalRevenue.ToString("N2")</h4>
+                            <p class="card-text">Total Revenue</p>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="fas fa-dollar-sign fa-2x"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card bg-secondary text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h4 class="card-title">$@Model.AverageBookingValue.ToString("N2")</h4>
+                            <p class="card-text">Average Booking Value</p>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="fas fa-chart-line fa-2x"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card bg-dark text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h4 class="card-title">@Model.OccupancyRate.ToString("F1")%</h4>
+                            <p class="card-text">Occupancy Rate</p>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="fas fa-percentage fa-2x"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Charts Row -->
+    <div class="row mb-4">
+        <!-- Booking Status Chart -->
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5><i class="fas fa-chart-pie me-2"></i>Booking Status Distribution</h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="bookingStatusChart" width="400" height="200"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Monthly Revenue Chart -->
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5><i class="fas fa-chart-bar me-2"></i>Monthly Revenue</h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="monthlyRevenueChart" width="400" height="200"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Room Type Performance -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5><i class="fas fa-bed me-2"></i>Room Type Performance</h5>
+                </div>
+                <div class="card-body">
+                    @if (Model.RoomTypeData != null && Model.RoomTypeData.Any())
+                    {
+                        <div class="table-responsive">
+                            <table class="table table-striped">
+                                <thead>
+                                    <tr>
+                                        <th>Room Type</th>
+                                        <th>Total Bookings</th>
+                                        <th>Revenue</th>
+                                        <th>Average Rate</th>
+                                        <th>Occupancy %</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var roomType in Model.RoomTypeData)
+                                    {
+                                        <tr>
+                                            <td>@roomType.RoomTypeName</td>
+                                            <td>@roomType.BookingCount</td>
+                                            <td>$@roomType.Revenue.ToString("N2")</td>
+                                            <td>$@roomType.AverageRate.ToString("N2")</td>
+                                            <td>@roomType.OccupancyRate.ToString("F1")%</td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    }
+                    else
+                    {
+                        <p class="text-muted">No room type data available for the selected period.</p>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Monthly Trends -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5><i class="fas fa-chart-line me-2"></i>Monthly Booking Trends</h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="monthlyTrendsChart" width="400" height="200"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        // Booking Status Chart
+        const statusCtx = document.getElementById('bookingStatusChart').getContext('2d');
+        new Chart(statusCtx, {
+            type: 'doughnut',
+            data: {
+                labels: ['Confirmed', 'Pending', 'Cancelled'],
+                datasets: [{
+                    data: [@Model.ConfirmedBookings, @Model.PendingBookings, @Model.CancelledBookings],
+                    backgroundColor: ['#28a745', '#ffc107', '#dc3545']
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        position: 'bottom'
+                    }
+                }
+            }
+        });
+
+        // Monthly Revenue Chart
+        const revenueCtx = document.getElementById('monthlyRevenueChart').getContext('2d');
+        const revenueData = @Html.Raw(Json.Serialize(Model.RevenueData != null ? Model.RevenueData : new List<object>()));
+
+        new Chart(revenueCtx, {
+            type: 'bar',
+            data: {
+                labels: revenueData.map(d => d.month),
+                datasets: [{
+                    label: 'Revenue ($)',
+                    data: revenueData.map(d => d.revenue),
+                    backgroundColor: '#007bff',
+                    borderColor: '#0056b3',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            callback: function(value) {
+                                return '$' + value.toLocaleString();
+                            }
+                        }
+                    }
+                }
+            }
+        });
+
+        // Monthly Trends Chart
+        const trendsCtx = document.getElementById('monthlyTrendsChart').getContext('2d');
+        const trendsData = @Html.Raw(Json.Serialize(Model.MonthlyData != null ? Model.MonthlyData : new List<object>()));
+        
+        new Chart(trendsCtx, {
+            type: 'line',
+            data: {
+                labels: trendsData.map(d => d.month),
+                datasets: [{
+                    label: 'Bookings',
+                    data: trendsData.map(d => d.bookings),
+                    borderColor: '#28a745',
+                    backgroundColor: 'rgba(40, 167, 69, 0.1)',
+                    tension: 0.4
+                }, {
+                    label: 'Revenue ($)',
+                    data: trendsData.map(d => d.revenue),
+                    borderColor: '#007bff',
+                    backgroundColor: 'rgba(0, 123, 255, 0.1)',
+                    yAxisID: 'y1',
+                    tension: 0.4
+                }]
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    y: {
+                        type: 'linear',
+                        display: true,
+                        position: 'left'
+                    },
+                    y1: {
+                        type: 'linear',
+                        display: true,
+                        position: 'right',
+                        grid: {
+                            drawOnChartArea: false,
+                        },
+                        ticks: {
+                            callback: function(value) {
+                                return '$' + value.toLocaleString();
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    </script>
+}
+
+<style>
+    @@media print {
+        .btn, .navbar, .sidebar {
+            display: none !important;
+        }
+        .container-fluid {
+            margin: 0 !important;
+            padding: 0 !important;
+        }
+    }
+</style>

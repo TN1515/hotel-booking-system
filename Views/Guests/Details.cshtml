@@ -1,0 +1,94 @@
+@model HotelBooking.Models.ViewModels.GuestProfileViewModel
+@{
+    ViewData["Title"] = "Guest Details";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">Guest Details</h3>
+                    <div class="card-tools">
+                        <a href="@Url.Action("Index")" class="btn btn-secondary">
+                            <i class="fas fa-arrow-left"></i> Back to List
+                        </a>
+                        <a href="@Url.Action("Edit", new { id = Model.GuestID })" class="btn btn-warning">
+                            <i class="fas fa-edit"></i> Edit
+                        </a>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h5>Personal Information</h5>
+                            <table class="table table-borderless">
+                                <tr>
+                                    <td><strong>Guest ID:</strong></td>
+                                    <td>@Model.GuestID</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>First Name:</strong></td>
+                                    <td>@Model.FirstName</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Last Name:</strong></td>
+                                    <td>@Model.LastName</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Email:</strong></td>
+                                    <td>@Model.Email</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Phone:</strong></td>
+                                    <td>@Model.Phone</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Age Group:</strong></td>
+                                    <td>@Model.AgeGroup</td>
+                                </tr>
+                            </table>
+                        </div>
+                        <div class="col-md-6">
+                            <h5>Address Information</h5>
+                            <table class="table table-borderless">
+                                <tr>
+                                    <td><strong>Address:</strong></td>
+                                    <td>@Model.Address</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Country:</strong></td>
+                                    <td>@Model.CountryName</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>State:</strong></td>
+                                    <td>@Model.StateName</td>
+                                </tr>
+                            </table>
+
+                            <h5>Account Information</h5>
+                            <table class="table table-borderless">
+                                <tr>
+                                    <td><strong>Username:</strong></td>
+                                    <td>@Model.UserName</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Created Date:</strong></td>
+                                    <td>@Model.CreatedDate.ToString("dd/MM/yyyy HH:mm")</td>
+                                </tr>
+                                @if (Model.ModifiedDate.HasValue)
+                                {
+                                    <tr>
+                                        <td><strong>Last Modified:</strong></td>
+                                        <td>@Model.ModifiedDate.Value.ToString("dd/MM/yyyy HH:mm")</td>
+                                    </tr>
+                                }
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

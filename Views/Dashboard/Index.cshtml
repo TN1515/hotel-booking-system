@@ -1,0 +1,338 @@
+@model HotelBooking.Models.DashboardViewModel
+@{
+    ViewData["Title"] = "Dashboard";
+}
+
+<!-- Dashboard Styles -->
+<style>
+    .dashboard-container {
+        background-color: #f8f9fa;
+        min-height: 100vh;
+        padding: 20px 0;
+    }
+
+    .stats-card {
+        background: white;
+        border-radius: 12px;
+        padding: 25px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+        border: none;
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+        height: 100%;
+    }
+
+    .stats-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 20px rgba(0,0,0,0.12);
+    }
+
+    .stats-icon {
+        width: 60px;
+        height: 60px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 24px;
+        color: white;
+        margin-bottom: 15px;
+    }
+
+    .stats-number {
+        font-size: 2.2rem;
+        font-weight: 700;
+        color: #2c3e50;
+        margin: 0;
+    }
+
+    .stats-label {
+        color: #6c757d;
+        font-size: 0.95rem;
+        margin: 5px 0 0 0;
+    }
+
+    .stats-change {
+        font-size: 0.85rem;
+        margin-top: 8px;
+    }
+
+    .chart-card {
+        background: white;
+        border-radius: 12px;
+        padding: 25px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+        height: 100%;
+    }
+
+    .chart-title {
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: #2c3e50;
+        margin-bottom: 20px;
+    }
+
+    .occupancy-bar {
+        background: #e9ecef;
+        height: 8px;
+        border-radius: 4px;
+        overflow: hidden;
+        margin: 8px 0;
+    }
+
+    .occupancy-fill {
+        height: 100%;
+        border-radius: 4px;
+        transition: width 0.3s ease;
+    }
+
+    .recent-reservations {
+        background: white;
+        border-radius: 12px;
+        padding: 25px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+    }
+
+    .reservation-item {
+        padding: 15px 0;
+        border-bottom: 1px solid #f1f3f4;
+    }
+
+    .reservation-item:last-child {
+        border-bottom: none;
+    }
+
+    .guest-avatar {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-weight: 600;
+        font-size: 14px;
+    }
+
+    .page-header {
+        background: white;
+        border-radius: 12px;
+        padding: 30px;
+        margin-bottom: 30px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+    }
+
+    .page-title {
+        font-size: 2rem;
+        font-weight: 700;
+        color: #2c3e50;
+        margin: 0;
+    }
+
+    .page-subtitle {
+        color: #6c757d;
+        margin: 8px 0 0 0;
+        font-size: 1.1rem;
+    }
+
+    .quick-actions {
+        display: flex;
+        gap: 15px;
+        margin-top: 20px;
+    }
+
+    .quick-action-btn {
+        padding: 10px 20px;
+        border-radius: 8px;
+        border: none;
+        font-weight: 500;
+        text-decoration: none;
+        transition: all 0.2s ease;
+    }
+
+    .btn-primary-custom {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+    }
+
+    .btn-outline-custom {
+        border: 2px solid #667eea;
+        color: #667eea;
+        background: transparent;
+    }
+
+    .btn-outline-custom:hover {
+        background: #667eea;
+        color: white;
+    }
+</style>
+
+<div class="dashboard-container">
+    <div class="container-fluid px-4">
+        <!-- Page Header -->
+        <div class="page-header">
+            <div class="row align-items-center">
+                <div class="col-md-8">
+                    <h1 class="page-title">
+                        <i class="fas fa-tachometer-alt me-3" style="color: #667eea;"></i>
+                        Dashboard
+                    </h1>
+                    <p class="page-subtitle">Welcome back! Here's what's happening at your hotels today.</p>
+                </div>
+                <div class="col-md-4 text-end">
+                    <div class="quick-actions">
+                        <a href="/Hotels" class="quick-action-btn btn-primary-custom">
+                            <i class="fas fa-plus me-2"></i>Add Hotel
+                        </a>
+                        <a href="/Reservations" class="quick-action-btn btn-outline-custom">
+                            <i class="fas fa-calendar me-2"></i>View Bookings
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Stats Cards -->
+        <div class="row g-4 mb-4">
+            <div class="col-xl-3 col-md-6">
+                <div class="stats-card">
+                    <div class="stats-icon" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                        <i class="fas fa-building"></i>
+                    </div>
+                    <h3 class="stats-number">@Model.Stats.TotalHotels</h3>
+                    <p class="stats-label">Total Hotels</p>
+                    <div class="stats-change text-success">
+                        <i class="fas fa-arrow-up me-1"></i>+2 this month
+                    </div>
+                </div>
+            </div>
+            <div class="col-xl-3 col-md-6">
+                <div class="stats-card">
+                    <div class="stats-icon" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">
+                        <i class="fas fa-bed"></i>
+                    </div>
+                    <h3 class="stats-number">@Model.Stats.TotalRooms</h3>
+                    <p class="stats-label">Total Rooms</p>
+                    <div class="stats-change text-info">
+                        <i class="fas fa-check me-1"></i>@Model.Stats.AvailableRooms available
+                    </div>
+                </div>
+            </div>
+            <div class="col-xl-3 col-md-6">
+                <div class="stats-card">
+                    <div class="stats-icon" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);">
+                        <i class="fas fa-calendar-check"></i>
+                    </div>
+                    <h3 class="stats-number">@Model.Stats.ActiveReservations</h3>
+                    <p class="stats-label">Active Reservations</p>
+                    <div class="stats-change text-warning">
+                        <i class="fas fa-clock me-1"></i>@Model.Stats.CheckInsToday check-ins today
+                    </div>
+                </div>
+            </div>
+            <div class="col-xl-3 col-md-6">
+                <div class="stats-card">
+                    <div class="stats-icon" style="background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);">
+                        <i class="fas fa-dollar-sign"></i>
+                    </div>
+                    <h3 class="stats-number">$@Model.Stats.TodayRevenue.ToString("N0")</h3>
+                    <p class="stats-label">Today's Revenue</p>
+                    <div class="stats-change text-success">
+                        <i class="fas fa-arrow-up me-1"></i>+15% vs yesterday
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Charts and Data -->
+        <div class="row g-4 mb-4">
+            <!-- Room Occupancy -->
+            <div class="col-xl-6">
+                <div class="chart-card">
+                    <h5 class="chart-title">
+                        <i class="fas fa-chart-bar me-2" style="color: #667eea;"></i>
+                        Room Occupancy by Type
+                    </h5>
+                    @foreach (var occupancy in Model.RoomOccupancy)
+                    {
+                        <div class="mb-3">
+                            <div class="d-flex justify-content-between align-items-center mb-1">
+                                <span class="fw-medium">@occupancy.RoomType</span>
+                                <span class="text-muted">@occupancy.OccupiedRooms/@occupancy.TotalRooms (@occupancy.OccupancyPercentage.ToString("F1")%)</span>
+                            </div>
+                            <div class="occupancy-bar">
+                                <div class="occupancy-fill" style="width: @occupancy.OccupancyPercentage.ToString("F1")%; background: linear-gradient(90deg, #667eea, #764ba2);"></div>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+
+            <!-- Monthly Revenue -->
+            <div class="col-xl-6">
+                <div class="chart-card">
+                    <h5 class="chart-title">
+                        <i class="fas fa-chart-line me-2" style="color: #667eea;"></i>
+                        Monthly Revenue Trend
+                    </h5>
+                    <div class="row g-3">
+                        @foreach (var revenue in Model.MonthlyRevenue)
+                        {
+                            <div class="col-4">
+                                <div class="text-center p-2 border rounded">
+                                    <div class="fw-bold text-primary">@revenue.Month</div>
+                                    <div class="fs-6 fw-medium">$@revenue.Revenue.ToString("N0")</div>
+                                    <div class="text-muted small">@revenue.Bookings bookings</div>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Recent Reservations -->
+        <div class="row g-4">
+            <div class="col-12">
+                <div class="recent-reservations">
+                    <h5 class="chart-title">
+                        <i class="fas fa-clock me-2" style="color: #667eea;"></i>
+                        Recent Reservations
+                    </h5>
+                    @foreach (var reservation in Model.RecentReservations)
+                    {
+                        <div class="reservation-item">
+                            <div class="row align-items-center">
+                                <div class="col-md-1">
+                                    <div class="guest-avatar">
+                                        @reservation.GuestName.Substring(0, 1).ToUpper()
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="fw-medium">@reservation.GuestName</div>
+                                    <div class="text-muted small">ID: #@reservation.ReservationId</div>
+                                </div>
+                                <div class="col-md-2">
+                                    <div class="fw-medium">@reservation.RoomNumber</div>
+                                    <div class="text-muted small">@reservation.RoomType</div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="small">
+                                        <i class="fas fa-calendar me-1"></i>
+                                        @reservation.CheckInDate.ToString("MMM dd") - @reservation.CheckOutDate.ToString("MMM dd")
+                                    </div>
+                                </div>
+                                <div class="col-md-2">
+                                    <span class="badge bg-@reservation.StatusClass">@reservation.Status</span>
+                                </div>
+                                <div class="col-md-1 text-end">
+                                    <div class="fw-bold">$@reservation.TotalAmount.ToString("N0")</div>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,218 @@
+@model HotelBooking.Models.ViewModels.CheckoutViewModel
+@{
+    ViewData["Title"] = "Checkout";
+}
+
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-10">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0">
+                        <i class="fas fa-receipt me-2"></i>Checkout - Final Bill
+                    </h4>
+                </div>
+                <div class="card-body">
+                    <!-- Reservation Summary -->
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <h5 class="text-primary">Reservation Details</h5>
+                            <table class="table table-borderless">
+                                <tr>
+                                    <td><strong>Room:</strong></td>
+                                    <td>@Model.RoomNumber - @Model.RoomType</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Check-in:</strong></td>
+                                    <td>@Model.CheckInDate.ToString("MMM dd, yyyy")</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Check-out:</strong></td>
+                                    <td>@Model.CheckOutDate.ToString("MMM dd, yyyy")</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Number of Nights:</strong></td>
+                                    <td>@Model.NumberOfNights</td>
+                                </tr>
+                            </table>
+                        </div>
+                        <div class="col-md-6">
+                            <h5 class="text-primary">Payment Status</h5>
+                            <table class="table table-borderless">
+                                <tr>
+                                    <td><strong>Status:</strong></td>
+                                    <td>
+                                        <span class="badge bg-@(Model.PaymentStatus == "Confirmed" ? "success" : "warning")">
+                                            @Model.PaymentStatus
+                                        </span>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Paid Amount:</strong></td>
+                                    <td>$@Model.PaidAmount.ToString("F2")</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Remaining:</strong></td>
+                                    <td class="@(Model.RemainingAmount > 0 ? "text-danger" : "text-success")">
+                                        $@Model.RemainingAmount.ToString("F2")
+                                    </td>
+                                </tr>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Cost Breakdown -->
+                    <div class="card mb-4">
+                        <div class="card-header">
+                            <h5 class="mb-0">
+                                <i class="fas fa-calculator me-2"></i>Cost Breakdown
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <table class="table">
+                                <tbody>
+                                    <tr>
+                                        <td><strong>Room Charges (@Model.NumberOfNights nights)</strong></td>
+                                        <td class="text-end">$@Model.RoomCost.ToString("F2")</td>
+                                    </tr>
+                                    @if (Model.ServiceCost > 0)
+                                    {
+                                        <tr>
+                                            <td><strong>Additional Services</strong></td>
+                                            <td class="text-end">$@Model.ServiceCost.ToString("F2")</td>
+                                        </tr>
+                                    }
+                                    <tr>
+                                        <td><strong>Tax (10%)</strong></td>
+                                        <td class="text-end">$@Model.TaxAmount.ToString("F2")</td>
+                                    </tr>
+                                    @if (Model.DiscountAmount > 0)
+                                    {
+                                        <tr class="text-success">
+                                            <td><strong>Discount</strong></td>
+                                            <td class="text-end">-$@Model.DiscountAmount.ToString("F2")</td>
+                                        </tr>
+                                    }
+                                </tbody>
+                                <tfoot>
+                                    <tr class="table-primary">
+                                        <th><strong>Total Amount</strong></th>
+                                        <th class="text-end"><strong>$@Model.TotalCost.ToString("F2")</strong></th>
+                                    </tr>
+                                </tfoot>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Services Used -->
+                    @if (Model.ServicesUsed != null && Model.ServicesUsed.Any())
+                    {
+                        <div class="card mb-4">
+                            <div class="card-header">
+                                <h5 class="mb-0">
+                                    <i class="fas fa-concierge-bell me-2"></i>Services Used
+                                </h5>
+                            </div>
+                            <div class="card-body">
+                                <table class="table table-sm">
+                                    <thead>
+                                        <tr>
+                                            <th>Service</th>
+                                            <th>Date</th>
+                                            <th>Quantity</th>
+                                            <th>Unit Price</th>
+                                            <th class="text-end">Total</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach (var service in Model.ServicesUsed)
+                                        {
+                                            <tr>
+                                                <td>@service.Service?.ServiceName</td>
+                                                <td>@service.UsageDate.ToString("MMM dd")</td>
+                                                <td>@service.Quantity</td>
+                                                <td>$@service.UnitPrice.ToString("F2")</td>
+                                                <td class="text-end">$@service.TotalPrice.ToString("F2")</td>
+                                            </tr>
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    }
+
+                    <!-- Room Changes -->
+                    @if (Model.RoomChanges != null && Model.RoomChanges.Any())
+                    {
+                        <div class="card mb-4">
+                            <div class="card-header">
+                                <h5 class="mb-0">
+                                    <i class="fas fa-exchange-alt me-2"></i>Room Changes
+                                </h5>
+                            </div>
+                            <div class="card-body">
+                                <table class="table table-sm">
+                                    <thead>
+                                        <tr>
+                                            <th>Date</th>
+                                            <th>From Room</th>
+                                            <th>To Room</th>
+                                            <th>Reason</th>
+                                            <th class="text-end">Price Difference</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach (var change in Model.RoomChanges)
+                                        {
+                                            <tr>
+                                                <td>@change.ChangeDate.ToString("MMM dd")</td>
+                                                <td>@change.OldRoom?.RoomNumber</td>
+                                                <td>@change.NewRoom?.RoomNumber</td>
+                                                <td>@change.Reason</td>
+                                                <td class="text-end @(change.PriceDifference >= 0 ? "text-danger" : "text-success")">
+                                                    @(change.PriceDifference >= 0 ? "+" : "")$@change.PriceDifference.ToString("F2")
+                                                </td>
+                                            </tr>
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    }
+
+                    <!-- Checkout Actions -->
+                    <div class="text-center">
+                        @if (Model.RemainingAmount > 0)
+                        {
+                            <div class="alert alert-warning">
+                                <i class="fas fa-exclamation-triangle me-2"></i>
+                                <strong>Outstanding Balance:</strong> $@Model.RemainingAmount.ToString("F2")
+                                <br>Please settle the remaining amount before checkout.
+                            </div>
+                            <button class="btn btn-warning btn-lg me-2" onclick="alert('Payment processing would be implemented here')">
+                                <i class="fas fa-credit-card me-2"></i>Pay Remaining Amount
+                            </button>
+                        }
+                        else
+                        {
+                            <div class="alert alert-success">
+                                <i class="fas fa-check-circle me-2"></i>
+                                All payments completed. Ready for checkout!
+                            </div>
+                            <form asp-action="CheckoutConfirmed" method="post" class="d-inline">
+                                <input type="hidden" name="id" value="@Model.ReservationID" />
+                                <button type="submit" class="btn btn-success btn-lg me-2" onclick="return confirm('Are you sure you want to complete checkout?')">
+                                    <i class="fas fa-sign-out-alt me-2"></i>Complete Checkout
+                                </button>
+                            </form>
+                        }
+                        
+                        <a href="@Url.Action("Details", new { id = Model.ReservationID })" class="btn btn-secondary btn-lg">
+                            <i class="fas fa-arrow-left me-2"></i>Back to Reservation
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

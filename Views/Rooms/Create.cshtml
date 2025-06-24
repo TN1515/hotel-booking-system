@@ -1,0 +1,649 @@
+@model HotelBooking.Models.ViewModels.RoomViewModel
+@{
+    ViewData["Title"] = "Create Room";
+}
+
+<style>
+    :root {
+        --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        --success-gradient: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        --warning-gradient: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+        --danger-gradient: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+    }
+
+    body {
+        background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+        min-height: 100vh;
+    }
+
+    .page-header {
+        background: var(--primary-gradient);
+        color: white;
+        padding: 3rem 0;
+        margin-bottom: 2rem;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .page-header::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 20"><defs><radialGradient id="a" cx="50%" cy="0%" r="100%"><stop offset="0%" stop-color="rgba(255,255,255,.1)"/><stop offset="100%" stop-color="rgba(255,255,255,0)"/></radialGradient></defs><rect width="100" height="20" fill="url(%23a)"/></svg>');
+        opacity: 0.1;
+    }
+
+    .page-title {
+        font-size: 2.5rem;
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+        text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+    }
+
+    .page-subtitle {
+        font-size: 1.1rem;
+        opacity: 0.9;
+        margin-bottom: 0;
+    }
+
+    .upload-instructions {
+        background: linear-gradient(135deg, #e3f2fd 0%, #f3e5f5 100%);
+        border: none;
+        border-radius: 15px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    }
+
+    .image-preview-container {
+        background: white;
+        border: 2px dashed #dee2e6;
+        border-radius: 15px;
+        padding: 2rem;
+        margin-top: 1rem;
+        transition: all 0.3s ease;
+    }
+
+    .image-preview-container:hover {
+        border-color: #667eea;
+        box-shadow: 0 5px 20px rgba(102, 126, 234, 0.1);
+    }
+
+    .image-upload-area:hover {
+        border-color: #007bff;
+        background: #e3f2fd;
+    }
+
+    .image-upload-area.dragover {
+        border-color: #28a745;
+        background: #d4edda;
+    }
+
+    .image-preview {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+        gap: 1rem;
+        margin-top: 0.5rem;
+    }
+
+    .image-preview-item {
+        text-align: center;
+        padding: 0.5rem;
+        background: white;
+        border: 1px solid #dee2e6;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    .image-preview-item img {
+        width: 100%;
+        height: 120px;
+        object-fit: cover;
+        border-radius: 4px;
+        margin-bottom: 0.5rem;
+    }
+
+    .image-preview-item .file-name {
+        font-size: 0.75rem;
+        color: #6c757d;
+        word-break: break-all;
+    }
+
+    .image-preview-item img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .image-remove-btn {
+        position: absolute;
+        top: 5px;
+        right: 5px;
+        background: #dc3545;
+        color: white;
+        border: none;
+        border-radius: 50%;
+        width: 25px;
+        height: 25px;
+        font-size: 12px;
+        cursor: pointer;
+    }
+
+    .form-section {
+        background: white;
+        border-radius: 10px;
+        padding: 1.5rem;
+        margin-bottom: 1.5rem;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    .section-title {
+        color: #495057;
+        font-weight: 600;
+        margin-bottom: 1.5rem;
+        padding-bottom: 0.5rem;
+        border-bottom: 3px solid transparent;
+        border-image: var(--primary-gradient) 1;
+        position: relative;
+    }
+
+    .section-title::before {
+        content: '';
+        position: absolute;
+        bottom: -3px;
+        left: 0;
+        width: 50px;
+        height: 3px;
+        background: var(--primary-gradient);
+        border-radius: 2px;
+    }
+
+    .form-section {
+        background: white;
+        border-radius: 20px;
+        padding: 2rem;
+        margin-bottom: 2rem;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        border: 1px solid rgba(255,255,255,0.2);
+        backdrop-filter: blur(10px);
+        transition: all 0.3s ease;
+    }
+
+    .form-section:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+    }
+
+    .form-control, .form-select {
+        border-radius: 12px;
+        border: 2px solid #e9ecef;
+        padding: 0.75rem 1rem;
+        transition: all 0.3s ease;
+        background: rgba(255,255,255,0.9);
+    }
+
+    .form-control:focus, .form-select:focus {
+        border-color: #667eea;
+        box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+        background: white;
+    }
+
+    .btn-primary {
+        background: var(--primary-gradient);
+        border: none;
+        border-radius: 12px;
+        padding: 0.75rem 2rem;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+    }
+
+    .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(102, 126, 234, 0.6);
+    }
+
+    .btn-outline-secondary {
+        border: 2px solid #6c757d;
+        border-radius: 12px;
+        padding: 0.75rem 2rem;
+        font-weight: 600;
+        transition: all 0.3s ease;
+    }
+
+    .btn-outline-secondary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 15px rgba(108, 117, 125, 0.3);
+    }
+
+    .upload-container {
+        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+        border: 2px dashed #dee2e6;
+        border-radius: 15px;
+        padding: 2rem;
+        margin-bottom: 1rem;
+        transition: all 0.3s ease;
+        text-align: center;
+    }
+
+    .upload-container:hover {
+        border-color: #667eea;
+        background: linear-gradient(135deg, #e3f2fd 0%, #f3e5f5 100%);
+    }
+
+    .upload-info {
+        text-align: center;
+        margin-top: 1rem;
+    }
+
+    .form-container {
+        padding: 2rem;
+        background: rgba(255,255,255,0.95);
+        backdrop-filter: blur(10px);
+        border-radius: 20px;
+        margin: 2rem 0;
+    }
+
+    .form-footer {
+        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+        border-radius: 20px;
+        border-top: 1px solid rgba(0,0,0,0.1);
+        padding: 2rem;
+        margin-top: 2rem;
+        box-shadow: 0 -5px 20px rgba(0,0,0,0.1);
+    }
+
+    .alert-danger {
+        background: linear-gradient(135deg, #ffebee 0%, #fce4ec 100%);
+        border: 1px solid #f8bbd9;
+        border-radius: 12px;
+        color: #c62828;
+    }
+
+    .input-group-text {
+        background: var(--primary-gradient);
+        color: white;
+        border: none;
+        border-radius: 12px 0 0 12px;
+        font-weight: 600;
+    }
+
+    .form-check-input:checked {
+        background: var(--primary-gradient);
+        border-color: #667eea;
+    }
+
+    .form-switch .form-check-input {
+        width: 3rem;
+        height: 1.5rem;
+    }
+
+    .form-switch .form-check-input:checked {
+        background: var(--success-gradient);
+    }
+</style>
+
+<!-- Page Header -->
+<div class="page-header">
+    <div class="container">
+        <div class="text-center">
+            <h1 class="page-title">
+                <i class="fas fa-plus-circle me-3"></i>Create New Room
+            </h1>
+            <p class="page-subtitle">Add a beautiful room to your hotel collection</p>
+        </div>
+    </div>
+</div>
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-md-10 offset-md-1">
+
+                <form asp-action="Create" method="post" enctype="multipart/form-data">
+                    <div class="form-container">
+                        <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
+
+                        <!-- Basic Information Section -->
+                        <div class="form-section">
+                            <h5 class="section-title"><i class="fas fa-info-circle me-2"></i>Basic Information</h5>
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label asp-for="RoomNumber" class="form-label fw-bold"></label>
+                                    <input asp-for="RoomNumber" class="form-control form-control-lg" placeholder="e.g., 101, A-205" />
+                                    <span asp-validation-for="RoomNumber" class="text-danger"></span>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label asp-for="RoomTypeID" class="form-label fw-bold"></label>
+                                    <select asp-for="RoomTypeID" class="form-select form-select-lg">
+                                        <option value="">Select Room Type</option>
+                                        @foreach (var roomType in Model.RoomTypes)
+                                        {
+                                            <option value="@roomType.RoomTypeID">@roomType.TypeName</option>
+                                        }
+                                    </select>
+                                    <span asp-validation-for="RoomTypeID" class="text-danger"></span>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-4 mb-3">
+                                    <label asp-for="Price" class="form-label fw-bold"></label>
+                                    <div class="input-group">
+                                        <span class="input-group-text">$</span>
+                                        <input asp-for="Price" class="form-control form-control-lg" type="number" step="0.01" placeholder="0.00" />
+                                    </div>
+                                    <span asp-validation-for="Price" class="text-danger"></span>
+                                </div>
+                                <div class="col-md-4 mb-3">
+                                    <label asp-for="BedType" class="form-label fw-bold"></label>
+                                    <select asp-for="BedType" class="form-select form-select-lg">
+                                        <option value="">Select Bed Type</option>
+                                        @foreach (var bedType in Model.BedTypeOptions)
+                                        {
+                                            <option value="@bedType">@bedType</option>
+                                        }
+                                    </select>
+                                    <span asp-validation-for="BedType" class="text-danger"></span>
+                                </div>
+                                <div class="col-md-4 mb-3">
+                                    <label asp-for="ViewType" class="form-label fw-bold"></label>
+                                    <select asp-for="ViewType" class="form-select form-select-lg">
+                                        <option value="">Select View Type</option>
+                                        @foreach (var viewType in Model.ViewTypeOptions)
+                                        {
+                                            <option value="@viewType">@viewType</option>
+                                        }
+                                    </select>
+                                    <span asp-validation-for="ViewType" class="text-danger"></span>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label asp-for="Status" class="form-label fw-bold"></label>
+                                    <select asp-for="Status" class="form-select form-select-lg">
+                                        @foreach (var status in Model.StatusOptions)
+                                        {
+                                            <option value="@status">@status</option>
+                                        }
+                                    </select>
+                                    <span asp-validation-for="Status" class="text-danger"></span>
+                                </div>
+                                <div class="col-md-6 mb-3 d-flex align-items-end">
+                                    <div class="form-check form-switch">
+                                        <input asp-for="IsActive" class="form-check-input" type="checkbox" style="transform: scale(1.5);" />
+                                        <label asp-for="IsActive" class="form-check-label fw-bold ms-2"></label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Room Images Section -->
+                        <div class="form-section">
+                            <h5 class="section-title"><i class="fas fa-images me-2"></i>Room Images</h5>
+                            <div class="mb-3">
+                                <label asp-for="RoomImages" class="form-label fw-bold">Upload Room Photos</label>
+
+                                <!-- Main file input - always visible and clickable -->
+                                <input type="file" asp-for="RoomImages" multiple accept="image/*"
+                                       class="form-control form-control-lg mb-3"
+                                       id="roomImagesInput"
+                                       onchange="showImagePreview(this)" />
+
+                                <!-- Upload instructions -->
+                                <div class="upload-instructions mb-3">
+                                    <div class="alert alert-info">
+                                        <i class="fas fa-info-circle me-2"></i>
+                                        <strong>How to upload:</strong>
+                                        <ul class="mb-0 mt-2">
+                                            <li>Click the "Choose Files" button above</li>
+                                            <li>Select multiple images (hold Ctrl/Cmd)</li>
+                                            <li>Supported: JPG, PNG, GIF (Max 5MB each)</li>
+                                        </ul>
+                                    </div>
+                                </div>
+
+                                <!-- Alternative upload button -->
+                                <div class="text-center mb-3">
+                                    <button type="button" class="btn btn-primary btn-lg" onclick="triggerFileInput()">
+                                        <i class="fas fa-upload me-2"></i>Choose Room Images
+                                    </button>
+                                </div>
+
+                                <!-- Image preview area -->
+                                <div id="imagePreviewContainer" class="image-preview-container" style="display: none;">
+                                    <h6><i class="fas fa-eye me-2"></i>Selected Images:</h6>
+                                    <div id="imagePreview" class="image-preview"></div>
+                                </div>
+
+                                <span asp-validation-for="RoomImages" class="text-danger"></span>
+                            </div>
+                        </div>
+
+                        <!-- Description Section -->
+                        <div class="form-section">
+                            <h5 class="section-title"><i class="fas fa-align-left me-2"></i>Description</h5>
+                            <div class="mb-3">
+                                <label asp-for="Description" class="form-label fw-bold"></label>
+                                <textarea asp-for="Description" class="form-control" rows="4"
+                                          placeholder="Describe the room features, amenities, and special characteristics..."></textarea>
+                                <span asp-validation-for="Description" class="text-danger"></span>
+                            </div>
+                        </div>
+
+                        <!-- Amenities Section -->
+                        <div class="form-section">
+                            <h5 class="section-title"><i class="fas fa-star me-2"></i>Room Amenities</h5>
+                            <div class="row">
+                                @foreach (var amenity in Model.Amenities)
+                                {
+                                    <div class="col-md-4 col-sm-6 mb-3">
+                                        <div class="form-check form-check-card">
+                                            <input type="checkbox" name="SelectedAmenityIds" value="@amenity.AmenityID"
+                                                   class="form-check-input" id="amenity_@amenity.AmenityID" />
+                                            <label class="form-check-label w-100 p-3 border rounded" for="amenity_@amenity.AmenityID">
+                                                <div class="d-flex align-items-center">
+                                                    @if (!string.IsNullOrEmpty(amenity.Icon))
+                                                    {
+                                                        <i class="@amenity.Icon fa-lg text-primary me-2"></i>
+                                                    }
+                                                    else
+                                                    {
+                                                        <i class="fas fa-check fa-lg text-primary me-2"></i>
+                                                    }
+                                                    <div>
+                                                        <strong>@amenity.AmenityName</strong>
+                                                        @if (!string.IsNullOrEmpty(amenity.Category))
+                                                        {
+                                                            <small class="text-muted d-block">@amenity.Category</small>
+                                                        }
+                                                    </div>
+                                                </div>
+                                            </label>
+                                        </div>
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-footer">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <a href="@Url.Action("Index")" class="btn btn-outline-secondary btn-lg">
+                                <i class="fas fa-arrow-left me-2"></i>Back to Rooms
+                            </a>
+                            <div class="text-center">
+                                <small class="text-muted">All fields marked with * are required</small>
+                            </div>
+                            <button type="submit" class="btn btn-primary btn-lg">
+                                <i class="fas fa-save me-2"></i>Create Room
+                            </button>
+                        </div>
+                    </div>
+                </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+
+    <script>
+        // Function to trigger file input click
+        function triggerFileInput() {
+            console.log('triggerFileInput called');
+            const fileInput = document.getElementById('roomImagesInput');
+            if (fileInput) {
+                console.log('File input found, clicking...');
+                fileInput.click();
+            } else {
+                console.log('File input not found!');
+                alert('Error: File input not found!');
+            }
+        }
+
+        // Function to show image preview
+        function showImagePreview(input) {
+            console.log('showImagePreview called with', input.files.length, 'files');
+
+            const previewContainer = document.getElementById('imagePreviewContainer');
+            const preview = document.getElementById('imagePreview');
+
+            // Clear previous previews
+            preview.innerHTML = '';
+
+            if (input.files && input.files.length > 0) {
+                // Show preview container
+                previewContainer.style.display = 'block';
+
+                // Process each file
+                Array.from(input.files).forEach((file, index) => {
+                    console.log('Processing file:', file.name, file.type);
+
+                    if (file.type.startsWith('image/')) {
+                        const reader = new FileReader();
+                        reader.onload = function(e) {
+                            const div = document.createElement('div');
+                            div.className = 'image-preview-item';
+                            div.innerHTML = `
+                                <img src="${e.target.result}" alt="Preview ${index + 1}">
+                                <div class="file-name">${file.name}</div>
+                                <small class="text-muted">${(file.size / 1024 / 1024).toFixed(2)} MB</small>
+                            `;
+                            preview.appendChild(div);
+                        };
+                        reader.readAsDataURL(file);
+                    } else {
+                        console.log('Skipping non-image file:', file.name);
+                    }
+                });
+            } else {
+                // Hide preview container if no files
+                previewContainer.style.display = 'none';
+            }
+        }
+
+        // Simple form validation
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('DOM loaded');
+
+            const form = document.querySelector('form');
+            if (form) {
+                form.addEventListener('submit', function(e) {
+                    const requiredFields = document.querySelectorAll('input[required], select[required]');
+                    let isValid = true;
+
+                    requiredFields.forEach(function(field) {
+                        if (!field.value.trim()) {
+                            field.classList.add('is-invalid');
+                            isValid = false;
+                        } else {
+                            field.classList.remove('is-invalid');
+                        }
+                    });
+
+                    if (!isValid) {
+                        e.preventDefault();
+                        alert('Please fill in all required fields.');
+                    }
+                });
+            }
+        });
+    </script>
+
+    <style>
+        .form-check-card .form-check-label {
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .form-check-card .form-check-label:hover {
+            background-color: #f8f9fa !important;
+            border-color: #007bff !important;
+        }
+
+        .form-check-input:checked + .form-check-label {
+            background-color: #e3f2fd !important;
+            border-color: #007bff !important;
+        }
+
+        .is-invalid {
+            border-color: #dc3545 !important;
+            animation: shake 0.5s ease-in-out;
+        }
+
+        @@keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+
+        @@keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .form-section {
+            animation: fadeInUp 0.6s ease-out;
+        }
+
+        .form-section:nth-child(1) { animation-delay: 0.1s; }
+        .form-section:nth-child(2) { animation-delay: 0.2s; }
+        .form-section:nth-child(3) { animation-delay: 0.3s; }
+        .form-section:nth-child(4) { animation-delay: 0.4s; }
+
+        .page-header {
+            animation: fadeInUp 0.8s ease-out;
+        }
+
+        .btn {
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            background: rgba(255,255,255,0.3);
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            transition: width 0.6s, height 0.6s;
+        }
+
+        .btn:active::before {
+            width: 300px;
+            height: 300px;
+        }
+    </style>
+}

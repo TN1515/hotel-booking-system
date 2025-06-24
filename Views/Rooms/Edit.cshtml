@@ -1,0 +1,413 @@
+@model HotelBooking.Models.ViewModels.RoomViewModel
+@{
+    ViewData["Title"] = "Edit Room";
+}
+
+<style>
+    .image-upload-area {
+        border: 2px dashed #dee2e6;
+        border-radius: 10px;
+        padding: 2rem;
+        text-align: center;
+        background: #f8f9fa;
+        transition: all 0.3s ease;
+        cursor: pointer;
+    }
+
+    .image-upload-area:hover {
+        border-color: #007bff;
+        background: #e3f2fd;
+    }
+
+    .image-upload-area.dragover {
+        border-color: #28a745;
+        background: #d4edda;
+    }
+
+    .image-preview {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1rem;
+        margin-top: 1rem;
+    }
+
+    .image-preview-item {
+        position: relative;
+        width: 150px;
+        height: 150px;
+        border-radius: 10px;
+        overflow: hidden;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+
+    .image-preview-item img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .image-remove-btn {
+        position: absolute;
+        top: 5px;
+        right: 5px;
+        background: #dc3545;
+        color: white;
+        border: none;
+        border-radius: 50%;
+        width: 25px;
+        height: 25px;
+        font-size: 12px;
+        cursor: pointer;
+    }
+
+    .existing-image {
+        border: 2px solid #28a745;
+    }
+
+    .form-section {
+        background: white;
+        border-radius: 10px;
+        padding: 1.5rem;
+        margin-bottom: 1.5rem;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    .section-title {
+        color: #495057;
+        font-weight: 600;
+        margin-bottom: 1rem;
+        padding-bottom: 0.5rem;
+        border-bottom: 2px solid #e9ecef;
+    }
+</style>
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-md-10 offset-md-1">
+            <div class="card shadow-lg border-0">
+                <div class="card-header bg-info text-white">
+                    <h3 class="card-title mb-0">
+                        <i class="fas fa-edit me-2"></i>Edit Room @Model.RoomNumber
+                    </h3>
+                </div>
+
+                <form asp-action="Edit" method="post" enctype="multipart/form-data">
+                    <div class="card-body">
+                        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                        
+                        <input type="hidden" asp-for="RoomID" />
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label asp-for="RoomNumber" class="control-label"></label>
+                                    <input asp-for="RoomNumber" class="form-control" />
+                                    <span asp-validation-for="RoomNumber" class="text-danger"></span>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label asp-for="RoomTypeID" class="control-label"></label>
+                                    <select asp-for="RoomTypeID" class="form-control">
+                                        <option value="">Select Room Type</option>
+                                        @foreach (var roomType in Model.RoomTypes)
+                                        {
+                                            <option value="@roomType.RoomTypeID" selected="@(Model.RoomTypeID == roomType.RoomTypeID)">
+                                                @roomType.TypeName - Max @roomType.MaxOccupancy guests
+                                            </option>
+                                        }
+                                    </select>
+                                    <span asp-validation-for="RoomTypeID" class="text-danger"></span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label asp-for="Price" class="control-label"></label>
+                                    <div class="input-group">
+                                        <div class="input-group-prepend">
+                                            <span class="input-group-text">$</span>
+                                        </div>
+                                        <input asp-for="Price" class="form-control" type="number" step="0.01" />
+                                    </div>
+                                    <span asp-validation-for="Price" class="text-danger"></span>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label asp-for="Status" class="control-label"></label>
+                                    <select asp-for="Status" class="form-control">
+                                        @foreach (var status in Model.StatusOptions)
+                                        {
+                                            <option value="@status" selected="@(Model.Status == status)">@status</option>
+                                        }
+                                    </select>
+                                    <span asp-validation-for="Status" class="text-danger"></span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Room Images Section -->
+                        <div class="form-section">
+                            <h5 class="section-title"><i class="fas fa-images me-2"></i>Room Images</h5>
+
+                            @if (Model.ExistingImagePaths != null && Model.ExistingImagePaths.Any())
+                            {
+                                <div class="mb-3">
+                                    <label class="form-label fw-bold">Current Images</label>
+                                    <div class="image-preview">
+                                        @foreach (var imagePath in Model.ExistingImagePaths)
+                                        {
+                                            <div class="image-preview-item existing-image">
+                                                <img src="@imagePath" alt="Room Image" />
+                                                <button type="button" class="image-remove-btn" onclick="removeExistingImage('@imagePath')">
+                                                    <i class="fas fa-times"></i>
+                                                </button>
+                                            </div>
+                                        }
+                                    </div>
+                                </div>
+                            }
+
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">Add New Images</label>
+                                <div class="image-upload-area" id="imageUploadArea">
+                                    <i class="fas fa-cloud-upload-alt fa-3x text-muted mb-3"></i>
+                                    <h6 class="text-muted">Drag & Drop images here or click to browse</h6>
+                                    <p class="text-muted small mb-0">Supported formats: JPG, PNG, GIF (Max 5MB each)</p>
+                                    <input type="file" asp-for="RoomImages" multiple accept="image/*" class="d-none" id="roomImagesInput" />
+                                </div>
+                                <div class="image-preview" id="imagePreview"></div>
+                                <span asp-validation-for="RoomImages" class="text-danger"></span>
+                            </div>
+                        </div>
+
+                        <!-- Description Section -->
+                        <div class="form-section">
+                            <h5 class="section-title"><i class="fas fa-align-left me-2"></i>Description</h5>
+                            <div class="mb-3">
+                                <label asp-for="Description" class="form-label fw-bold"></label>
+                                <textarea asp-for="Description" class="form-control" rows="4"
+                                          placeholder="Enter room description, special features, etc."></textarea>
+                                <span asp-validation-for="Description" class="text-danger"></span>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="control-label">Amenities</label>
+                            <div class="card card-outline card-info">
+                                <div class="card-header">
+                                    <h6 class="card-title">Select amenities available in this room</h6>
+                                    <div class="card-tools">
+                                        <button type="button" class="btn btn-sm btn-outline-primary" onclick="selectAllAmenities()">
+                                            Select All
+                                        </button>
+                                        <button type="button" class="btn btn-sm btn-outline-secondary" onclick="deselectAllAmenities()">
+                                            Deselect All
+                                        </button>
+                                    </div>
+                                </div>
+                                <div class="card-body">
+                                    @if (Model.Amenities.Any())
+                                    {
+                                        <div class="row">
+                                            @foreach (var amenity in Model.Amenities.OrderBy(a => a.Category).ThenBy(a => a.AmenityName))
+                                            {
+                                                var isSelected = Model.SelectedAmenityIds.Contains(amenity.AmenityID);
+                                                <div class="col-md-4 col-lg-3 mb-2">
+                                                    <div class="form-check">
+                                                        <input type="checkbox" 
+                                                               name="SelectedAmenityIds" 
+                                                               value="@amenity.AmenityID" 
+                                                               class="form-check-input amenity-checkbox" 
+                                                               id="amenity_@amenity.AmenityID"
+                                                               @(isSelected ? "checked" : "") />
+                                                        <label class="form-check-label" for="amenity_@amenity.AmenityID">
+                                                            @if (!string.IsNullOrEmpty(amenity.Icon))
+                                                            {
+                                                                <i class="@amenity.Icon"></i>
+                                                            }
+                                                            @amenity.AmenityName
+                                                            <small class="text-muted d-block">@amenity.Category</small>
+                                                        </label>
+                                                    </div>
+                                                </div>
+                                            }
+                                        </div>
+                                    }
+                                    else
+                                    {
+                                        <div class="alert alert-info mb-0">
+                                            <i class="fas fa-info-circle"></i>
+                                            No amenities available. Please create some amenities first.
+                                        </div>
+                                    }
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <div class="form-check">
+                                <input asp-for="IsActive" class="form-check-input" type="checkbox" />
+                                <label asp-for="IsActive" class="form-check-label"></label>
+                                <small class="form-text text-muted">
+                                    Inactive rooms will not be available for booking
+                                </small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card-footer">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save"></i> Update Room
+                        </button>
+                        <a href="@Url.Action("Details", new { id = Model.RoomID })" class="btn btn-info">
+                            <i class="fas fa-eye"></i> View Details
+                        </a>
+                        <a href="@Url.Action("Index")" class="btn btn-secondary">
+                            <i class="fas fa-arrow-left"></i> Back to List
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+
+    <script>
+        $(document).ready(function() {
+            const imageUploadArea = $('#imageUploadArea');
+            const imageInput = $('#roomImagesInput');
+            const imagePreview = $('#imagePreview');
+            let selectedFiles = [];
+            let removedExistingImages = [];
+
+            // Click to upload
+            imageUploadArea.on('click', function() {
+                imageInput.click();
+            });
+
+            // Drag and drop functionality
+            imageUploadArea.on('dragover', function(e) {
+                e.preventDefault();
+                $(this).addClass('dragover');
+            });
+
+            imageUploadArea.on('dragleave', function(e) {
+                e.preventDefault();
+                $(this).removeClass('dragover');
+            });
+
+            imageUploadArea.on('drop', function(e) {
+                e.preventDefault();
+                $(this).removeClass('dragover');
+
+                const files = e.originalEvent.dataTransfer.files;
+                handleFiles(files);
+            });
+
+            // File input change
+            imageInput.on('change', function() {
+                const files = this.files;
+                handleFiles(files);
+            });
+
+            function handleFiles(files) {
+                for (let i = 0; i < files.length; i++) {
+                    const file = files[i];
+
+                    // Validate file type
+                    if (!file.type.startsWith('image/')) {
+                        alert('Please select only image files.');
+                        continue;
+                    }
+
+                    // Validate file size (5MB)
+                    if (file.size > 5 * 1024 * 1024) {
+                        alert('File size should not exceed 5MB.');
+                        continue;
+                    }
+
+                    selectedFiles.push(file);
+                    displayImagePreview(file);
+                }
+
+                updateFileInput();
+            }
+
+            function displayImagePreview(file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const previewItem = $(`
+                        <div class="image-preview-item" data-filename="${file.name}">
+                            <img src="${e.target.result}" alt="Preview">
+                            <button type="button" class="image-remove-btn" onclick="removeNewImage('${file.name}')">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                    `);
+                    imagePreview.append(previewItem);
+                };
+                reader.readAsDataURL(file);
+            }
+
+            window.removeNewImage = function(filename) {
+                // Remove from selectedFiles array
+                selectedFiles = selectedFiles.filter(file => file.name !== filename);
+
+                // Remove preview
+                $(`.image-preview-item[data-filename="${filename}"]`).remove();
+
+                // Update file input
+                updateFileInput();
+            };
+
+            window.removeExistingImage = function(imagePath) {
+                if (confirm('Are you sure you want to remove this image?')) {
+                    // Add to removed list
+                    removedExistingImages.push(imagePath);
+
+                    // Hide the image
+                    $(`.existing-image img[src="${imagePath}"]`).closest('.image-preview-item').hide();
+
+                    // Add hidden input to track removed images
+                    $('form').append(`<input type="hidden" name="RemovedImages" value="${imagePath}" />`);
+                }
+            };
+
+            function updateFileInput() {
+                // Create new DataTransfer object
+                const dt = new DataTransfer();
+
+                // Add selected files to DataTransfer
+                selectedFiles.forEach(file => {
+                    dt.items.add(file);
+                });
+
+                // Update input files
+                imageInput[0].files = dt.files;
+            }
+        });
+
+        function selectAllAmenities() {
+            $('.amenity-checkbox').prop('checked', true);
+        }
+
+        function deselectAllAmenities() {
+            $('.amenity-checkbox').prop('checked', false);
+        }
+
+        // Update price display
+        $('#Price').on('input', function() {
+            const value = parseFloat($(this).val());
+            if (!isNaN(value)) {
+                $(this).val(value.toFixed(2));
+            }
+        });
+    </script>
+}

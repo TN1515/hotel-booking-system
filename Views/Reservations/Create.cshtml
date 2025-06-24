@@ -1,0 +1,151 @@
+@model HotelBooking.Models.ViewModels.CreateReservationViewModel
+@{
+    ViewData["Title"] = "Create Reservation";
+}
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-md-8 offset-md-2">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">
+                        <i class="fas fa-calendar-plus"></i>
+                        Create New Reservation
+                    </h3>
+                </div>
+                <div class="card-body">
+                    <form asp-action="Create" method="post">
+                        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                        
+                        <!-- Room Selection -->
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label asp-for="RoomID" class="form-label">
+                                    <i class="fas fa-bed me-1"></i>Room
+                                </label>
+                                <select asp-for="RoomID" class="form-select" asp-items="ViewBag.Rooms">
+                                    <option value="">Select a room</option>
+                                </select>
+                                <span asp-validation-for="RoomID" class="text-danger"></span>
+                            </div>
+                            <div class="col-md-6">
+                                <label asp-for="UserID" class="form-label">
+                                    <i class="fas fa-user me-1"></i>Customer
+                                </label>
+                                <select asp-for="UserID" class="form-select" asp-items="ViewBag.Users">
+                                    <option value="">Select a customer</option>
+                                </select>
+                                <span asp-validation-for="UserID" class="text-danger"></span>
+                            </div>
+                        </div>
+
+                        <!-- Dates -->
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label asp-for="CheckInDate" class="form-label">
+                                    <i class="fas fa-calendar-check me-1"></i>Check-in Date
+                                </label>
+                                <input asp-for="CheckInDate" type="date" class="form-control" />
+                                <span asp-validation-for="CheckInDate" class="text-danger"></span>
+                            </div>
+                            <div class="col-md-6">
+                                <label asp-for="CheckOutDate" class="form-label">
+                                    <i class="fas fa-calendar-times me-1"></i>Check-out Date
+                                </label>
+                                <input asp-for="CheckOutDate" type="date" class="form-control" />
+                                <span asp-validation-for="CheckOutDate" class="text-danger"></span>
+                            </div>
+                        </div>
+
+                        <!-- Guest Information -->
+                        <div class="row mb-3">
+                            <div class="col-md-4">
+                                <label asp-for="Adults" class="form-label">
+                                    <i class="fas fa-users me-1"></i>Adults
+                                </label>
+                                <input asp-for="Adults" type="number" class="form-control" min="1" max="10" />
+                                <span asp-validation-for="Adults" class="text-danger"></span>
+                            </div>
+                            <div class="col-md-4">
+                                <label asp-for="Children" class="form-label">
+                                    <i class="fas fa-child me-1"></i>Children
+                                </label>
+                                <input asp-for="Children" type="number" class="form-control" min="0" max="10" />
+                                <span asp-validation-for="Children" class="text-danger"></span>
+                            </div>
+                            <div class="col-md-4">
+                                <label asp-for="Status" class="form-label">
+                                    <i class="fas fa-info-circle me-1"></i>Status
+                                </label>
+                                <select asp-for="Status" class="form-select">
+                                    <option value="Pending">Pending</option>
+                                    <option value="Confirmed">Confirmed</option>
+                                    <option value="Cancelled">Cancelled</option>
+                                </select>
+                                <span asp-validation-for="Status" class="text-danger"></span>
+                            </div>
+                        </div>
+
+                        <!-- Special Requests -->
+                        <div class="mb-3">
+                            <label asp-for="SpecialRequests" class="form-label">
+                                <i class="fas fa-comment me-1"></i>Special Requests
+                            </label>
+                            <textarea asp-for="SpecialRequests" class="form-control" rows="3" placeholder="Any special requests or notes..."></textarea>
+                            <span asp-validation-for="SpecialRequests" class="text-danger"></span>
+                        </div>
+
+                        <!-- Buttons -->
+                        <div class="d-flex justify-content-between">
+                            <a asp-action="Index" class="btn btn-secondary">
+                                <i class="fas fa-arrow-left"></i> Back to List
+                            </a>
+                            <button type="submit" class="btn btn-success">
+                                <i class="fas fa-save"></i> Create Reservation
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    
+    <script>
+        $(document).ready(function() {
+            // Set minimum date to today
+            var today = new Date().toISOString().split('T')[0];
+            $('#CheckInDate').attr('min', today);
+            
+            // Update checkout minimum date when checkin changes
+            $('#CheckInDate').change(function() {
+                var checkinDate = $(this).val();
+                if (checkinDate) {
+                    var nextDay = new Date(checkinDate);
+                    nextDay.setDate(nextDay.getDate() + 1);
+                    var nextDayStr = nextDay.toISOString().split('T')[0];
+                    $('#CheckOutDate').attr('min', nextDayStr);
+                }
+            });
+            
+            // Calculate total price when room or dates change
+            $('#RoomID, #CheckInDate, #CheckOutDate').change(function() {
+                calculateTotalPrice();
+            });
+            
+            function calculateTotalPrice() {
+                var roomId = $('#RoomID').val();
+                var checkin = $('#CheckInDate').val();
+                var checkout = $('#CheckOutDate').val();
+                
+                if (roomId && checkin && checkout) {
+                    // You can add AJAX call here to calculate price
+                    console.log('Calculating price for room:', roomId, 'from', checkin, 'to', checkout);
+                }
+            }
+        });
+    </script>
+}

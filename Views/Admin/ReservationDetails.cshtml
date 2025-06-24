@@ -1,0 +1,291 @@
+@model HotelBooking.Models.Reservation
+@{
+    ViewData["Title"] = "Reservation Details";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<div class="container-fluid py-4">
+    <div class="row">
+        <div class="col-12">
+            <!-- Header -->
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h2 class="mb-1">
+                        <i class="fas fa-calendar-check text-primary me-2"></i>
+                        Reservation Details
+                    </h2>
+                    <p class="text-muted mb-0">Reservation ID: #@Model.ReservationID</p>
+                </div>
+                <div>
+                    <a href="@Url.Action("Reservations", "Admin")" class="btn btn-outline-secondary">
+                        <i class="fas fa-arrow-left me-2"></i>Back to Reservations
+                    </a>
+                </div>
+            </div>
+
+            <!-- Status Badge -->
+            <div class="mb-4">
+                @{
+                    var statusClass = Model.Status switch
+                    {
+                        "Confirmed" => "bg-success",
+                        "Pending" => "bg-warning",
+                        "Cancelled" => "bg-danger",
+                        "Completed" => "bg-info",
+                        _ => "bg-secondary"
+                    };
+                }
+                <span class="badge @statusClass fs-6 px-3 py-2">
+                    <i class="fas fa-circle me-2"></i>@Model.Status
+                </span>
+            </div>
+
+            <div class="row">
+                <!-- Guest Information -->
+                <div class="col-lg-6 mb-4">
+                    <div class="card h-100">
+                        <div class="card-header bg-primary text-white">
+                            <h5 class="mb-0">
+                                <i class="fas fa-user me-2"></i>Guest Information
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-sm-6">
+                                    <strong>Name:</strong>
+                                    <p class="mb-2">@(Model.User?.UserName ?? "N/A")</p>
+                                </div>
+                                <div class="col-sm-6">
+                                    <strong>Email:</strong>
+                                    <p class="mb-2">@(Model.User?.Email ?? "N/A")</p>
+                                </div>
+                                <div class="col-sm-6">
+                                    <strong>Phone:</strong>
+                                    <p class="mb-2">@(Model.User?.PhoneNumber ?? "N/A")</p>
+                                </div>
+                                <div class="col-sm-6">
+                                    <strong>Guest Count:</strong>
+                                    <p class="mb-2">@((Model.CheckOutDate - Model.CheckInDate).Days) nights</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Room Information -->
+                <div class="col-lg-6 mb-4">
+                    <div class="card h-100">
+                        <div class="card-header bg-info text-white">
+                            <h5 class="mb-0">
+                                <i class="fas fa-bed me-2"></i>Room Information
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-sm-6">
+                                    <strong>Room Number:</strong>
+                                    <p class="mb-2">@(Model.Room?.RoomNumber ?? "N/A")</p>
+                                </div>
+                                <div class="col-sm-6">
+                                    <strong>Room Type:</strong>
+                                    <p class="mb-2">@(Model.Room?.RoomType?.TypeName ?? "N/A")</p>
+                                </div>
+                                <div class="col-sm-6">
+                                    <strong>Price per Night:</strong>
+                                    <p class="mb-2">$@(Model.Room?.Price.ToString("F2") ?? "0.00")</p>
+                                </div>
+                                <div class="col-sm-6">
+                                    <strong>Max Occupancy:</strong>
+                                    <p class="mb-2">@(Model.Room?.RoomType?.MaxOccupancy ?? 0)</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <!-- Booking Details -->
+                <div class="col-lg-6 mb-4">
+                    <div class="card h-100">
+                        <div class="card-header bg-success text-white">
+                            <h5 class="mb-0">
+                                <i class="fas fa-calendar me-2"></i>Booking Details
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-sm-6">
+                                    <strong>Check-in Date:</strong>
+                                    <p class="mb-2">@Model.CheckInDate.ToString("MMM dd, yyyy")</p>
+                                </div>
+                                <div class="col-sm-6">
+                                    <strong>Check-out Date:</strong>
+                                    <p class="mb-2">@Model.CheckOutDate.ToString("MMM dd, yyyy")</p>
+                                </div>
+                                <div class="col-sm-6">
+                                    <strong>Nights:</strong>
+                                    <p class="mb-2">@((Model.CheckOutDate - Model.CheckInDate).Days)</p>
+                                </div>
+                                <div class="col-sm-6">
+                                    <strong>Total Amount:</strong>
+                                    @{
+                                        var nights = (Model.CheckOutDate - Model.CheckInDate).Days;
+                                        var totalAmount = Model.Room?.Price * nights ?? 0;
+                                    }
+                                    <p class="mb-2 fw-bold text-success">$@totalAmount.ToString("F2")</p>
+                                </div>
+                                <div class="col-12">
+                                    <strong>Special Requests:</strong>
+                                    <p class="mb-0">None</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Payment Information -->
+                <div class="col-lg-6 mb-4">
+                    <div class="card h-100">
+                        <div class="card-header bg-warning text-dark">
+                            <h5 class="mb-0">
+                                <i class="fas fa-credit-card me-2"></i>Payment Information
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            @if (Model.Payments != null && Model.Payments.Any())
+                            {
+                                @foreach (var payment in Model.Payments)
+                                {
+                                    <div class="border-bottom pb-2 mb-2">
+                                        <div class="row">
+                                            <div class="col-sm-6">
+                                                <strong>Amount:</strong>
+                                                <p class="mb-1">$@payment.Amount.ToString("F2")</p>
+                                            </div>
+                                            <div class="col-sm-6">
+                                                <strong>Method:</strong>
+                                                <p class="mb-1">Credit Card</p>
+                                            </div>
+                                            <div class="col-sm-6">
+                                                <strong>Status:</strong>
+                                                <span class="badge bg-success">
+                                                    Completed
+                                                </span>
+                                            </div>
+                                            <div class="col-sm-6">
+                                                <strong>Date:</strong>
+                                                <p class="mb-1">@DateTime.Now.ToString("MMM dd, yyyy")</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                }
+                            }
+                            else
+                            {
+                                <p class="text-muted">No payment information available.</p>
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Booking Timeline -->
+            <div class="row">
+                <div class="col-12">
+                    <div class="card">
+                        <div class="card-header bg-dark text-white">
+                            <h5 class="mb-0">
+                                <i class="fas fa-history me-2"></i>Booking Timeline
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="timeline">
+                                <div class="timeline-item">
+                                    <div class="timeline-marker bg-primary"></div>
+                                    <div class="timeline-content">
+                                        <h6 class="mb-1">Reservation Created</h6>
+                                        <p class="text-muted mb-0">@Model.CreatedDate.ToString("MMM dd, yyyy HH:mm")</p>
+                                    </div>
+                                </div>
+                                @if (Model.ModifiedDate.HasValue)
+                                {
+                                    <div class="timeline-item">
+                                        <div class="timeline-marker bg-info"></div>
+                                        <div class="timeline-content">
+                                            <h6 class="mb-1">Last Modified</h6>
+                                            <p class="text-muted mb-0">@Model.ModifiedDate.Value.ToString("MMM dd, yyyy HH:mm")</p>
+                                        </div>
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="row mt-4">
+                <div class="col-12">
+                    <div class="d-flex gap-2 flex-wrap">
+                        @if (Model.Status == "Pending")
+                        {
+                            <button class="btn btn-success">
+                                <i class="fas fa-check me-2"></i>Confirm Reservation
+                            </button>
+                            <button class="btn btn-danger">
+                                <i class="fas fa-times me-2"></i>Cancel Reservation
+                            </button>
+                        }
+                        @if (Model.Status == "Confirmed")
+                        {
+                            <button class="btn btn-info">
+                                <i class="fas fa-edit me-2"></i>Modify Reservation
+                            </button>
+                            <button class="btn btn-warning">
+                                <i class="fas fa-exchange-alt me-2"></i>Change Room
+                            </button>
+                        }
+                        <button class="btn btn-outline-primary">
+                            <i class="fas fa-print me-2"></i>Print Details
+                        </button>
+                        <button class="btn btn-outline-info">
+                            <i class="fas fa-envelope me-2"></i>Send Email
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.timeline {
+    position: relative;
+    padding-left: 30px;
+}
+
+.timeline-item {
+    position: relative;
+    margin-bottom: 20px;
+}
+
+.timeline-marker {
+    position: absolute;
+    left: -35px;
+    top: 5px;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+}
+
+.timeline::before {
+    content: '';
+    position: absolute;
+    left: -30px;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background: #dee2e6;
+}
+</style>
