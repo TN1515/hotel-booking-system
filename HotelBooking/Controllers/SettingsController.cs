@@ -30,7 +30,7 @@ namespace HotelBooking.Controllers
                     .Where(r => r.Status == "Confirmed")
                     .Include(r => r.Room)
                     .ToListAsync())
-                    .Sum(r => r.Room.Price * (decimal)(r.CheckOutDate - r.CheckInDate).Days),
+                    .Sum(r => (r.Room?.Price ?? 0) * (decimal)(r.CheckOutDate - r.CheckInDate).Days),
 
                 // Room Types
                 RoomTypes = await _context.RoomTypes.Where(rt => rt.IsActive).ToListAsync(),

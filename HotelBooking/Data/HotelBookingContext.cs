@@ -99,7 +99,7 @@ namespace HotelBooking.Data
                 .HasOne(si => si.Service)
                 .WithMany(s => s.ServiceInventories)
                 .HasForeignKey(si => si.ServiceID)
-                .OnDelete(DeleteBehavior.Cascade);
+                .OnDelete(DeleteBehavior.Restrict);
 
             modelBuilder.Entity<RoomChange>()
                 .HasOne(r => r.FromRoom)
@@ -260,12 +260,7 @@ namespace HotelBooking.Data
                 .HasForeignKey(cl => cl.LoyaltyTierID)
                 .OnDelete(DeleteBehavior.Restrict);
 
-            // Configure Service Inventory relationships
-            modelBuilder.Entity<ServiceInventory>()
-                .HasOne(si => si.Service)
-                .WithMany()
-                .HasForeignKey(si => si.ServiceID)
-                .OnDelete(DeleteBehavior.Restrict);
+
 
             modelBuilder.Entity<InventoryTransaction>()
                 .HasOne(it => it.ServiceInventory)

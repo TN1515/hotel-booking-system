@@ -297,6 +297,164 @@ namespace HotelBooking.Controllers
             return File(bytes, "text/csv", $"system_logs_{DateTime.Now:yyyyMMdd_HHmmss}.csv");
         }
 
+        // GET: Admin/ExportReportPDF
+        public async Task<IActionResult> ExportReportPDF()
+        {
+            try
+            {
+                var today = DateTime.Today;
+                var thisMonth = new DateTime(today.Year, today.Month, 1);
+                var lastMonth = thisMonth.AddMonths(-1);
+
+                // Get report data
+                var reportData = new
+                {
+                    TodayRevenue = await CalculateRevenue(today, today.AddDays(1)),
+                    ThisMonthRevenue = await CalculateRevenue(thisMonth, thisMonth.AddMonths(1)),
+                    LastMonthRevenue = await CalculateRevenue(lastMonth, thisMonth),
+                    TodayBookings = await _context.Reservations.CountAsync(r => r.CreatedDate.Date == today),
+                    ThisMonthBookings = await _context.Reservations.CountAsync(r => r.CreatedDate >= thisMonth),
+                    TotalRooms = await _context.Rooms.CountAsync(),
+                    OccupiedRooms = await _context.Reservations.CountAsync(r =>
+                        r.Status == "Confirmed" &&
+                        r.CheckInDate <= today &&
+                        r.CheckOutDate > today),
+                    TotalPayments = await _context.Payments.SumAsync(p => p.Amount),
+                    PendingPayments = await _context.QRPayments.Where(q => q.Status == "Pending").SumAsync(q => q.Amount),
+                    CompletedPayments = await _context.QRPayments.Where(q => q.Status == "Paid").SumAsync(q => q.Amount)
+                };
+
+                // Create simple HTML content for PDF
+                var htmlContent = $@"
+                <html>
+                <head>
+                    <title>Hotel Booking Report</title>
+                    <style>
+                        body {{ font-family: Arial, sans-serif; margin: 20px; }}
+                        .header {{ text-align: center; margin-bottom: 30px; }}
+                        .section {{ margin-bottom: 20px; }}
+                        .metric {{ display: inline-block; margin: 10px; padding: 15px; border: 1px solid #ddd; border-radius: 5px; }}
+                        .metric-value {{ font-size: 24px; font-weight: bold; color: #007bff; }}
+                        .metric-label {{ font-size: 14px; color: #666; }}
+                    </style>
+                </head>
+                <body>
+                    <div class='header'>
+                        <h1>Hotel Booking System Report</h1>
+                        <p>Generated on: {DateTime.Now:yyyy-MM-dd HH:mm:ss}</p>
+                    </div>
+
+                    <div class='section'>
+                        <h2>Revenue Overview</h2>
+                        <div class='metric'>
+                            <div class='metric-value'>${reportData.TodayRevenue:N2}</div>
+                            <div class='metric-label'>Today's Revenue</div>
+                        </div>
+                        <div class='metric'>
+                            <div class='metric-value'>${reportData.ThisMonthRevenue:N2}</div>
+                            <div class='metric-label'>This Month's Revenue</div>
+                        </div>
+                        <div class='metric'>
+                            <div class='metric-value'>${reportData.LastMonthRevenue:N2}</div>
+                            <div class='metric-label'>Last Month's Revenue</div>
+                        </div>
+                    </div>
+
+                    <div class='section'>
+                        <h2>Booking Statistics</h2>
+                        <div class='metric'>
+                            <div class='metric-value'>{reportData.TodayBookings}</div>
+                            <div class='metric-label'>Today's Bookings</div>
+                        </div>
+                        <div class='metric'>
+                            <div class='metric-value'>{reportData.ThisMonthBookings}</div>
+                            <div class='metric-label'>This Month's Bookings</div>
+                        </div>
+                    </div>
+
+                    <div class='section'>
+                        <h2>Room Occupancy</h2>
+                        <div class='metric'>
+                            <div class='metric-value'>{reportData.OccupiedRooms}/{reportData.TotalRooms}</div>
+                            <div class='metric-label'>Occupied Rooms</div>
+                        </div>
+                        <div class='metric'>
+                            <div class='metric-value'>{(reportData.TotalRooms > 0 ? (double)reportData.OccupiedRooms / reportData.TotalRooms * 100 : 0):F1}%</div>
+                            <div class='metric-label'>Occupancy Rate</div>
+                        </div>
+                    </div>
+
+                    <div class='section'>
+                        <h2>Payment Summary</h2>
+                        <div class='metric'>
+                            <div class='metric-value'>${reportData.TotalPayments:N2}</div>
+                            <div class='metric-label'>Total Payments</div>
+                        </div>
+                        <div class='metric'>
+                            <div class='metric-value'>${reportData.PendingPayments:N2}</div>
+                            <div class='metric-label'>Pending Payments</div>
+                        </div>
+                        <div class='metric'>
+                            <div class='metric-value'>${reportData.CompletedPayments:N2}</div>
+                            <div class='metric-label'>Completed Payments</div>
+                        </div>
+                    </div>
+                </body>
+                </html>";
+
+                var bytes = System.Text.Encoding.UTF8.GetBytes(htmlContent);
+                return File(bytes, "text/html", $"hotel_report_{DateTime.Now:yyyyMMdd_HHmmss}.html");
+            }
+            catch (Exception ex)
+            {
+                TempData["Error"] = "Failed to export PDF report: " + ex.Message;
+                return RedirectToAction("Reports");
+            }
+        }
+
+        // GET: Admin/ExportReportExcel
+        public async Task<IActionResult> ExportReportExcel()
+        {
+            try
+            {
+                var today = DateTime.Today;
+                var thisMonth = new DateTime(today.Year, today.Month, 1);
+
+                // Get reservations data
+                var reservations = await _context.Reservations
+                    .Include(r => r.User)
+                    .Include(r => r.Room)
+                    .ThenInclude(room => room!.RoomType)
+                    .Where(r => r.CreatedDate >= thisMonth)
+                    .OrderByDescending(r => r.CreatedDate)
+                    .ToListAsync();
+
+                // Create CSV content
+                var csvContent = "Reservation ID,Guest Name,Room Number,Room Type,Check-in Date,Check-out Date,Status,Booking Date,Number of Guests\n";
+
+                foreach (var reservation in reservations)
+                {
+                    csvContent += $"{reservation.ReservationID}," +
+                                 $"\"{reservation.User?.UserName ?? "Unknown"}\"," +
+                                 $"{reservation.Room?.RoomNumber ?? "N/A"}," +
+                                 $"\"{reservation.Room?.RoomType?.TypeName ?? "N/A"}\"," +
+                                 $"{reservation.CheckInDate:yyyy-MM-dd}," +
+                                 $"{reservation.CheckOutDate:yyyy-MM-dd}," +
+                                 $"{reservation.Status}," +
+                                 $"{reservation.BookingDate:yyyy-MM-dd}," +
+                                 $"{reservation.NumberOfGuests}\n";
+                }
+
+                var bytes = System.Text.Encoding.UTF8.GetBytes(csvContent);
+                return File(bytes, "text/csv", $"hotel_reservations_{DateTime.Now:yyyyMMdd_HHmmss}.csv");
+            }
+            catch (Exception ex)
+            {
+                TempData["Error"] = "Failed to export Excel report: " + ex.Message;
+                return RedirectToAction("Reports");
+            }
+        }
+
         private async Task<decimal> CalculateRevenue(DateTime startDate, DateTime endDate)
         {
             try

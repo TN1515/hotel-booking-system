@@ -54,15 +54,33 @@
         /* Notification Bell Styles */
         .notification-bell {
             transition: all 0.3s ease;
+            border-radius: 50% !important;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 5px;
         }
 
         .notification-bell:hover {
             transform: scale(1.1);
             color: #007bff !important;
+            background-color: rgba(0, 123, 255, 0.1) !important;
+        }
+
+        .notification-bell:focus {
+            box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+            outline: none;
         }
 
         .notification-badge {
             animation: pulse 2s infinite;
+            min-width: 18px;
+            height: 18px;
+            font-size: 0.65rem !important;
+            line-height: 1;
+            padding: 2px 4px;
         }
 
         @@keyframes pulse {
@@ -74,6 +92,56 @@
             }
             100% {
                 transform: scale(1);
+            }
+        }
+
+        /* Fix dropdown positioning */
+        .dropdown-menu {
+            border: 1px solid rgba(0, 0, 0, 0.15);
+            box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+            border-radius: 0.5rem;
+            margin-top: 0.5rem;
+        }
+
+        .dropdown-menu.show {
+            animation: fadeInDown 0.3s ease;
+        }
+
+        .dropdown-menu-end {
+            right: 0;
+            left: auto;
+        }
+
+        /* Notification dropdown specific styles */
+        .dropdown .dropdown-menu {
+            z-index: 1050;
+            position: absolute;
+        }
+
+        .notification-item {
+            padding: 0.75rem 1rem;
+            border-bottom: 1px solid #f8f9fa;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+        }
+
+        .notification-item:hover {
+            background-color: #f8f9fa;
+        }
+
+        .notification-item.unread {
+            background-color: #fff3cd;
+            border-left: 3px solid #ffc107;
+        }
+
+        @@keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
             }
         }
 
@@ -184,16 +252,16 @@
                 </div>
 
                 <!-- Notifications & User Menu -->
-                <div style="display: flex; align-items: center; gap: 15px;">
+                <div style="display: flex; align-items: center; gap: 10px;">
                     @if (User.Identity!.IsAuthenticated)
                     {
                         <!-- Notification Bell -->
                         <div class="dropdown">
-                            <button class="btn btn-link position-relative p-2 notification-bell" type="button" id="notificationDropdown" data-bs-toggle="dropdown" style="text-decoration: none; color: #6c757d; border: none;">
+                            <button class="btn btn-link position-relative p-2 notification-bell" type="button" id="notificationDropdown" data-bs-toggle="dropdown" aria-expanded="false" style="text-decoration: none; color: #6c757d; border: none;">
                                 <i class="fas fa-bell" style="font-size: 1.2rem;"></i>
                                 <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger notification-badge" style="font-size: 0.7rem; display: none;">0</span>
                             </button>
-                            <ul class="dropdown-menu dropdown-menu-end" id="notificationDropdown" style="width: 350px; max-height: 450px; overflow-y: auto;">
+                            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="notificationDropdown" style="width: 350px; max-height: 450px; overflow-y: auto;">
                                 <li><h6 class="dropdown-header"><i class="fas fa-bell me-2"></i>Recent Notifications</h6></li>
                                 <li><hr class="dropdown-divider"></li>
                                 <div id="notificationList">
@@ -597,8 +665,33 @@
                 loadNotificationCount();
 
                 // Load notifications when dropdown is opened
-                $('#notificationDropdown').on('show.bs.dropdown', function() {
+                $('#notificationDropdown').on('show.bs.dropdown', function(e) {
+                    console.log('Notification dropdown opening...');
                     loadRecentNotifications();
+                });
+
+                // Handle dropdown click manually if Bootstrap fails
+                $('#notificationDropdown').on('click', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+
+                    var dropdown = $(this).next('.dropdown-menu');
+                    var isVisible = dropdown.hasClass('show');
+
+                    // Close all other dropdowns
+                    $('.dropdown-menu').removeClass('show');
+
+                    if (!isVisible) {
+                        dropdown.addClass('show');
+                        loadRecentNotifications();
+                    }
+                });
+
+                // Close dropdown when clicking outside
+                $(document).on('click', function(e) {
+                    if (!$(e.target).closest('.dropdown').length) {
+                        $('.dropdown-menu').removeClass('show');
+                    }
                 });
 
                 // Refresh notifications every 30 seconds

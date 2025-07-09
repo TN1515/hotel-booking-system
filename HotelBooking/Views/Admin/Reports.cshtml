@@ -292,11 +292,57 @@
 
         // Export functions
         function exportReport() {
-            alert('PDF export functionality will be implemented');
+            // Show loading message
+            Swal.fire({
+                title: 'Exporting Report...',
+                text: 'Please wait while we generate your PDF report.',
+                allowOutsideClick: false,
+                didOpen: () => {
+                    Swal.showLoading();
+                }
+            });
+
+            // Redirect to export PDF action
+            window.location.href = '@Url.Action("ExportReportPDF", "Admin")';
+
+            // Close loading after a short delay
+            setTimeout(() => {
+                Swal.close();
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Export Successful!',
+                    text: 'Your PDF report has been downloaded.',
+                    timer: 2000,
+                    showConfirmButton: false
+                });
+            }, 2000);
         }
 
         function exportExcel() {
-            alert('Excel export functionality will be implemented');
+            // Show loading message
+            Swal.fire({
+                title: 'Exporting to Excel...',
+                text: 'Please wait while we generate your Excel file.',
+                allowOutsideClick: false,
+                didOpen: () => {
+                    Swal.showLoading();
+                }
+            });
+
+            // Redirect to export Excel action
+            window.location.href = '@Url.Action("ExportReportExcel", "Admin")';
+
+            // Close loading after a short delay
+            setTimeout(() => {
+                Swal.close();
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Export Successful!',
+                    text: 'Your Excel file has been downloaded.',
+                    timer: 2000,
+                    showConfirmButton: false
+                });
+            }, 2000);
         }
     </script>
 }

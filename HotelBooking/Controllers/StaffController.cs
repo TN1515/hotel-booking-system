@@ -50,7 +50,7 @@ namespace HotelBooking.Controllers
         }
 
         // GET: Staff/Dashboard
-        public async Task<IActionResult> Dashboard()
+        public IActionResult Dashboard()
         {
             return RedirectToAction("Index", "Dashboard");
         }
@@ -64,13 +64,13 @@ namespace HotelBooking.Controllers
         // GET: Staff/Guests
         public IActionResult Guests()
         {
-            return RedirectToAction("Index", "GuestProfile");
+            return RedirectToAction("Index", "Guests");
         }
 
         // GET: Staff/Reports
         public IActionResult Reports()
         {
-            return RedirectToAction("Index", "Report");
+            return RedirectToAction("Reports", "Admin");
         }
 
         private async Task<decimal> GetTotalRevenueAsync()

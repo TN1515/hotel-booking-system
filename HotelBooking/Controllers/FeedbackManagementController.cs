@@ -156,7 +156,7 @@ namespace HotelBooking.Controllers
                 FeedbackDate = feedback.FeedbackDate,
                 RoomNumber = feedback.Reservation?.Room?.RoomNumber ?? "N/A",
                 RoomType = feedback.Reservation?.Room?.RoomType?.TypeName ?? "N/A",
-                Category = "General"
+                Category = feedback.Category ?? "General"
             };
 
             return View(viewModel);

@@ -5,6 +5,7 @@ using HotelBooking.Models;
 using HotelBooking.Models.ViewModels;
 using HotelBooking.Services;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc.Rendering;
 
 namespace HotelBooking.Controllers
 {
@@ -72,6 +73,146 @@ namespace HotelBooking.Controllers
             }
 
             return View(reservation);
+        }
+
+        // GET: Reservations/Create
+        [Authorize(Roles = "Admin,Staff")]
+        public async Task<IActionResult> Create()
+        {
+            var availableRooms = await _context.Rooms
+                .Include(r => r.RoomType)
+                .Where(r => r.IsActive && r.Status == "Available")
+                .ToListAsync();
+
+            var customers = await _context.Users
+                .Where(u => u.IsActive)
+                .ToListAsync();
+
+            var viewModel = new CreateReservationViewModel
+            {
+                CheckInDate = DateTime.Today.AddDays(1),
+                CheckOutDate = DateTime.Today.AddDays(2),
+                Adults = 1,
+                Children = 0,
+                Status = "Pending",
+                AvailableRooms = availableRooms,
+                Customers = customers
+            };
+
+            // Set ViewBag for dropdowns
+            ViewBag.Rooms = availableRooms.Select(r => new SelectListItem
+            {
+                Value = r.RoomID.ToString(),
+                Text = $"{r.RoomNumber} - {r.RoomType?.TypeName} (${r.Price}/night)"
+            }).ToList();
+
+            ViewBag.Users = customers.Select(u => new SelectListItem
+            {
+                Value = u.Id.ToString(),
+                Text = $"{u.UserName} ({u.Email})"
+            }).ToList();
+
+            return View(viewModel);
+        }
+
+        // POST: Reservations/Create
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Admin,Staff")]
+        public async Task<IActionResult> Create(CreateReservationViewModel viewModel)
+        {
+            if (ModelState.IsValid)
+            {
+                try
+                {
+                    // Check if room is available for the selected dates
+                    var isAvailable = !await _context.Reservations
+                        .AnyAsync(r => r.RoomID == viewModel.RoomID &&
+                                     r.CheckInDate < viewModel.CheckOutDate &&
+                                     r.CheckOutDate > viewModel.CheckInDate &&
+                                     r.Status != "Cancelled");
+
+                    if (!isAvailable)
+                    {
+                        ModelState.AddModelError("", "The selected room is not available for the chosen dates.");
+                        var availableRoomsError = await _context.Rooms
+                            .Include(r => r.RoomType)
+                            .Where(r => r.IsActive && r.Status == "Available")
+                            .ToListAsync();
+                        var customersError = await _context.Users
+                            .Where(u => u.IsActive)
+                            .ToListAsync();
+
+                        viewModel.AvailableRooms = availableRoomsError;
+                        viewModel.Customers = customersError;
+
+                        // Set ViewBag for dropdowns
+                        ViewBag.Rooms = availableRoomsError.Select(r => new SelectListItem
+                        {
+                            Value = r.RoomID.ToString(),
+                            Text = $"{r.RoomNumber} - {r.RoomType?.TypeName} (${r.Price}/night)"
+                        }).ToList();
+
+                        ViewBag.Users = customersError.Select(u => new SelectListItem
+                        {
+                            Value = u.Id.ToString(),
+                            Text = $"{u.UserName} ({u.Email})"
+                        }).ToList();
+
+                        return View(viewModel);
+                    }
+
+                    var reservation = new Reservation
+                    {
+                        UserID = viewModel.UserID,
+                        RoomID = viewModel.RoomID,
+                        BookingDate = DateTime.Now,
+                        CheckInDate = viewModel.CheckInDate,
+                        CheckOutDate = viewModel.CheckOutDate,
+                        NumberOfGuests = viewModel.Adults + viewModel.Children,
+                        Status = viewModel.Status,
+                        CreatedBy = User.Identity?.Name ?? "System",
+                        CreatedDate = DateTime.Now
+                    };
+
+                    _context.Reservations.Add(reservation);
+                    await _context.SaveChangesAsync();
+
+                    TempData["SuccessMessage"] = "Reservation created successfully.";
+                    return RedirectToAction("Details", new { id = reservation.ReservationID });
+                }
+                catch (Exception ex)
+                {
+                    ModelState.AddModelError("", "An error occurred while creating the reservation: " + ex.Message);
+                }
+            }
+
+            // Reload data if validation fails
+            var availableRooms = await _context.Rooms
+                .Include(r => r.RoomType)
+                .Where(r => r.IsActive && r.Status == "Available")
+                .ToListAsync();
+            var customers = await _context.Users
+                .Where(u => u.IsActive)
+                .ToListAsync();
+
+            viewModel.AvailableRooms = availableRooms;
+            viewModel.Customers = customers;
+
+            // Set ViewBag for dropdowns
+            ViewBag.Rooms = availableRooms.Select(r => new SelectListItem
+            {
+                Value = r.RoomID.ToString(),
+                Text = $"{r.RoomNumber} - {r.RoomType?.TypeName} (${r.Price}/night)"
+            }).ToList();
+
+            ViewBag.Users = customers.Select(u => new SelectListItem
+            {
+                Value = u.Id.ToString(),
+                Text = $"{u.UserName} ({u.Email})"
+            }).ToList();
+
+            return View(viewModel);
         }
 
         // GET: Reservations/Cancel/5

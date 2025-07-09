@@ -170,11 +170,11 @@
                     
                     $('#numberOfNights').val(nights);
                     $('#nightsDisplay').text(nights);
-                    $('#totalPrice').text('$' + total.toFixed(2));
+                    $('#totalPrice').text(total.toLocaleString('vi-VN') + ' ₫');
                 } else {
                     $('#numberOfNights').val('');
                     $('#nightsDisplay').text('-');
-                    $('#totalPrice').text('$0.00');
+                    $('#totalPrice').text('0 ₫');
                 }
             }
             

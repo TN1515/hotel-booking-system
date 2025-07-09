@@ -306,7 +306,7 @@
                         beginAtZero: true,
                         ticks: {
                             callback: function(value) {
-                                return '$' + value.toLocaleString();
+                                return value.toLocaleString('vi-VN') + ' ₫';
                             }
                         }
                     }
@@ -338,7 +338,7 @@
                         beginAtZero: true,
                         ticks: {
                             callback: function(value) {
-                                return '$' + value.toLocaleString();
+                                return value.toLocaleString('vi-VN') + ' ₫';
                             }
                         }
                     }
@@ -347,8 +347,8 @@
         });
 
         function viewTransaction(id) {
-            // Implement transaction details view
-            alert('View transaction details for ID: ' + id);
+            // Redirect to transaction details page
+            window.location.href = '/Admin/PaymentManagement?transactionId=' + id;
         }
     </script>
 }
