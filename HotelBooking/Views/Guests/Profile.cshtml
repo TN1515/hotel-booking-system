@@ -1,0 +1,392 @@
+@model HotelBooking.Models.ViewModels.GuestProfileViewModel
+@{
+    ViewData["Title"] = "Guest Profile";
+}
+
+<div class="container-fluid">
+    <div class="row">
+        <!-- Guest Information -->
+        <div class="col-lg-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-user"></i> Guest Information
+                    </h5>
+                </div>
+                <div class="card-body text-center">
+                    <div class="mb-3">
+                        <div class="avatar-circle mx-auto mb-3">
+                            <i class="fas fa-user fa-3x text-muted"></i>
+                        </div>
+                        <h4 class="mb-1">@Model.FirstName @Model.LastName</h4>
+                        <p class="text-muted">@Model.Email</p>
+                    </div>
+                    
+                    <div class="row text-center">
+                        <div class="col-4">
+                            <div class="border-end">
+                                <h5 class="mb-0 text-primary">@Model.TotalBookings</h5>
+                                <small class="text-muted">Bookings</small>
+                            </div>
+                        </div>
+                        <div class="col-4">
+                            <div class="border-end">
+                                <h5 class="mb-0 text-success">@Model.TotalSpent.ToString("C", new System.Globalization.CultureInfo("vi-VN"))</h5>
+                                <small class="text-muted">Total Spent</small>
+                            </div>
+                        </div>
+                        <div class="col-4">
+                            <h5 class="mb-0 text-warning">@Model.LoyaltyPoints</h5>
+                            <small class="text-muted">Points</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Contact Information -->
+            <div class="card mt-4">
+                <div class="card-header">
+                    <h6 class="mb-0">Contact Information</h6>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <label class="form-label text-muted">Email</label>
+                        <p class="mb-0">@Model.Email</p>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label text-muted">Phone</label>
+                        <p class="mb-0">@(Model.Phone ?? "Not provided")</p>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label text-muted">Address</label>
+                        <p class="mb-0">@(Model.Address ?? "Not provided")</p>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label text-muted">Date of Birth</label>
+                        <p class="mb-0">@(Model.DateOfBirth?.ToString("dd/MM/yyyy") ?? "Not provided")</p>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label text-muted">Nationality</label>
+                        <p class="mb-0">@(Model.Nationality ?? "Not provided")</p>
+                    </div>
+                    <div class="mb-0">
+                        <label class="form-label text-muted">Member Since</label>
+                        <p class="mb-0">@Model.CreatedDate.ToString("dd/MM/yyyy")</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Preferences -->
+            <div class="card mt-4">
+                <div class="card-header">
+                    <h6 class="mb-0">Preferences</h6>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <label class="form-label text-muted">Room Type Preference</label>
+                        <p class="mb-0">@(Model.PreferredRoomType ?? "No preference")</p>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label text-muted">Special Requests</label>
+                        <p class="mb-0">@(Model.SpecialRequests ?? "None")</p>
+                    </div>
+                    <div class="mb-0">
+                        <label class="form-label text-muted">Dietary Restrictions</label>
+                        <p class="mb-0">@(Model.DietaryRestrictions ?? "None")</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Booking History & Details -->
+        <div class="col-lg-8">
+            <!-- Quick Stats -->
+            <div class="row mb-4">
+                <div class="col-md-3">
+                    <div class="card border-primary">
+                        <div class="card-body text-center">
+                            <i class="fas fa-calendar-check fa-2x text-primary mb-2"></i>
+                            <h4 class="mb-1">@Model.TotalBookings</h4>
+                            <p class="text-muted mb-0">Total Bookings</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card border-success">
+                        <div class="card-body text-center">
+                            <i class="fas fa-check-circle fa-2x text-success mb-2"></i>
+                            <h4 class="mb-1">@Model.CompletedBookings</h4>
+                            <p class="text-muted mb-0">Completed</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card border-warning">
+                        <div class="card-body text-center">
+                            <i class="fas fa-clock fa-2x text-warning mb-2"></i>
+                            <h4 class="mb-1">@Model.PendingBookings</h4>
+                            <p class="text-muted mb-0">Pending</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card border-danger">
+                        <div class="card-body text-center">
+                            <i class="fas fa-times-circle fa-2x text-danger mb-2"></i>
+                            <h4 class="mb-1">@Model.CancelledBookings</h4>
+                            <p class="text-muted mb-0">Cancelled</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Booking History -->
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-history"></i> Booking History
+                    </h5>
+                </div>
+                <div class="card-body">
+                    @if (Model.RecentBookings.Any())
+                    {
+                        <div class="table-responsive">
+                            <table class="table table-striped table-hover">
+                                <thead class="table-dark">
+                                    <tr>
+                                        <th>Booking ID</th>
+                                        <th>Room</th>
+                                        <th>Check-in</th>
+                                        <th>Check-out</th>
+                                        <th>Guests</th>
+                                        <th>Amount</th>
+                                        <th>Status</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var booking in Model.RecentBookings)
+                                    {
+                                        <tr>
+                                            <td>
+                                                <strong>#@booking.ReservationID</strong>
+                                            </td>
+                                            <td>
+                                                @booking.RoomNumber
+                                                <br>
+                                                <small class="text-muted">@booking.RoomType</small>
+                                            </td>
+                                            <td>
+                                                @booking.CheckInDate.ToString("dd/MM/yyyy")
+                                                <br>
+                                                <small class="text-muted">@booking.CheckInDate.ToString("HH:mm")</small>
+                                            </td>
+                                            <td>
+                                                @booking.CheckOutDate.ToString("dd/MM/yyyy")
+                                                <br>
+                                                <small class="text-muted">@booking.CheckOutDate.ToString("HH:mm")</small>
+                                            </td>
+                                            <td>
+                                                <span class="badge bg-info">@booking.Adults adults</span>
+                                                @if (booking.Children > 0)
+                                                {
+                                                    <br><span class="badge bg-light text-dark">@booking.Children children</span>
+                                                }
+                                            </td>
+                                            <td>
+                                                <strong>@booking.TotalAmount.ToString("C", new System.Globalization.CultureInfo("vi-VN"))</strong>
+                                            </td>
+                                            <td>
+                                                @switch (booking.Status)
+                                                {
+                                                    case "Confirmed":
+                                                        <span class="badge bg-success">Confirmed</span>
+                                                        break;
+                                                    case "Pending":
+                                                        <span class="badge bg-warning">Pending</span>
+                                                        break;
+                                                    case "Cancelled":
+                                                        <span class="badge bg-danger">Cancelled</span>
+                                                        break;
+                                                    case "Completed":
+                                                        <span class="badge bg-info">Completed</span>
+                                                        break;
+                                                    default:
+                                                        <span class="badge bg-secondary">@booking.Status</span>
+                                                        break;
+                                                }
+                                            </td>
+                                            <td>
+                                                <div class="btn-group" role="group">
+                                                    <a href="@Url.Action("Details", "Reservations", new { id = booking.ReservationID })" 
+                                                       class="btn btn-sm btn-outline-primary">
+                                                        <i class="fas fa-eye"></i>
+                                                    </a>
+                                                    @if (booking.Status == "Confirmed" || booking.Status == "Pending")
+                                                    {
+                                                        <a href="@Url.Action("Edit", "Reservations", new { id = booking.ReservationID })" 
+                                                           class="btn btn-sm btn-outline-warning">
+                                                            <i class="fas fa-edit"></i>
+                                                        </a>
+                                                    }
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                        
+                        @if (Model.TotalBookings > Model.RecentBookings.Count)
+                        {
+                            <div class="text-center mt-3">
+                                <a href="@Url.Action("BookingHistory", "Guests", new { id = Model.GuestID })" class="btn btn-outline-primary">
+                                    <i class="fas fa-list"></i> View All Bookings (@Model.TotalBookings)
+                                </a>
+                            </div>
+                        }
+                    }
+                    else
+                    {
+                        <div class="text-center py-5">
+                            <i class="fas fa-calendar-times fa-3x text-muted mb-3"></i>
+                            <h5 class="text-muted">No booking history</h5>
+                            <p class="text-muted">This guest hasn't made any bookings yet.</p>
+                        </div>
+                    }
+                </div>
+            </div>
+
+            <!-- Notes & Comments -->
+            <div class="card mt-4">
+                <div class="card-header">
+                    <h6 class="mb-0">
+                        <i class="fas fa-sticky-note"></i> Staff Notes
+                    </h6>
+                </div>
+                <div class="card-body">
+                    @if (!string.IsNullOrEmpty(Model.StaffNotes))
+                    {
+                        <div class="bg-light p-3 rounded">
+                            @Model.StaffNotes
+                        </div>
+                    }
+                    else
+                    {
+                        <p class="text-muted mb-0">No staff notes available.</p>
+                    }
+                    
+                    <div class="mt-3">
+                        <button type="button" class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#addNoteModal">
+                            <i class="fas fa-plus"></i> Add Note
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Add Note Modal -->
+<div class="modal fade" id="addNoteModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Add Staff Note</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form id="addNoteForm">
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="noteText" class="form-label">Note</label>
+                        <textarea class="form-control" id="noteText" rows="4" required 
+                                  placeholder="Add any important notes about this guest..."></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label for="noteCategory" class="form-label">Category</label>
+                        <select class="form-select" id="noteCategory">
+                            <option value="General">General</option>
+                            <option value="Preference">Preference</option>
+                            <option value="Issue">Issue</option>
+                            <option value="Compliment">Compliment</option>
+                            <option value="Special Request">Special Request</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Add Note</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function() {
+            // Add note form submission
+            $('#addNoteForm').on('submit', function(e) {
+                e.preventDefault();
+                
+                var formData = {
+                    guestId: @Model.GuestID,
+                    note: $('#noteText').val(),
+                    category: $('#noteCategory').val()
+                };
+                
+                $.ajax({
+                    url: '@Url.Action("AddNote", "Guests")',
+                    type: 'POST',
+                    data: formData,
+                    success: function(response) {
+                        if (response.success) {
+                            $('#addNoteModal').modal('hide');
+                            location.reload();
+                        } else {
+                            alert('Error: ' + response.message);
+                        }
+                    },
+                    error: function() {
+                        alert('An error occurred while adding the note.');
+                    }
+                });
+            });
+        });
+    </script>
+}
+
+<style>
+    .avatar-circle {
+        width: 80px;
+        height: 80px;
+        border-radius: 50%;
+        background-color: #f8f9fa;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border: 3px solid #e9ecef;
+    }
+    
+    .card {
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        border: none;
+    }
+    
+    .border-end {
+        border-right: 1px solid #dee2e6 !important;
+    }
+    
+    .table th {
+        font-weight: 600;
+        font-size: 0.875rem;
+    }
+    
+    .btn-group .btn {
+        margin-right: 2px;
+    }
+    
+    .btn-group .btn:last-child {
+        margin-right: 0;
+    }
+</style>

@@ -1,0 +1,85 @@
+@{
+    ViewData["Title"] = "Give Feedback";
+}
+
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow">
+                <div class="card-header bg-success text-white">
+                    <h4 class="mb-0">
+                        <i class="fas fa-comment-dots me-2"></i>Give Feedback
+                    </h4>
+                </div>
+                <div class="card-body">
+                    @if (ViewBag.Message != null)
+                    {
+                        <div class="alert alert-info">
+                            <i class="fas fa-info-circle me-2"></i>@ViewBag.Message
+                        </div>
+                    }
+
+                    <form asp-action="Feedback" method="post">
+                        <div class="mb-4">
+                            <label for="rating" class="form-label fw-bold">Rating:</label>
+                            <div class="rating-stars">
+                                <input type="radio" name="rating" value="5" id="star5">
+                                <label for="star5" class="star">★</label>
+                                <input type="radio" name="rating" value="4" id="star4">
+                                <label for="star4" class="star">★</label>
+                                <input type="radio" name="rating" value="3" id="star3">
+                                <label for="star3" class="star">★</label>
+                                <input type="radio" name="rating" value="2" id="star2">
+                                <label for="star2" class="star">★</label>
+                                <input type="radio" name="rating" value="1" id="star1">
+                                <label for="star1" class="star">★</label>
+                            </div>
+                            <small class="form-text text-muted">Click on stars to rate your experience</small>
+                        </div>
+
+                        <div class="mb-4">
+                            <label for="comment" class="form-label fw-bold">Your Feedback:</label>
+                            <textarea name="comment" id="comment" class="form-control" rows="5" 
+                                      placeholder="Please share your experience with us..." required></textarea>
+                        </div>
+
+                        <div class="text-center">
+                            <button type="submit" class="btn btn-success btn-lg">
+                                <i class="fas fa-paper-plane me-2"></i>Submit Feedback
+                            </button>
+                            <a href="@Url.Action("Index", "Home")" class="btn btn-secondary btn-lg ms-2">
+                                <i class="fas fa-arrow-left me-2"></i>Back to Home
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .rating-stars {
+        display: flex;
+        flex-direction: row-reverse;
+        justify-content: flex-end;
+        margin-bottom: 10px;
+    }
+
+    .rating-stars input[type="radio"] {
+        display: none;
+    }
+
+    .rating-stars label.star {
+        font-size: 2rem;
+        color: #ddd;
+        cursor: pointer;
+        transition: color 0.2s;
+    }
+
+    .rating-stars input[type="radio"]:checked ~ label.star,
+    .rating-stars label.star:hover,
+    .rating-stars label.star:hover ~ label.star {
+        color: #ffc107;
+    }
+</style>

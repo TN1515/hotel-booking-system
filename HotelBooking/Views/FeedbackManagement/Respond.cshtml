@@ -1,0 +1,251 @@
+@model HotelBooking.Models.ViewModels.FeedbackResponseViewModel
+@{
+    ViewData["Title"] = "Respond to Feedback";
+}
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-md-10 offset-md-1">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">
+                        <i class="fas fa-reply"></i>
+                        Respond to Customer Feedback
+                    </h3>
+                </div>
+                <div class="card-body">
+                    <!-- Original Feedback -->
+                    <div class="card mb-4 border-info">
+                        <div class="card-header bg-info text-white">
+                            <h5 class="mb-0">
+                                <i class="fas fa-comment"></i>
+                                Original Feedback
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <p><strong>Customer:</strong> @Model.CustomerName</p>
+                                    <p><strong>Room:</strong> @Model.RoomNumber - @Model.RoomType</p>
+                                    <p><strong>Date:</strong> @Model.FeedbackDate.ToString("dd/MM/yyyy HH:mm")</p>
+                                </div>
+                                <div class="col-md-6">
+                                    <p><strong>Rating:</strong> 
+                                        @for (int i = 1; i <= 5; i++)
+                                        {
+                                            if (i <= Model.Rating)
+                                            {
+                                                <i class="fas fa-star text-warning"></i>
+                                            }
+                                            else
+                                            {
+                                                <i class="far fa-star text-muted"></i>
+                                            }
+                                        }
+                                        (@Model.Rating/5)
+                                    </p>
+                                    <p><strong>Category:</strong> 
+                                        <span class="badge bg-secondary">@Model.Category</span>
+                                    </p>
+                                </div>
+                            </div>
+                            <div class="mt-3">
+                                <strong>Comment:</strong>
+                                <div class="bg-light p-3 rounded mt-2">
+                                    @Model.Comment
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Response Form -->
+                    <form asp-action="Respond" method="post">
+                        <input type="hidden" asp-for="FeedbackID" />
+                        <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+                        <div class="mb-3">
+                            <label asp-for="Response" class="form-label">
+                                <i class="fas fa-pen me-1"></i>Your Response
+                            </label>
+                            <textarea asp-for="Response" class="form-control" rows="6" 
+                                      placeholder="Write your response to the customer's feedback..."></textarea>
+                            <span asp-validation-for="Response" class="text-danger"></span>
+                            <div class="form-text">
+                                <i class="fas fa-info-circle"></i>
+                                Be professional, empathetic, and provide specific solutions or explanations.
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label asp-for="ResponseCategory" class="form-label">
+                                    <i class="fas fa-tag me-1"></i>Response Category
+                                </label>
+                                <select asp-for="ResponseCategory" class="form-select">
+                                    <option value="">Select category</option>
+                                    <option value="Acknowledgment">Acknowledgment</option>
+                                    <option value="Apology">Apology</option>
+                                    <option value="Explanation">Explanation</option>
+                                    <option value="Solution">Solution Provided</option>
+                                    <option value="Follow-up">Follow-up Required</option>
+                                    <option value="Appreciation">Appreciation</option>
+                                </select>
+                                <span asp-validation-for="ResponseCategory" class="text-danger"></span>
+                            </div>
+                            <div class="col-md-6">
+                                <label asp-for="Priority" class="form-label">
+                                    <i class="fas fa-exclamation-triangle me-1"></i>Priority Level
+                                </label>
+                                <select asp-for="Priority" class="form-select">
+                                    <option value="Low">Low</option>
+                                    <option value="Medium" selected>Medium</option>
+                                    <option value="High">High</option>
+                                    <option value="Urgent">Urgent</option>
+                                </select>
+                                <span asp-validation-for="Priority" class="text-danger"></span>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <div class="form-check">
+                                <input asp-for="RequiresFollowUp" class="form-check-input" type="checkbox" />
+                                <label asp-for="RequiresFollowUp" class="form-check-label">
+                                    <i class="fas fa-calendar-check me-1"></i>
+                                    This feedback requires follow-up action
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="mb-3" id="followUpSection" style="display: none;">
+                            <label asp-for="FollowUpDate" class="form-label">
+                                <i class="fas fa-calendar me-1"></i>Follow-up Date
+                            </label>
+                            <input asp-for="FollowUpDate" type="datetime-local" class="form-control" />
+                            <span asp-validation-for="FollowUpDate" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="InternalNotes" class="form-label">
+                                <i class="fas fa-sticky-note me-1"></i>Internal Notes (Not visible to customer)
+                            </label>
+                            <textarea asp-for="InternalNotes" class="form-control" rows="3" 
+                                      placeholder="Add any internal notes for staff reference..."></textarea>
+                            <span asp-validation-for="InternalNotes" class="text-danger"></span>
+                        </div>
+
+                        <!-- Action Buttons -->
+                        <div class="d-flex justify-content-between">
+                            <div>
+                                <a asp-action="Index" class="btn btn-secondary">
+                                    <i class="fas fa-arrow-left"></i> Back to List
+                                </a>
+                                <a asp-action="Details" asp-route-id="@Model.FeedbackID" class="btn btn-info">
+                                    <i class="fas fa-eye"></i> View Details
+                                </a>
+                            </div>
+                            <div>
+                                <button type="button" class="btn btn-warning" onclick="saveDraft()">
+                                    <i class="fas fa-save"></i> Save Draft
+                                </button>
+                                <button type="submit" class="btn btn-success">
+                                    <i class="fas fa-paper-plane"></i> Send Response
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    
+    <script>
+        $(document).ready(function() {
+            // Show/hide follow-up section
+            $('#RequiresFollowUp').change(function() {
+                if ($(this).is(':checked')) {
+                    $('#followUpSection').show();
+                    // Set default follow-up date to 1 week from now
+                    var nextWeek = new Date();
+                    nextWeek.setDate(nextWeek.getDate() + 7);
+                    $('#FollowUpDate').val(nextWeek.toISOString().slice(0, 16));
+                } else {
+                    $('#followUpSection').hide();
+                    $('#FollowUpDate').val('');
+                }
+            });
+
+            // Character counter for response
+            $('#Response').on('input', function() {
+                var length = $(this).val().length;
+                var maxLength = 1000;
+                var remaining = maxLength - length;
+                
+                if (!$('#charCounter').length) {
+                    $(this).after('<div id="charCounter" class="form-text"></div>');
+                }
+                
+                $('#charCounter').text(remaining + ' characters remaining');
+                
+                if (remaining < 50) {
+                    $('#charCounter').addClass('text-warning');
+                } else {
+                    $('#charCounter').removeClass('text-warning');
+                }
+            });
+
+            // Auto-save draft every 30 seconds
+            setInterval(function() {
+                if ($('#Response').val().trim().length > 0) {
+                    saveDraft(true); // Silent save
+                }
+            }, 30000);
+        });
+
+        function saveDraft(silent = false) {
+            var formData = {
+                FeedbackID: $('#FeedbackID').val(),
+                Response: $('#Response').val(),
+                ResponseCategory: $('#ResponseCategory').val(),
+                Priority: $('#Priority').val(),
+                RequiresFollowUp: $('#RequiresFollowUp').is(':checked'),
+                FollowUpDate: $('#FollowUpDate').val(),
+                InternalNotes: $('#InternalNotes').val()
+            };
+
+            $.ajax({
+                url: '@Url.Action("SaveDraft", "FeedbackManagement")',
+                type: 'POST',
+                data: formData,
+                success: function(response) {
+                    if (!silent) {
+                        toastr.success('Draft saved successfully');
+                    }
+                },
+                error: function() {
+                    if (!silent) {
+                        toastr.error('Failed to save draft');
+                    }
+                }
+            });
+        }
+
+        // Predefined response templates
+        function insertTemplate(template) {
+            var templates = {
+                'acknowledgment': 'Thank you for taking the time to share your feedback with us. We truly appreciate your input as it helps us improve our services.',
+                'apology': 'We sincerely apologize for the inconvenience you experienced during your stay. This is not the level of service we strive to provide.',
+                'appreciation': 'Thank you so much for your wonderful review! We are delighted to hear that you enjoyed your stay with us.',
+                'solution': 'We have taken immediate action to address the issue you raised. Here are the steps we have implemented:'
+            };
+            
+            var currentText = $('#Response').val();
+            var newText = currentText + (currentText ? '\n\n' : '') + templates[template];
+            $('#Response').val(newText);
+            $('#Response').trigger('input'); // Trigger character counter
+        }
+    </script>
+}

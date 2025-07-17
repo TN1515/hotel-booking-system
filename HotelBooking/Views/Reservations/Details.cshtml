@@ -1,0 +1,236 @@
+@model HotelBooking.Models.Reservation
+@{
+    ViewData["Title"] = "Booking Details";
+}
+
+<div class="container-fluid py-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-10">
+            <div class="card shadow-lg border-0">
+                <div class="card-header bg-primary text-white">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h2 class="card-title mb-0">
+                            <i class="fas fa-calendar-check me-2"></i>Booking Details
+                        </h2>
+                        <span class="badge bg-light text-dark fs-6">
+                            Reservation #@Model.ReservationID
+                        </span>
+                    </div>
+                </div>
+                <div class="card-body p-4">
+                    <!-- Status Alert -->
+                    @if (!string.IsNullOrEmpty(TempData["Message"] as string))
+                    {
+                        <div class="alert alert-success alert-dismissible fade show" role="alert">
+                            <i class="fas fa-check-circle me-2"></i>@TempData["Message"]
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+                    }
+                    @if (!string.IsNullOrEmpty(TempData["Error"] as string))
+                    {
+                        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                            <i class="fas fa-exclamation-triangle me-2"></i>@TempData["Error"]
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+                    }
+
+                    <div class="row">
+                        <!-- Left Column - Booking Information -->
+                        <div class="col-md-8">
+                            <!-- Room Information -->
+                            <div class="card mb-4">
+                                <div class="card-header bg-light">
+                                    <h5 class="mb-0">
+                                        <i class="fas fa-bed me-2"></i>Room Information
+                                    </h5>
+                                </div>
+                                <div class="card-body">
+                                    <div class="row">
+                                        <div class="col-md-4">
+                                            <div class="room-image-placeholder bg-light rounded d-flex align-items-center justify-content-center" style="height: 150px;">
+                                                <i class="fas fa-bed fa-3x text-muted"></i>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-8">
+                                            <h4 class="text-primary">@Model.Room?.RoomNumber</h4>
+                                            <p class="text-muted mb-2">
+                                                <i class="fas fa-tag me-2"></i>@Model.Room?.RoomType?.TypeName
+                                            </p>
+                                            <p class="h5 text-success mb-2">
+                                                <i class="fas fa-dollar-sign me-1"></i>@Model.Room?.Price.ToString("C") / night
+                                            </p>
+                                            @if (!string.IsNullOrEmpty(Model.Room?.Description))
+                                            {
+                                                <p class="text-muted">@Model.Room.Description</p>
+                                            }
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Booking Details -->
+                            <div class="card mb-4">
+                                <div class="card-header bg-light">
+                                    <h5 class="mb-0">
+                                        <i class="fas fa-calendar-alt me-2"></i>Booking Details
+                                    </h5>
+                                </div>
+                                <div class="card-body">
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <dl class="row">
+                                                <dt class="col-sm-5">Check-in:</dt>
+                                                <dd class="col-sm-7">@Model.CheckInDate.ToString("MMM dd, yyyy")</dd>
+                                                
+                                                <dt class="col-sm-5">Check-out:</dt>
+                                                <dd class="col-sm-7">@Model.CheckOutDate.ToString("MMM dd, yyyy")</dd>
+                                                
+                                                <dt class="col-sm-5">Guests:</dt>
+                                                <dd class="col-sm-7">@Model.NumberOfGuests</dd>
+                                            </dl>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <dl class="row">
+                                                <dt class="col-sm-5">Booking Date:</dt>
+                                                <dd class="col-sm-7">@Model.BookingDate.ToString("MMM dd, yyyy")</dd>
+                                                
+                                                <dt class="col-sm-5">Nights:</dt>
+                                                <dd class="col-sm-7">@((Model.CheckOutDate - Model.CheckInDate).Days)</dd>
+                                                
+                                                <dt class="col-sm-5">Total Cost:</dt>
+                                                <dd class="col-sm-7 text-success fw-bold">
+                                                    @(((Model.CheckOutDate - Model.CheckInDate).Days * (Model.Room?.Price ?? 0)).ToString("C"))
+                                                </dd>
+                                            </dl>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Right Column - Status & Actions -->
+                        <div class="col-md-4">
+                            <!-- Status Card -->
+                            <div class="card mb-4">
+                                <div class="card-header bg-light">
+                                    <h5 class="mb-0">
+                                        <i class="fas fa-info-circle me-2"></i>Status
+                                    </h5>
+                                </div>
+                                <div class="card-body text-center">
+                                    @{
+                                        var statusClass = Model.Status switch
+                                        {
+                                            "Confirmed" => "success",
+                                            "Cancelled" => "danger",
+                                            "Pending" => "warning",
+                                            "Completed" => "info",
+                                            _ => "secondary"
+                                        };
+                                    }
+                                    <span class="badge bg-@statusClass fs-6 px-3 py-2">
+                                        @Model.Status
+                                    </span>
+                                </div>
+                            </div>
+
+                            <!-- Action Buttons -->
+                            @if (Model.Status == "Confirmed")
+                            {
+                                <div class="card">
+                                    <div class="card-header bg-light">
+                                        <h5 class="mb-0">
+                                            <i class="fas fa-cogs me-2"></i>Actions
+                                        </h5>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="d-grid gap-2">
+                                            <!-- QR Payment -->
+                                            <a href="@Url.Action("Create", "QRPayment", new { id = Model.ReservationID })" class="btn btn-success">
+                                                <i class="fas fa-qrcode me-2"></i>Thanh toán QR Code
+                                            </a>
+
+                                            <!-- Service History -->
+                                            <button class="btn btn-info" onclick="viewServiceHistory(@Model.ReservationID)">
+                                                <i class="fas fa-history me-2"></i>Service History
+                                            </button>
+
+                                            <!-- Loyalty Points -->
+                                            <button class="btn btn-warning" onclick="viewLoyaltyPoints()">
+                                                <i class="fas fa-star me-2"></i>Loyalty Points
+                                            </button>
+
+                                            @if (Model.CheckInDate <= DateTime.Today && Model.CheckOutDate > DateTime.Today)
+                                            {
+                                                <!-- Currently staying - show in-stay options -->
+                                                <a asp-action="ChangeRoom" asp-route-id="@Model.ReservationID" class="btn btn-primary">
+                                                    <i class="fas fa-exchange-alt me-2"></i>Change Room
+                                                </a>
+                                            }
+                                            
+                                            @if (Model.CheckOutDate > DateTime.Today)
+                                            {
+                                                <!-- Future or current stay - show add service -->
+                                                <a asp-action="AddService" asp-route-id="@Model.ReservationID" class="btn btn-success">
+                                                    <i class="fas fa-plus-circle me-2"></i>Add Services
+                                                </a>
+                                            }
+
+                                            @if (Model.CheckInDate <= DateTime.Today && Model.CheckOutDate >= DateTime.Today)
+                                            {
+                                                <!-- Smart Checkout -->
+                                                <button class="btn btn-secondary" onclick="smartCheckout(@Model.ReservationID)">
+                                                    <i class="fas fa-receipt me-2"></i>Smart Checkout
+                                                </button>
+                                            }
+
+                                            @if (Model.CheckInDate > DateTime.Today.AddDays(1))
+                                            {
+                                                <!-- Can cancel if more than 24 hours before check-in -->
+                                                <a asp-action="Cancel" asp-route-id="@Model.ReservationID" class="btn btn-outline-danger">
+                                                    <i class="fas fa-times me-2"></i>Cancel Booking
+                                                </a>
+                                            }
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    </div>
+
+                    <!-- Back Button -->
+                    <div class="row mt-4">
+                        <div class="col-12">
+                            <a asp-action="Index" class="btn btn-outline-primary">
+                                <i class="fas fa-arrow-left me-2"></i>Back to My Bookings
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // Service History Modal
+        function viewServiceHistory(reservationId) {
+            // Implementation for service history modal
+            alert('Service History feature - Reservation ID: ' + reservationId);
+        }
+
+        // Loyalty Points Modal
+        function viewLoyaltyPoints() {
+            // Implementation for loyalty points modal
+            alert('Loyalty Points feature coming soon!');
+        }
+
+        // Smart Checkout
+        function smartCheckout(reservationId) {
+            if (confirm('Are you ready to checkout? This will finalize your stay.')) {
+                window.location.href = '@Url.Action("Checkout", "Reservations")/' + reservationId;
+            }
+        }
+    </script>
+}

@@ -1,0 +1,130 @@
+@model IEnumerable<HotelBooking.Models.BookingServiceUsage>
+@{
+    ViewData["Title"] = "Service History";
+}
+
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card shadow">
+                <div class="card-header bg-info text-white">
+                    <h4 class="mb-0">
+                        <i class="fas fa-history me-2"></i>My Service History
+                    </h4>
+                </div>
+                <div class="card-body">
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <a href="@Url.Action("Loyalty")" class="btn btn-warning">
+                                <i class="fas fa-star me-2"></i>View Loyalty Points
+                            </a>
+                        </div>
+                        <div class="col-md-6 text-end">
+                            <a href="@Url.Action("Statistics")" class="btn btn-success">
+                                <i class="fas fa-chart-bar me-2"></i>View Statistics
+                            </a>
+                        </div>
+                    </div>
+
+                    @if (Model.Any())
+                    {
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Service</th>
+                                        <th>Category</th>
+                                        <th>Reservation</th>
+                                        <th>Date Used</th>
+                                        <th>Quantity</th>
+                                        <th>Total Cost</th>
+                                        <th>Status</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var service in Model)
+                                    {
+                                        <tr>
+                                            <td>
+                                                <strong>@service.Service?.ServiceName</strong>
+                                                <br><small class="text-muted">@service.Service?.Description</small>
+                                            </td>
+                                            <td>
+                                                <span class="badge bg-secondary">@service.Service?.Category</span>
+                                            </td>
+                                            <td>
+                                                Room @service.Reservation?.Room?.RoomNumber
+                                                <br><small class="text-muted">@service.Reservation?.CheckInDate.ToString("MMM dd") - @service.Reservation?.CheckOutDate.ToString("MMM dd, yyyy")</small>
+                                            </td>
+                                            <td>@service.UsageDate.ToString("MMM dd, yyyy HH:mm")</td>
+                                            <td>@service.Quantity</td>
+                                            <td class="fw-bold text-success">$@service.TotalPrice.ToString("F2")</td>
+                                            <td>
+                                                <span class="badge bg-@(service.Status == "Delivered" ? "success" : service.Status == "Ordered" ? "warning" : "secondary")">
+                                                    @service.Status
+                                                </span>
+                                            </td>
+                                            <td>
+                                                <a href="@Url.Action("Details", new { id = service.BookingServiceUsageID })" class="btn btn-sm btn-outline-primary">
+                                                    <i class="fas fa-eye me-1"></i>Details
+                                                </a>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <!-- Summary Statistics -->
+                        <div class="row mt-4">
+                            <div class="col-md-3">
+                                <div class="card bg-primary text-white">
+                                    <div class="card-body text-center">
+                                        <h5>Total Services</h5>
+                                        <h3>@Model.Count()</h3>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="card bg-success text-white">
+                                    <div class="card-body text-center">
+                                        <h5>Total Spent</h5>
+                                        <h3>$@Model.Sum(s => s.TotalPrice).ToString("F2")</h3>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="card bg-info text-white">
+                                    <div class="card-body text-center">
+                                        <h5>Most Used Category</h5>
+                                        <h3>@(Model.GroupBy(s => s.Service?.Category).OrderByDescending(g => g.Count()).FirstOrDefault()?.Key ?? "N/A")</h3>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="card bg-warning text-white">
+                                    <div class="card-body text-center">
+                                        <h5>This Month</h5>
+                                        <h3>@Model.Where(s => s.UsageDate.Month == DateTime.Now.Month && s.UsageDate.Year == DateTime.Now.Year).Count()</h3>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="text-center py-5">
+                            <i class="fas fa-concierge-bell fa-3x text-muted mb-3"></i>
+                            <h5 class="text-muted">No Service History</h5>
+                            <p class="text-muted">You haven't used any additional services yet.</p>
+                            <a href="@Url.Action("Index", "Reservations")" class="btn btn-primary">
+                                <i class="fas fa-plus me-2"></i>Book a Room & Add Services
+                            </a>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

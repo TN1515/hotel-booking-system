@@ -1,0 +1,188 @@
+@model HotelBooking.Models.ViewModels.GuestProfileViewModel
+@{
+    ViewData["Title"] = "Edit Profile";
+}
+
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow">
+                <div class="card-header bg-warning text-dark">
+                    <h4 class="mb-0">
+                        <i class="fas fa-user-edit me-2"></i>Edit My Profile
+                    </h4>
+                </div>
+                <div class="card-body">
+                    @if (!ViewData.ModelState.IsValid)
+                    {
+                        <div class="alert alert-danger">
+                            <ul class="mb-0">
+                                @foreach (var error in ViewData.ModelState.Values.SelectMany(v => v.Errors))
+                                {
+                                    <li>@error.ErrorMessage</li>
+                                }
+                            </ul>
+                        </div>
+                    }
+
+                    <form asp-action="EditProfile" method="post">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label asp-for="FirstName" class="form-label fw-bold">
+                                        <i class="fas fa-user me-1"></i>First Name
+                                    </label>
+                                    <input asp-for="FirstName" class="form-control" placeholder="Enter your first name" />
+                                    <span asp-validation-for="FirstName" class="text-danger"></span>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label asp-for="LastName" class="form-label fw-bold">
+                                        <i class="fas fa-user me-1"></i>Last Name
+                                    </label>
+                                    <input asp-for="LastName" class="form-control" placeholder="Enter your last name" />
+                                    <span asp-validation-for="LastName" class="text-danger"></span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label asp-for="Email" class="form-label fw-bold">
+                                        <i class="fas fa-envelope me-1"></i>Email
+                                    </label>
+                                    <input asp-for="Email" class="form-control" type="email" placeholder="Enter your email" />
+                                    <span asp-validation-for="Email" class="text-danger"></span>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label asp-for="Phone" class="form-label fw-bold">
+                                        <i class="fas fa-phone me-1"></i>Phone
+                                    </label>
+                                    <input asp-for="Phone" class="form-control" placeholder="Enter your phone number" />
+                                    <span asp-validation-for="Phone" class="text-danger"></span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label asp-for="CountryID" class="form-label fw-bold">
+                                        <i class="fas fa-globe me-1"></i>Country
+                                    </label>
+                                    <select asp-for="CountryID" class="form-select">
+                                        <option value="">Select Country</option>
+                                        @if (ViewBag.Countries != null)
+                                        {
+                                            @foreach (var country in (ViewBag.Countries as List<HotelBooking.Models.Country>) ?? new List<HotelBooking.Models.Country>())
+                                            {
+                                                <option value="@country.CountryID">@country.CountryName</option>
+                                            }
+                                        }
+                                    </select>
+                                    <span asp-validation-for="CountryID" class="text-danger"></span>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label asp-for="StateID" class="form-label fw-bold">
+                                        <i class="fas fa-map-marker-alt me-1"></i>State/Province
+                                    </label>
+                                    <select asp-for="StateID" class="form-select">
+                                        <option value="">Select State</option>
+                                        @if (ViewBag.States != null)
+                                        {
+                                            @foreach (var state in (ViewBag.States as List<HotelBooking.Models.State>) ?? new List<HotelBooking.Models.State>())
+                                            {
+                                                <option value="@state.StateID">@state.StateName</option>
+                                            }
+                                        }
+                                    </select>
+                                    <span asp-validation-for="StateID" class="text-danger"></span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label asp-for="AgeGroup" class="form-label fw-bold">
+                                        <i class="fas fa-birthday-cake me-1"></i>Age Group
+                                    </label>
+                                    <select asp-for="AgeGroup" class="form-select">
+                                        <option value="">Select Age Group</option>
+                                        <option value="18-25">18-25</option>
+                                        <option value="26-35">26-35</option>
+                                        <option value="36-45">36-45</option>
+                                        <option value="46-55">46-55</option>
+                                        <option value="56-65">56-65</option>
+                                        <option value="65+">65+</option>
+                                    </select>
+                                    <span asp-validation-for="AgeGroup" class="text-danger"></span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="Address" class="form-label fw-bold">
+                                <i class="fas fa-home me-1"></i>Address
+                            </label>
+                            <textarea asp-for="Address" class="form-control" rows="3" placeholder="Enter your full address"></textarea>
+                            <span asp-validation-for="Address" class="text-danger"></span>
+                        </div>
+
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                            <a href="@Url.Action("Profile")" class="btn btn-secondary me-md-2">
+                                <i class="fas fa-times me-1"></i>Cancel
+                            </a>
+                            <button type="submit" class="btn btn-warning">
+                                <i class="fas fa-save me-1"></i>Update Profile
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+
+    <script>
+        // Filter states based on selected country
+        $('#CountryID').change(function() {
+            var countryId = $(this).val();
+            var stateSelect = $('#StateID');
+
+            // Clear current options
+            stateSelect.empty();
+            stateSelect.append('<option value="">Select State</option>');
+
+            if (countryId) {
+                // In a real implementation, you would make an AJAX call to get states for the selected country
+                // For now, we'll show all states
+                @if (ViewBag.States != null)
+                {
+                    @foreach (var state in (ViewBag.States as List<HotelBooking.Models.State>) ?? new List<HotelBooking.Models.State>())
+                    {
+                        <text>
+                        if (@state.CountryID == countryId) {
+                            stateSelect.append('<option value="@state.StateID">@state.StateName</option>');
+                        }
+                        </text>
+                    }
+                }
+            }
+        });
+
+        // Trigger change event on page load to populate states if country is already selected
+        $(document).ready(function() {
+            $('#CountryID').trigger('change');
+        });
+    </script>
+}

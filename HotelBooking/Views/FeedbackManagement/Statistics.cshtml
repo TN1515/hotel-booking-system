@@ -1,0 +1,263 @@
+@model HotelBooking.Models.ViewModels.FeedbackStatisticsViewModel
+@{
+    ViewData["Title"] = "Feedback Statistics";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2><i class="fas fa-chart-bar me-2"></i>Feedback Statistics</h2>
+                <a href="@Url.Action("Index", "FeedbackManagement")" class="btn btn-secondary">
+                    <i class="fas fa-arrow-left me-2"></i>Back to Feedback List
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Summary Cards -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card bg-primary text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h4 class="card-title">@Model.TotalFeedbacks</h4>
+                            <p class="card-text">Total Feedbacks</p>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="fas fa-comments fa-2x"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-success text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h4 class="card-title">@Model.AverageRating.ToString("F1")</h4>
+                            <p class="card-text">Average Rating</p>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="fas fa-star fa-2x"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-info text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h4 class="card-title">@(Model.TopRatedExperiences?.Count ?? 0)</h4>
+                            <p class="card-text">Top Rated (5★)</p>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="fas fa-trophy fa-2x"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-warning text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h4 class="card-title">@(Model.LowRatedExperiences?.Count ?? 0)</h4>
+                            <p class="card-text">Low Rated (≤2★)</p>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="fas fa-exclamation-triangle fa-2x"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Charts Row -->
+    <div class="row mb-4">
+        <!-- Rating Distribution Chart -->
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5><i class="fas fa-chart-pie me-2"></i>Rating Distribution</h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="ratingDistributionChart" width="400" height="200"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Monthly Trends Chart -->
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5><i class="fas fa-chart-line me-2"></i>Monthly Trends</h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="monthlyTrendsChart" width="400" height="200"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Feedbacks -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5><i class="fas fa-clock me-2"></i>Recent Feedbacks</h5>
+                </div>
+                <div class="card-body">
+                    @if (Model.RecentFeedbacks != null && Model.RecentFeedbacks.Any())
+                    {
+                        <div class="table-responsive">
+                            <table class="table table-striped">
+                                <thead>
+                                    <tr>
+                                        <th>Guest</th>
+                                        <th>Room</th>
+                                        <th>Rating</th>
+                                        <th>Comment</th>
+                                        <th>Date</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var feedback in Model.RecentFeedbacks.Take(10))
+                                    {
+                                        <tr>
+                                            <td>@feedback.GuestName</td>
+                                            <td>@feedback.RoomNumber</td>
+                                            <td>
+                                                <div class="rating">
+                                                    @for (int i = 1; i <= 5; i++)
+                                                    {
+                                                        if (i <= feedback.Rating)
+                                                        {
+                                                            <i class="fas fa-star text-warning"></i>
+                                                        }
+                                                        else
+                                                        {
+                                                            <i class="far fa-star text-muted"></i>
+                                                        }
+                                                    }
+                                                </div>
+                                            </td>
+                                            <td>
+                                                @if (!string.IsNullOrEmpty(feedback.Comment) && feedback.Comment.Length > 50)
+                                                {
+                                                    @(feedback.Comment.Substring(0, 50) + "...")
+                                                }
+                                                else
+                                                {
+                                                    @feedback.Comment
+                                                }
+                                            </td>
+                                            <td>@feedback.FeedbackDate.ToString("MMM dd, yyyy")</td>
+                                            <td>
+                                                <a href="@Url.Action("Details", "FeedbackManagement", new { id = feedback.FeedbackID })" 
+                                                   class="btn btn-sm btn-outline-primary">
+                                                    <i class="fas fa-eye"></i>
+                                                </a>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    }
+                    else
+                    {
+                        <p class="text-muted">No recent feedbacks available.</p>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        // Rating Distribution Chart
+        const ratingCtx = document.getElementById('ratingDistributionChart').getContext('2d');
+        const ratingData = @Html.Raw(Json.Serialize(Model.RatingDistribution ?? new Dictionary<int, int>()));
+        
+        new Chart(ratingCtx, {
+            type: 'doughnut',
+            data: {
+                labels: Object.keys(ratingData).map(k => k + ' Star' + (k == 1 ? '' : 's')),
+                datasets: [{
+                    data: Object.values(ratingData),
+                    backgroundColor: [
+                        '#dc3545', // 1 star - red
+                        '#fd7e14', // 2 stars - orange
+                        '#ffc107', // 3 stars - yellow
+                        '#20c997', // 4 stars - teal
+                        '#28a745'  // 5 stars - green
+                    ]
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        position: 'bottom'
+                    }
+                }
+            }
+        });
+
+        // Monthly Trends Chart
+        const trendsCtx = document.getElementById('monthlyTrendsChart').getContext('2d');
+        const trendsData = @Html.Raw(Json.Serialize(Model.MonthlyTrends != null ? Model.MonthlyTrends : new List<object>()));
+        
+        new Chart(trendsCtx, {
+            type: 'line',
+            data: {
+                labels: trendsData.map(d => d.month),
+                datasets: [{
+                    label: 'Average Rating',
+                    data: trendsData.map(d => d.averageRating),
+                    borderColor: '#007bff',
+                    backgroundColor: 'rgba(0, 123, 255, 0.1)',
+                    tension: 0.4
+                }, {
+                    label: 'Feedback Count',
+                    data: trendsData.map(d => d.feedbackCount),
+                    borderColor: '#28a745',
+                    backgroundColor: 'rgba(40, 167, 69, 0.1)',
+                    yAxisID: 'y1',
+                    tension: 0.4
+                }]
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    y: {
+                        type: 'linear',
+                        display: true,
+                        position: 'left',
+                        min: 0,
+                        max: 5
+                    },
+                    y1: {
+                        type: 'linear',
+                        display: true,
+                        position: 'right',
+                        grid: {
+                            drawOnChartArea: false,
+                        },
+                    }
+                }
+            }
+        });
+    </script>
+}

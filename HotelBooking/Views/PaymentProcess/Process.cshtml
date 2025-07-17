@@ -1,0 +1,157 @@
+@model HotelBooking.Models.ViewModels.ProcessPaymentViewModel
+@{
+    ViewData["Title"] = "Process Payment";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">Process Payment</h3>
+                    <div class="card-tools">
+                        <a href="@Url.Action("Index")" class="btn btn-secondary">
+                            <i class="fas fa-arrow-left"></i> Back to List
+                        </a>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <!-- Reservation Summary -->
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <div class="card bg-light">
+                                <div class="card-header">
+                                    <h5>Reservation Details</h5>
+                                </div>
+                                <div class="card-body">
+                                    <table class="table table-borderless">
+                                        <tr>
+                                            <td><strong>Reservation ID:</strong></td>
+                                            <td>@Model.ReservationID</td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>Guest Name:</strong></td>
+                                            <td>@Model.GuestName</td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>Room Number:</strong></td>
+                                            <td>@Model.RoomNumber</td>
+                                        </tr>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="card bg-light">
+                                <div class="card-header">
+                                    <h5>Payment Summary</h5>
+                                </div>
+                                <div class="card-body">
+                                    <table class="table table-borderless">
+                                        <tr>
+                                            <td><strong>Total Amount:</strong></td>
+                                            <td>@Model.TotalAmount.ToString("C")</td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>Paid Amount:</strong></td>
+                                            <td>@Model.PaidAmount.ToString("C")</td>
+                                        </tr>
+                                        <tr class="table-warning">
+                                            <td><strong>Remaining Amount:</strong></td>
+                                            <td><strong>@Model.RemainingAmount.ToString("C")</strong></td>
+                                        </tr>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Payment Form -->
+                    <form asp-action="Process" method="post">
+                        <input asp-for="ReservationID" type="hidden" />
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label asp-for="Amount" class="control-label"></label>
+                                    <div class="input-group">
+                                        <span class="input-group-text">$</span>
+                                        <input asp-for="Amount" class="form-control" type="number" step="0.01" min="0.01" max="@Model.RemainingAmount" />
+                                    </div>
+                                    <span asp-validation-for="Amount" class="text-danger"></span>
+                                    <small class="form-text text-muted">Maximum amount: @Model.RemainingAmount.ToString("C")</small>
+                                </div>
+
+                                <div class="form-group">
+                                    <label asp-for="PaymentMethod" class="control-label"></label>
+                                    <select asp-for="PaymentMethod" class="form-control">
+                                        <option value="">Select Payment Method</option>
+                                        <option value="Credit Card">Credit Card</option>
+                                        <option value="Debit Card">Debit Card</option>
+                                        <option value="Cash">Cash</option>
+                                        <option value="Bank Transfer">Bank Transfer</option>
+                                        <option value="PayPal">PayPal</option>
+                                        <option value="Stripe">Stripe</option>
+                                    </select>
+                                    <span asp-validation-for="PaymentMethod" class="text-danger"></span>
+                                </div>
+
+                                <div class="form-group">
+                                    <label asp-for="Notes" class="control-label"></label>
+                                    <textarea asp-for="Notes" class="form-control" rows="3" placeholder="Optional payment notes..."></textarea>
+                                    <span asp-validation-for="Notes" class="text-danger"></span>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="alert alert-info">
+                                    <h6><i class="fas fa-info-circle"></i> Payment Information</h6>
+                                    <ul class="mb-0">
+                                        <li>Enter the amount to be processed for this payment</li>
+                                        <li>Select the appropriate payment method</li>
+                                        <li>Add any relevant notes for this transaction</li>
+                                        <li>Payment will be recorded immediately upon submission</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-group mt-3">
+                            <button type="submit" class="btn btn-success btn-lg">
+                                <i class="fas fa-credit-card"></i> Process Payment
+                            </button>
+                            <a href="@Url.Action("Index")" class="btn btn-secondary btn-lg">
+                                <i class="fas fa-times"></i> Cancel
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    
+    <script>
+        $(document).ready(function() {
+            // Auto-fill remaining amount when amount field is focused
+            $('#Amount').focus(function() {
+                if ($(this).val() === '' || $(this).val() === '0') {
+                    $(this).val(@Model.RemainingAmount);
+                }
+            });
+
+            // Validate amount doesn't exceed remaining amount
+            $('#Amount').on('input', function() {
+                var amount = parseFloat($(this).val());
+                var remaining = @Model.RemainingAmount;
+                
+                if (amount > remaining) {
+                    $(this).val(remaining);
+                }
+            });
+        });
+    </script>
+}

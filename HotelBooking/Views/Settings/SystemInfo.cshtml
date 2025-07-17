@@ -1,0 +1,282 @@
+@model dynamic
+@{
+    ViewData["Title"] = "System Information";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<div class="container-fluid py-4">
+    <div class="row">
+        <div class="col-12">
+            <!-- Header -->
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h2 class="mb-1">
+                        <i class="fas fa-info-circle text-primary me-2"></i>
+                        System Information
+                    </h2>
+                    <p class="text-muted mb-0">Overview of system database and statistics</p>
+                </div>
+                <div>
+                    <a href="@Url.Action("Index")" class="btn btn-outline-secondary">
+                        <i class="fas fa-arrow-left me-2"></i>Back to Settings
+                    </a>
+                </div>
+            </div>
+
+            <div class="row">
+                <!-- Database Tables -->
+                <div class="col-lg-6 mb-4">
+                    <div class="card border-0 shadow-sm h-100">
+                        <div class="card-header bg-primary text-white">
+                            <h5 class="mb-0">
+                                <i class="fas fa-database me-2"></i>Database Tables
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="table table-sm">
+                                    <thead>
+                                        <tr>
+                                            <th>Table</th>
+                                            <th class="text-end">Records</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td><i class="fas fa-users text-primary me-2"></i>Users</td>
+                                            <td class="text-end"><span class="badge bg-primary">@Model.DatabaseTables.Users</span></td>
+                                        </tr>
+                                        <tr>
+                                            <td><i class="fas fa-bed text-info me-2"></i>Rooms</td>
+                                            <td class="text-end"><span class="badge bg-info">@Model.DatabaseTables.Rooms</span></td>
+                                        </tr>
+                                        <tr>
+                                            <td><i class="fas fa-calendar-check text-success me-2"></i>Reservations</td>
+                                            <td class="text-end"><span class="badge bg-success">@Model.DatabaseTables.Reservations</span></td>
+                                        </tr>
+                                        <tr>
+                                            <td><i class="fas fa-credit-card text-warning me-2"></i>Payments</td>
+                                            <td class="text-end"><span class="badge bg-warning">@Model.DatabaseTables.Payments</span></td>
+                                        </tr>
+                                        <tr>
+                                            <td><i class="fas fa-spa text-secondary me-2"></i>Amenities</td>
+                                            <td class="text-end"><span class="badge bg-secondary">@Model.DatabaseTables.Amenities</span></td>
+                                        </tr>
+                                        <tr>
+                                            <td><i class="fas fa-home text-dark me-2"></i>Room Types</td>
+                                            <td class="text-end"><span class="badge bg-dark">@Model.DatabaseTables.RoomTypes</span></td>
+                                        </tr>
+                                        <tr>
+                                            <td><i class="fas fa-globe text-primary me-2"></i>Countries</td>
+                                            <td class="text-end"><span class="badge bg-primary">@Model.DatabaseTables.Countries</span></td>
+                                        </tr>
+                                        <tr>
+                                            <td><i class="fas fa-map-marker-alt text-info me-2"></i>States</td>
+                                            <td class="text-end"><span class="badge bg-info">@Model.DatabaseTables.States</span></td>
+                                        </tr>
+                                        <tr>
+                                            <td><i class="fas fa-concierge-bell text-success me-2"></i>Services</td>
+                                            <td class="text-end"><span class="badge bg-success">@Model.DatabaseTables.Services</span></td>
+                                        </tr>
+                                        <tr>
+                                            <td><i class="fas fa-star text-warning me-2"></i>Loyalty Tiers</td>
+                                            <td class="text-end"><span class="badge bg-warning">@Model.DatabaseTables.LoyaltyTiers</span></td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- System Statistics -->
+                <div class="col-lg-6 mb-4">
+                    <div class="card border-0 shadow-sm h-100">
+                        <div class="card-header bg-success text-white">
+                            <h5 class="mb-0">
+                                <i class="fas fa-chart-line me-2"></i>System Statistics
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-6 mb-4">
+                                    <div class="text-center">
+                                        <div class="text-success mb-2">
+                                            <i class="fas fa-dollar-sign fa-2x"></i>
+                                        </div>
+                                        <h4 class="fw-bold text-success">$@Model.SystemStats.TotalRevenue.ToString("N0")</h4>
+                                        <p class="text-muted mb-0">Total Revenue</p>
+                                    </div>
+                                </div>
+                                <div class="col-6 mb-4">
+                                    <div class="text-center">
+                                        <div class="text-primary mb-2">
+                                            <i class="fas fa-user-check fa-2x"></i>
+                                        </div>
+                                        <h4 class="fw-bold text-primary">@Model.SystemStats.ActiveUsers</h4>
+                                        <p class="text-muted mb-0">Active Users</p>
+                                    </div>
+                                </div>
+                                <div class="col-6 mb-4">
+                                    <div class="text-center">
+                                        <div class="text-info mb-2">
+                                            <i class="fas fa-bed fa-2x"></i>
+                                        </div>
+                                        <h4 class="fw-bold text-info">@Model.SystemStats.AvailableRooms</h4>
+                                        <p class="text-muted mb-0">Available Rooms</p>
+                                    </div>
+                                </div>
+                                <div class="col-6 mb-4">
+                                    <div class="text-center">
+                                        <div class="text-warning mb-2">
+                                            <i class="fas fa-clock fa-2x"></i>
+                                        </div>
+                                        <h4 class="fw-bold text-warning">@Model.SystemStats.PendingReservations</h4>
+                                        <p class="text-muted mb-0">Pending Reservations</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- System Health -->
+            <div class="row">
+                <div class="col-12">
+                    <div class="card border-0 shadow-sm">
+                        <div class="card-header bg-dark text-white">
+                            <h5 class="mb-0">
+                                <i class="fas fa-heartbeat me-2"></i>System Health
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-3 mb-3">
+                                    <div class="d-flex align-items-center">
+                                        <div class="text-success me-3">
+                                            <i class="fas fa-check-circle fa-2x"></i>
+                                        </div>
+                                        <div>
+                                            <h6 class="mb-0">Database</h6>
+                                            <small class="text-success">Connected</small>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-3 mb-3">
+                                    <div class="d-flex align-items-center">
+                                        <div class="text-success me-3">
+                                            <i class="fas fa-check-circle fa-2x"></i>
+                                        </div>
+                                        <div>
+                                            <h6 class="mb-0">Application</h6>
+                                            <small class="text-success">Running</small>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-3 mb-3">
+                                    <div class="d-flex align-items-center">
+                                        <div class="text-success me-3">
+                                            <i class="fas fa-check-circle fa-2x"></i>
+                                        </div>
+                                        <div>
+                                            <h6 class="mb-0">Authentication</h6>
+                                            <small class="text-success">Active</small>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-3 mb-3">
+                                    <div class="d-flex align-items-center">
+                                        <div class="text-success me-3">
+                                            <i class="fas fa-check-circle fa-2x"></i>
+                                        </div>
+                                        <div>
+                                            <h6 class="mb-0">Services</h6>
+                                            <small class="text-success">Operational</small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- System Information -->
+            <div class="row mt-4">
+                <div class="col-12">
+                    <div class="card border-0 shadow-sm">
+                        <div class="card-header bg-info text-white">
+                            <h5 class="mb-0">
+                                <i class="fas fa-server me-2"></i>Technical Information
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <table class="table table-sm">
+                                        <tr>
+                                            <td><strong>Framework:</strong></td>
+                                            <td>.NET 8.0</td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>Database:</strong></td>
+                                            <td>SQL Server</td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>ORM:</strong></td>
+                                            <td>Entity Framework Core</td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>Authentication:</strong></td>
+                                            <td>ASP.NET Core Identity</td>
+                                        </tr>
+                                    </table>
+                                </div>
+                                <div class="col-md-6">
+                                    <table class="table table-sm">
+                                        <tr>
+                                            <td><strong>Server Time:</strong></td>
+                                            <td>@DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")</td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>Environment:</strong></td>
+                                            <td>Development</td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>Version:</strong></td>
+                                            <td>1.0.0</td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>Last Updated:</strong></td>
+                                            <td>@DateTime.Now.ToString("yyyy-MM-dd")</td>
+                                        </tr>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.card {
+    border-radius: 12px;
+}
+
+.card-header {
+    border-radius: 12px 12px 0 0 !important;
+}
+
+.table td {
+    border: none;
+    padding: 0.5rem 0;
+}
+
+.badge {
+    font-size: 0.8rem;
+}
+</style>

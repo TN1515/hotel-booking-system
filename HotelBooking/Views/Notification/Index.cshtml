@@ -1,0 +1,200 @@
+@model HotelBooking.Models.ViewModels.NotificationListViewModel
+@{
+    ViewData["Title"] = "Notification Management";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">Notification Management</h3>
+                    <div class="card-tools">
+                        <a href="@Url.Action("Send")" class="btn btn-primary">
+                            <i class="fas fa-plus"></i> Send Notification
+                        </a>
+                        <a href="@Url.Action("Bulk")" class="btn btn-success">
+                            <i class="fas fa-broadcast-tower"></i> Bulk Send
+                        </a>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <!-- Search and Filter Form -->
+                    <form method="get" class="mb-3">
+                        <div class="row">
+                            <div class="col-md-3">
+                                <input type="text" name="searchTerm" value="@Model.SearchTerm" class="form-control" placeholder="Search notifications..." />
+                            </div>
+                            <div class="col-md-2">
+                                <select name="typeFilter" class="form-control">
+                                    <option value="">All Types</option>
+                                    <option value="Email" selected="@(Model.TypeFilter == "Email")">Email</option>
+                                    <option value="SMS" selected="@(Model.TypeFilter == "SMS")">SMS</option>
+                                    <option value="System" selected="@(Model.TypeFilter == "System")">System</option>
+                                </select>
+                            </div>
+                            <div class="col-md-2">
+                                <select name="statusFilter" class="form-control">
+                                    <option value="">All Status</option>
+                                    <option value="Sent" selected="@(Model.StatusFilter == "Sent")">Sent</option>
+                                    <option value="Pending" selected="@(Model.StatusFilter == "Pending")">Pending</option>
+                                    <option value="Failed" selected="@(Model.StatusFilter == "Failed")">Failed</option>
+                                </select>
+                            </div>
+                            <div class="col-md-2">
+                                <input type="date" name="fromDate" value="@Model.FromDate?.ToString("yyyy-MM-dd")" class="form-control" />
+                            </div>
+                            <div class="col-md-2">
+                                <input type="date" name="toDate" value="@Model.ToDate?.ToString("yyyy-MM-dd")" class="form-control" />
+                            </div>
+                            <div class="col-md-1">
+                                <button type="submit" class="btn btn-primary">Search</button>
+                            </div>
+                        </div>
+                    </form>
+
+                    <!-- Statistics -->
+                    <div class="row mb-3">
+                        <div class="col-md-12">
+                            <div class="alert alert-info">
+                                <strong>Total Notifications:</strong> @Model.TotalNotifications
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Notification List Table -->
+                    <div class="table-responsive">
+                        <table class="table table-striped table-hover">
+                            <thead class="table-dark">
+                                <tr>
+                                    <th>Title</th>
+                                    <th>Recipient</th>
+                                    <th>Type</th>
+                                    <th>Status</th>
+                                    <th>Created Date</th>
+                                    <th>Sent Date</th>
+                                    <th>Read</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @if (Model.Notifications != null && Model.Notifications.Any())
+                                {
+                                    @foreach (var notification in Model.Notifications)
+                                    {
+                                        <tr>
+                                            <td>
+                                                <strong>@notification.Title</strong>
+                                                <br />
+                                                <small class="text-muted">@(notification.Message?.Length > 50 ? notification.Message.Substring(0, 50) + "..." : notification.Message)</small>
+                                            </td>
+                                            <td>
+                                                @notification.UserName
+                                                <br />
+                                                <small class="text-muted">@notification.UserEmail</small>
+                                            </td>
+                                            <td>
+                                                <span class="badge @(notification.Type == "Email" ? "bg-primary" : notification.Type == "SMS" ? "bg-success" : "bg-info")">
+                                                    @notification.Type
+                                                </span>
+                                            </td>
+                                            <td>
+                                                <span class="badge @(notification.Status == "Sent" ? "bg-success" : notification.Status == "Pending" ? "bg-warning" : "bg-danger")">
+                                                    @notification.Status
+                                                </span>
+                                            </td>
+                                            <td>@notification.CreatedDate.ToString("dd/MM/yyyy HH:mm")</td>
+                                            <td>@(notification.SentDate?.ToString("dd/MM/yyyy HH:mm") ?? "-")</td>
+                                            <td>
+                                                @if (notification.IsRead)
+                                                {
+                                                    <span class="badge bg-success">Read</span>
+                                                }
+                                                else
+                                                {
+                                                    <span class="badge bg-secondary">Unread</span>
+                                                }
+                                            </td>
+                                            <td>
+                                                <div class="btn-group" role="group">
+                                                    <a href="@Url.Action("Details", new { id = notification.NotificationID })" class="btn btn-sm btn-info">
+                                                        <i class="fas fa-eye"></i> View
+                                                    </a>
+                                                    @if (!notification.IsRead)
+                                                    {
+                                                        <button type="button" class="btn btn-sm btn-warning" onclick="markAsRead(@notification.NotificationID)">
+                                                            <i class="fas fa-check"></i> Mark Read
+                                                        </button>
+                                                    }
+                                                    <button type="button" class="btn btn-sm btn-danger" onclick="deleteNotification(@notification.NotificationID)">
+                                                        <i class="fas fa-trash"></i> Delete
+                                                    </button>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    }
+                                }
+                                else
+                                {
+                                    <tr>
+                                        <td colspan="8" class="text-center">No notifications found.</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Pagination -->
+                    @if (Model.TotalPages > 1)
+                    {
+                        <nav aria-label="Notification pagination">
+                            <ul class="pagination justify-content-center">
+                                @if (Model.CurrentPage > 1)
+                                {
+                                    <li class="page-item">
+                                        <a class="page-link" href="@Url.Action("Index", new { page = Model.CurrentPage - 1, searchTerm = Model.SearchTerm, typeFilter = Model.TypeFilter, statusFilter = Model.StatusFilter, fromDate = Model.FromDate, toDate = Model.ToDate })">Previous</a>
+                                    </li>
+                                }
+
+                                @for (int i = Math.Max(1, Model.CurrentPage - 2); i <= Math.Min(Model.TotalPages, Model.CurrentPage + 2); i++)
+                                {
+                                    <li class="page-item @(i == Model.CurrentPage ? "active" : "")">
+                                        <a class="page-link" href="@Url.Action("Index", new { page = i, searchTerm = Model.SearchTerm, typeFilter = Model.TypeFilter, statusFilter = Model.StatusFilter, fromDate = Model.FromDate, toDate = Model.ToDate })">@i</a>
+                                    </li>
+                                }
+
+                                @if (Model.CurrentPage < Model.TotalPages)
+                                {
+                                    <li class="page-item">
+                                        <a class="page-link" href="@Url.Action("Index", new { page = Model.CurrentPage + 1, searchTerm = Model.SearchTerm, typeFilter = Model.TypeFilter, statusFilter = Model.StatusFilter, fromDate = Model.FromDate, toDate = Model.ToDate })">Next</a>
+                                    </li>
+                                }
+                            </ul>
+                        </nav>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function markAsRead(notificationId) {
+            $.post('@Url.Action("MarkAsRead")', { id: notificationId }, function(data) {
+                if (data.success) {
+                    location.reload();
+                }
+            });
+        }
+
+        function deleteNotification(notificationId) {
+            if (confirm('Are you sure you want to delete this notification?')) {
+                $.post('@Url.Action("Delete")', { id: notificationId }, function() {
+                    location.reload();
+                });
+            }
+        }
+    </script>
+}

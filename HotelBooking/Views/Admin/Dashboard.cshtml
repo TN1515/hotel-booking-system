@@ -1,0 +1,248 @@
+@model HotelBooking.Models.AdminDashboardViewModel
+@{
+    ViewData["Title"] = "Admin Dashboard";
+    Layout = "_AdminLayout";
+}
+
+<div class="admin-content">
+    <!-- Header Section -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="h2 mb-1 fw-bold">Dashboard</h1>
+            <p class="text-muted mb-0">Welcome back! Here's what's happening at your hotel.</p>
+        </div>
+        <div class="d-flex gap-2">
+            <a href="@Url.Action("Reports", "Admin")" class="btn btn-outline-primary">
+                <i class="fas fa-download me-2"></i>Export Report
+            </a>
+            <a href="@Url.Action("Create", "Reservations")" class="btn btn-primary">
+                <i class="fas fa-plus me-2"></i>New Reservation
+            </a>
+        </div>
+    </div>
+
+    <!-- Stats Cards -->
+    <div class="row mb-4">
+        <div class="col-lg-3 col-md-6 mb-4">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <div class="d-flex align-items-center justify-content-between">
+                        <div>
+                            <h6 class="text-muted mb-1">Total Reservations</h6>
+                            <h3 class="mb-0 fw-bold">@Model.TotalReservations</h3>
+                            <small class="text-success">
+                                <i class="fas fa-arrow-up me-1"></i>12% from last month
+                            </small>
+                        </div>
+                        <div class="text-primary">
+                            <i class="fas fa-calendar-alt fa-2x"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-3 col-md-6 mb-4">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <div class="d-flex align-items-center justify-content-between">
+                        <div>
+                            <h6 class="text-muted mb-1">Confirmed</h6>
+                            <h3 class="mb-0 fw-bold text-success">@Model.ConfirmedReservations</h3>
+                            <small class="text-success">
+                                <i class="fas fa-arrow-up me-1"></i>8% from last month
+                            </small>
+                        </div>
+                        <div class="text-success">
+                            <i class="fas fa-check-circle fa-2x"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-3 col-md-6 mb-4">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <div class="d-flex align-items-center justify-content-between">
+                        <div>
+                            <h6 class="text-muted mb-1">Pending</h6>
+                            <h3 class="mb-0 fw-bold text-warning">@Model.PendingReservations</h3>
+                            <small class="text-warning">
+                                <i class="fas fa-clock me-1"></i>Awaiting confirmation
+                            </small>
+                        </div>
+                        <div class="text-warning">
+                            <i class="fas fa-hourglass-half fa-2x"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-3 col-md-6 mb-4">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <div class="d-flex align-items-center justify-content-between">
+                        <div>
+                            <h6 class="text-muted mb-1">Revenue</h6>
+                            <h3 class="mb-0 fw-bold text-info">$@Model.TotalRevenue.ToString("N0")</h3>
+                            <small class="text-success">
+                                <i class="fas fa-arrow-up me-1"></i>15% from last month
+                            </small>
+                        </div>
+                        <div class="text-info">
+                            <i class="fas fa-dollar-sign fa-2x"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Activity -->
+    <div class="row">
+        <div class="col-lg-8">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white border-0 py-3">
+                    <h5 class="mb-0 fw-bold">Recent Reservations</h5>
+                </div>
+                <div class="card-body p-0">
+                    @if (Model.RecentReservations.Any())
+                    {
+                        @foreach (var reservation in Model.RecentReservations)
+                        {
+                            var nights = (reservation.CheckOutDate - reservation.CheckInDate).Days;
+                            var totalAmount = reservation.Room?.Price * nights ?? 0;
+                            
+                            <div class="reservation-item p-3 border-bottom">
+                                <div class="d-flex align-items-center">
+                                    <div class="me-3">
+                                        <i class="fas fa-user-circle fa-2x text-primary"></i>
+                                    </div>
+                                    <div class="flex-grow-1">
+                                        <h6 class="mb-1 fw-semibold">@reservation.User?.UserName</h6>
+                                        <small class="text-muted">@reservation.User?.Email</small>
+                                    </div>
+                                    <div class="text-center me-3">
+                                        <strong>Room @reservation.Room?.RoomNumber</strong>
+                                        <div class="small text-muted">@reservation.Room?.RoomType?.TypeName</div>
+                                    </div>
+                                    <div class="text-center me-3">
+                                        <strong>@reservation.CheckInDate.ToString("MMM dd")</strong>
+                                        <div class="small text-muted">Check-in</div>
+                                    </div>
+                                    <div class="text-center me-3">
+                                        <strong>$@totalAmount.ToString("F0")</strong>
+                                        <div class="small text-muted">@nights night@(nights > 1 ? "s" : "")</div>
+                                    </div>
+                                    <div>
+                                        @if (reservation.Status == "Confirmed")
+                                        {
+                                            <span class="badge bg-success">Confirmed</span>
+                                        }
+                                        else if (reservation.Status == "Pending")
+                                        {
+                                            <span class="badge bg-warning">Pending</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-secondary">@reservation.Status</span>
+                                        }
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    }
+                    else
+                    {
+                        <div class="text-center py-4">
+                            <i class="fas fa-calendar-times fa-2x text-muted mb-2"></i>
+                            <p class="text-muted">No recent reservations</p>
+                        </div>
+                    }
+                </div>
+                <div class="card-footer bg-white border-0 text-center">
+                    <a href="@Url.Action("Reservations", "Admin")" class="btn btn-outline-primary">
+                        View All Reservations
+                    </a>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-lg-4">
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-header bg-white border-0 py-3">
+                    <h5 class="mb-0 fw-bold">Quick Actions</h5>
+                </div>
+                <div class="card-body">
+                    <div class="d-grid gap-2">
+                        <a href="@Url.Action("Create", "Reservations")" class="btn btn-primary">
+                            <i class="fas fa-plus me-2"></i>New Reservation
+                        </a>
+                        <a href="@Url.Action("Index", "Rooms")" class="btn btn-outline-primary">
+                            <i class="fas fa-bed me-2"></i>Manage Rooms
+                        </a>
+                        <a href="@Url.Action("Index", "Users")" class="btn btn-outline-primary">
+                            <i class="fas fa-users me-2"></i>Guest Management
+                        </a>
+                        <a href="@Url.Action("Reports", "Admin")" class="btn btn-outline-primary">
+                            <i class="fas fa-chart-bar me-2"></i>Reports
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white border-0 py-3">
+                    <h5 class="mb-0 fw-bold">Today's Summary</h5>
+                </div>
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <span>Check-ins Today</span>
+                        <span class="badge bg-primary">5</span>
+                    </div>
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <span>Check-outs Today</span>
+                        <span class="badge bg-info">3</span>
+                    </div>
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <span>Occupancy Rate</span>
+                        <span class="badge bg-success">85%</span>
+                    </div>
+                    <div class="d-flex justify-content-between align-items-center">
+                        <span>Available Rooms</span>
+                        <span class="badge bg-warning">12</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.admin-content {
+    padding: 2rem;
+    background-color: #f8f9fa;
+    min-height: 100vh;
+}
+
+.reservation-item:hover {
+    background-color: #f8f9fa;
+}
+
+.reservation-item:last-child {
+    border-bottom: none !important;
+}
+
+.card {
+    border-radius: 12px;
+}
+
+.card-header {
+    border-radius: 12px 12px 0 0 !important;
+}
+
+.badge {
+    border-radius: 6px;
+    font-size: 0.75rem;
+    padding: 0.35em 0.65em;
+}
+</style>

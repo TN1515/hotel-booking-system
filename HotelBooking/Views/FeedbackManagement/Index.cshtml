@@ -1,0 +1,185 @@
+@model HotelBooking.Models.ViewModels.FeedbackListViewModel
+@{
+    ViewData["Title"] = "Feedback Management";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">Feedback Management</h3>
+                    <div class="card-tools">
+                        <a href="@Url.Action("Statistics")" class="btn btn-info">
+                            <i class="fas fa-chart-line"></i> View Statistics
+                        </a>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <!-- Search and Filter Form -->
+                    <form method="get" class="mb-3">
+                        <div class="row">
+                            <div class="col-md-3">
+                                <input type="text" name="searchTerm" value="@Model.SearchTerm" class="form-control" placeholder="Search feedback..." />
+                            </div>
+                            <div class="col-md-2">
+                                <select name="ratingFilter" class="form-control">
+                                    <option value="">All Ratings</option>
+                                    <option value="5" selected="@(Model.RatingFilter == 5)">5 Stars</option>
+                                    <option value="4" selected="@(Model.RatingFilter == 4)">4 Stars</option>
+                                    <option value="3" selected="@(Model.RatingFilter == 3)">3 Stars</option>
+                                    <option value="2" selected="@(Model.RatingFilter == 2)">2 Stars</option>
+                                    <option value="1" selected="@(Model.RatingFilter == 1)">1 Star</option>
+                                </select>
+                            </div>
+                            <div class="col-md-2">
+                                <input type="date" name="fromDate" value="@Model.FromDate?.ToString("yyyy-MM-dd")" class="form-control" />
+                            </div>
+                            <div class="col-md-2">
+                                <input type="date" name="toDate" value="@Model.ToDate?.ToString("yyyy-MM-dd")" class="form-control" />
+                            </div>
+                            <div class="col-md-2">
+                                <button type="submit" class="btn btn-primary">Search</button>
+                            </div>
+                            <div class="col-md-1">
+                                <a href="@Url.Action("Index")" class="btn btn-secondary">Clear</a>
+                            </div>
+                        </div>
+                    </form>
+
+                    <!-- Statistics Summary -->
+                    <div class="row mb-3">
+                        <div class="col-md-3">
+                            <div class="card bg-primary text-white">
+                                <div class="card-body">
+                                    <h5>Total Feedback</h5>
+                                    <h3>@Model.TotalFeedbacks</h3>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="card bg-success text-white">
+                                <div class="card-body">
+                                    <h5>Average Rating</h5>
+                                    <h3>@Model.AverageRating.ToString("F1") <small>/ 5.0</small></h3>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="card bg-light">
+                                <div class="card-body">
+                                    <h6>Rating Distribution</h6>
+                                    @if (Model.RatingDistribution != null)
+                                    {
+                                        @for (int i = 5; i >= 1; i--)
+                                        {
+                                            var count = Model.RatingDistribution.ContainsKey(i) ? Model.RatingDistribution[i] : 0;
+                                            var percentage = Model.TotalFeedbacks > 0 ? (count * 100.0 / Model.TotalFeedbacks) : 0;
+                                            <div class="d-flex align-items-center mb-1">
+                                                <span class="me-2">@i ⭐</span>
+                                                <div class="progress flex-grow-1 me-2" style="height: 20px;">
+                                                    <div class="progress-bar bg-warning" style="width: @percentage%"></div>
+                                                </div>
+                                                <span class="text-muted">@count</span>
+                                            </div>
+                                        }
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Feedback List -->
+                    <div class="row">
+                        @if (Model.Feedbacks != null && Model.Feedbacks.Any())
+                        {
+                            @foreach (var feedback in Model.Feedbacks)
+                            {
+                                <div class="col-md-6 mb-3">
+                                    <div class="card">
+                                        <div class="card-header d-flex justify-content-between align-items-center">
+                                            <div>
+                                                <strong>@feedback.GuestName</strong>
+                                                <small class="text-muted">(@feedback.GuestEmail)</small>
+                                            </div>
+                                            <div>
+                                                @for (int i = 1; i <= 5; i++)
+                                                {
+                                                    <i class="fas fa-star @(i <= feedback.Rating ? "text-warning" : "text-muted")"></i>
+                                                }
+                                            </div>
+                                        </div>
+                                        <div class="card-body">
+                                            <p class="card-text">@feedback.Comment</p>
+                                            <div class="d-flex justify-content-between align-items-center">
+                                                <small class="text-muted">
+                                                    Room: @feedback.RoomNumber (@feedback.RoomType)<br />
+                                                    Date: @feedback.FeedbackDate.ToString("dd/MM/yyyy")
+                                                </small>
+                                                <div class="btn-group">
+                                                    <a href="@Url.Action("Details", new { id = feedback.FeedbackID })" class="btn btn-sm btn-info">
+                                                        <i class="fas fa-eye"></i> View
+                                                    </a>
+                                                    <a href="@Url.Action("Respond", new { id = feedback.FeedbackID })" class="btn btn-sm btn-primary">
+                                                        <i class="fas fa-reply"></i> Respond
+                                                    </a>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                        }
+                        else
+                        {
+                            <div class="col-12">
+                                <div class="alert alert-info text-center">
+                                    <i class="fas fa-info-circle"></i> No feedback found.
+                                </div>
+                            </div>
+                        }
+                    </div>
+
+                    <!-- Pagination -->
+                    @if (Model.TotalPages > 1)
+                    {
+                        <nav aria-label="Feedback pagination">
+                            <ul class="pagination justify-content-center">
+                                @if (Model.CurrentPage > 1)
+                                {
+                                    <li class="page-item">
+                                        <a class="page-link" href="@Url.Action("Index", new { page = Model.CurrentPage - 1, searchTerm = Model.SearchTerm, ratingFilter = Model.RatingFilter, fromDate = Model.FromDate, toDate = Model.ToDate })">Previous</a>
+                                    </li>
+                                }
+
+                                @for (int i = Math.Max(1, Model.CurrentPage - 2); i <= Math.Min(Model.TotalPages, Model.CurrentPage + 2); i++)
+                                {
+                                    <li class="page-item @(i == Model.CurrentPage ? "active" : "")">
+                                        <a class="page-link" href="@Url.Action("Index", new { page = i, searchTerm = Model.SearchTerm, ratingFilter = Model.RatingFilter, fromDate = Model.FromDate, toDate = Model.ToDate })">@i</a>
+                                    </li>
+                                }
+
+                                @if (Model.CurrentPage < Model.TotalPages)
+                                {
+                                    <li class="page-item">
+                                        <a class="page-link" href="@Url.Action("Index", new { page = Model.CurrentPage + 1, searchTerm = Model.SearchTerm, ratingFilter = Model.RatingFilter, fromDate = Model.FromDate, toDate = Model.ToDate })">Next</a>
+                                    </li>
+                                }
+                            </ul>
+                        </nav>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function() {
+            // Initialize tooltips
+            $('[data-toggle="tooltip"]').tooltip();
+        });
+    </script>
+}

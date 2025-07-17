@@ -1,0 +1,101 @@
+@model HotelBooking.Models.RegisterViewModel
+@{
+    ViewData["Title"] = "Register";
+    Layout = null;
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - HotelPro</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/login.css" asp-append-version="true" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
+</head>
+<body class="login-page">
+    <div class="login-container">
+        <div class="login-card">
+            <!-- Header -->
+            <div class="login-header">
+                <div class="logo-container">
+                    <i class="fas fa-building logo-icon"></i>
+                </div>
+                <h1 class="brand-title">HotelPro</h1>
+                <p class="brand-subtitle">Hotel Management System</p>
+            </div>
+
+            <!-- Welcome Section -->
+            <div class="welcome-section">
+                <h2 class="welcome-title">Welcome</h2>
+                <p class="welcome-subtitle">Create your account to get started</p>
+            </div>
+
+            <!-- Tab Navigation -->
+            <div class="tab-navigation">
+                <a href="@Url.Action("Login", "Account")" class="tab-btn" id="signin-tab">Sign In</a>
+                <button class="tab-btn active" id="signup-tab">Sign Up</button>
+            </div>
+
+            <!-- Register Form -->
+            <form asp-action="Register" asp-controller="Account" method="post" class="login-form">
+                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+                <div class="form-group">
+                    <label asp-for="FirstName" class="form-label">First Name</label>
+                    <input asp-for="FirstName" class="form-control" placeholder="Enter your first name" />
+                    <span asp-validation-for="FirstName" class="text-danger"></span>
+                </div>
+
+                <div class="form-group">
+                    <label asp-for="LastName" class="form-label">Last Name</label>
+                    <input asp-for="LastName" class="form-control" placeholder="Enter your last name" />
+                    <span asp-validation-for="LastName" class="text-danger"></span>
+                </div>
+
+                <div class="form-group">
+                    <label asp-for="Email" class="form-label">Email</label>
+                    <input asp-for="Email" class="form-control" placeholder="Enter your email" />
+                    <span asp-validation-for="Email" class="text-danger"></span>
+                </div>
+
+                <div class="form-group">
+                    <label asp-for="PhoneNumber" class="form-label">Phone Number (Optional)</label>
+                    <input asp-for="PhoneNumber" class="form-control" placeholder="Enter your phone number" />
+                    <span asp-validation-for="PhoneNumber" class="text-danger"></span>
+                </div>
+
+                <div class="form-group">
+                    <label asp-for="Password" class="form-label">Password</label>
+                    <input asp-for="Password" type="password" class="form-control" placeholder="Create a password" />
+                    <span asp-validation-for="Password" class="text-danger"></span>
+                </div>
+
+                <div class="form-group">
+                    <label asp-for="ConfirmPassword" class="form-label">Confirm Password</label>
+                    <input asp-for="ConfirmPassword" type="password" class="form-control" placeholder="Confirm your password" />
+                    <span asp-validation-for="ConfirmPassword" class="text-danger"></span>
+                </div>
+
+                <div class="form-group">
+                    <label asp-for="Role" class="form-label">Role</label>
+                    <select asp-for="Role" class="form-control">
+                        <option value="Customer">Customer</option>
+                        <option value="Staff">Staff</option>
+                        <option value="Admin">Admin</option>
+                    </select>
+                    <span asp-validation-for="Role" class="text-danger"></span>
+                </div>
+
+                <button type="submit" class="btn-signin">Create Account</button>
+            </form>
+        </div>
+    </div>
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/lib/jquery-validation/dist/jquery.validate.min.js"></script>
+    <script src="~/lib/jquery-validation-unobtrusive/jquery.validate.unobtrusive.min.js"></script>
+</body>
+</html>

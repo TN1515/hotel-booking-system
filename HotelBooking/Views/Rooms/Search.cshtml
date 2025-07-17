@@ -1,0 +1,160 @@
+@{
+    ViewData["Title"] = "Search Rooms";
+}
+
+<div class="container">
+    <div class="row mb-4">
+        <div class="col-12">
+            <h1 class="display-5">Search Rooms</h1>
+            <p class="lead">Find the perfect room for your stay</p>
+        </div>
+    </div>
+
+    <div class="row justify-content-center">
+        <div class="col-lg-10">
+            <div class="card shadow">
+                <div class="card-body p-4">
+                    <form asp-action="Search" method="post">
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label for="checkIn" class="form-label fw-semibold">Check-in Date</label>
+                                <input type="date" class="form-control form-control-lg" id="checkIn" name="checkIn" 
+                                       value="@DateTime.Today.AddDays(1).ToString("yyyy-MM-dd")" required>
+                            </div>
+                            
+                            <div class="col-md-6">
+                                <label for="checkOut" class="form-label fw-semibold">Check-out Date</label>
+                                <input type="date" class="form-control form-control-lg" id="checkOut" name="checkOut" 
+                                       value="@DateTime.Today.AddDays(2).ToString("yyyy-MM-dd")" required>
+                            </div>
+                            
+                            <div class="col-md-4">
+                                <label for="guests" class="form-label fw-semibold">Number of Guests</label>
+                                <select class="form-select form-select-lg" id="guests" name="guests" required>
+                                    <option value="1">1 Guest</option>
+                                    <option value="2" selected>2 Guests</option>
+                                    <option value="3">3 Guests</option>
+                                    <option value="4">4 Guests</option>
+                                    <option value="5">5 Guests</option>
+                                    <option value="6">6 Guests</option>
+                                    <option value="7">7 Guests</option>
+                                    <option value="8">8 Guests</option>
+                                    <option value="9">9 Guests</option>
+                                    <option value="10">10 Guests</option>
+                                </select>
+                            </div>
+                            
+                            <div class="col-md-4">
+                                <label for="roomTypeId" class="form-label fw-semibold">Room Type</label>
+                                <select class="form-select form-select-lg" id="roomTypeId" name="roomTypeId">
+                                    <option value="">Any Room Type</option>
+                                    @foreach (var roomType in ViewBag.RoomTypes as List<HotelBooking.Models.RoomType> ?? new List<HotelBooking.Models.RoomType>())
+                                    {
+                                        <option value="@roomType.RoomTypeID">@roomType.TypeName</option>
+                                    }
+                                </select>
+                            </div>
+                            
+                            <div class="col-md-4">
+                                <label for="maxPrice" class="form-label fw-semibold">Max Price per Night</label>
+                                <select class="form-select form-select-lg" id="maxPrice" name="maxPrice">
+                                    <option value="">Any Price</option>
+                                    <option value="100">Under $100</option>
+                                    <option value="150">Under $150</option>
+                                    <option value="200">Under $200</option>
+                                    <option value="300">Under $300</option>
+                                    <option value="500">Under $500</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div class="row mt-4">
+                            <div class="col-12">
+                                <div class="d-grid gap-2 d-md-flex justify-content-md-center">
+                                    <button type="submit" class="btn btn-primary btn-lg px-5">
+                                        <i class="fas fa-search me-2"></i>Search Available Rooms
+                                    </button>
+                                    <a asp-action="Index" class="btn btn-outline-secondary btn-lg px-4">
+                                        View All Rooms
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Search Tips -->
+    <div class="row mt-5">
+        <div class="col-lg-8 mx-auto">
+            <div class="card bg-light">
+                <div class="card-body">
+                    <h5 class="card-title">
+                        <i class="fas fa-lightbulb text-warning me-2"></i>Search Tips
+                    </h5>
+                    <ul class="mb-0">
+                        <li>Book at least 24 hours in advance for the best availability</li>
+                        <li>Flexible dates? Try searching different check-in/out dates for better rates</li>
+                        <li>Room types include Standard, Deluxe, and Suite options</li>
+                        <li>All rooms include complimentary WiFi and daily housekeeping</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Popular Room Types -->
+    <div class="row mt-5">
+        <div class="col-12">
+            <h3 class="text-center mb-4">Popular Room Types</h3>
+            <div class="row">
+                @foreach (var roomType in ViewBag.RoomTypes as List<HotelBooking.Models.RoomType> ?? new List<HotelBooking.Models.RoomType>())
+                {
+                    <div class="col-md-4 mb-3">
+                        <div class="card text-center h-100">
+                            <div class="card-body">
+                                <h5 class="card-title text-primary">@roomType.TypeName</h5>
+                                <p class="card-text">@roomType.Description</p>
+                                <p class="text-muted">
+                                    <i class="fas fa-users me-1"></i>Up to @roomType.MaxOccupancy guests
+                                </p>
+                                <a href="#" onclick="selectRoomType(@roomType.RoomTypeID, '@roomType.TypeName')" 
+                                   class="btn btn-outline-primary">Select This Type</a>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function selectRoomType(roomTypeId, roomTypeName) {
+    document.getElementById('roomTypeId').value = roomTypeId;
+    // Scroll to search form
+    document.querySelector('.card.shadow').scrollIntoView({ behavior: 'smooth' });
+}
+
+// Set minimum date to today
+document.addEventListener('DOMContentLoaded', function() {
+    const today = new Date().toISOString().split('T')[0];
+    document.getElementById('checkIn').setAttribute('min', today);
+    document.getElementById('checkOut').setAttribute('min', today);
+    
+    // Update checkout min date when checkin changes
+    document.getElementById('checkIn').addEventListener('change', function() {
+        const checkInDate = new Date(this.value);
+        checkInDate.setDate(checkInDate.getDate() + 1);
+        const minCheckOut = checkInDate.toISOString().split('T')[0];
+        document.getElementById('checkOut').setAttribute('min', minCheckOut);
+        
+        // If checkout is before new minimum, update it
+        if (document.getElementById('checkOut').value <= this.value) {
+            document.getElementById('checkOut').value = minCheckOut;
+        }
+    });
+});
+</script>

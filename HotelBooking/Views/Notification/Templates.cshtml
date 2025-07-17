@@ -1,0 +1,341 @@
+@model List<HotelBooking.Models.ViewModels.NotificationTemplateViewModel>
+@{
+    ViewData["Title"] = "Notification Templates";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <!-- Header -->
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h2 class="mb-1">
+                        <i class="fas fa-file-alt text-primary me-2"></i>
+                        Notification Templates
+                    </h2>
+                    <p class="text-muted mb-0">Pre-defined templates for common notifications</p>
+                </div>
+                <div>
+                    <a href="@Url.Action("Index")" class="btn btn-outline-secondary">
+                        <i class="fas fa-arrow-left"></i> Back to Notifications
+                    </a>
+                    <a href="@Url.Action("Send")" class="btn btn-primary">
+                        <i class="fas fa-plus"></i> Create New Notification
+                    </a>
+                </div>
+            </div>
+
+            <!-- Templates Grid -->
+            <div class="row">
+                @foreach (var template in Model)
+                {
+                    <div class="col-lg-4 col-md-6 mb-4">
+                        <div class="card h-100 template-card">
+                            <div class="card-header bg-light">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <h5 class="mb-0">@template.TemplateName</h5>
+                                    <span class="badge bg-@(template.Type == "Email" ? "primary" : template.Type == "SMS" ? "success" : "info")">
+                                        @template.Type
+                                    </span>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <div class="mb-3">
+                                    <label class="form-label text-muted small">Title Template:</label>
+                                    <div class="template-content bg-light p-2 rounded">
+                                        <strong>@template.Title</strong>
+                                    </div>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label class="form-label text-muted small">Message Template:</label>
+                                    <div class="template-content bg-light p-2 rounded">
+                                        @template.Message
+                                    </div>
+                                </div>
+
+                                @if (template.Variables != null && template.Variables.Any())
+                                {
+                                    <div class="mb-3">
+                                        <label class="form-label text-muted small">Available Variables:</label>
+                                        <div class="variables-list">
+                                            @foreach (var variable in template.Variables)
+                                            {
+                                                <span class="badge bg-secondary me-1 mb-1" title="@variable.Value">
+                                                    {@variable.Key}
+                                                </span>
+                                            }
+                                        </div>
+                                    </div>
+                                }
+                            </div>
+                            <div class="card-footer bg-transparent">
+                                <div class="btn-group w-100" role="group">
+                                    <button type="button" class="btn btn-outline-primary btn-sm" 
+                                            onclick="useTemplate('@template.TemplateName', '@template.Title', '@template.Message', '@template.Type')">
+                                        <i class="fas fa-copy"></i> Use Template
+                                    </button>
+                                    <button type="button" class="btn btn-outline-info btn-sm" 
+                                            onclick="previewTemplate('@template.TemplateName', '@template.Title', '@template.Message', '@template.Type')">
+                                        <i class="fas fa-eye"></i> Preview
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+
+            <!-- Custom Template Section -->
+            <div class="card mt-4">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-plus-circle me-2"></i>
+                        Create Custom Template
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <form id="customTemplateForm">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="templateName" class="form-label">Template Name</label>
+                                    <input type="text" class="form-control" id="templateName" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="templateType" class="form-label">Type</label>
+                                    <select class="form-select" id="templateType" required>
+                                        <option value="">Select Type</option>
+                                        <option value="Email">Email</option>
+                                        <option value="SMS">SMS</option>
+                                        <option value="Push">Push Notification</option>
+                                        <option value="System">System Alert</option>
+                                    </select>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="templateTitle" class="form-label">Title Template</label>
+                                    <input type="text" class="form-control" id="templateTitle" required>
+                                    <div class="form-text">Use {VariableName} for dynamic content</div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="templateMessage" class="form-label">Message Template</label>
+                                    <textarea class="form-control" id="templateMessage" rows="5" required></textarea>
+                                    <div class="form-text">Use {VariableName} for dynamic content</div>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Common Variables</label>
+                                    <div class="variable-buttons">
+                                        <button type="button" class="btn btn-outline-secondary btn-sm me-1 mb-1" onclick="insertVariable('GuestName')">
+                                            {GuestName}
+                                        </button>
+                                        <button type="button" class="btn btn-outline-secondary btn-sm me-1 mb-1" onclick="insertVariable('ReservationID')">
+                                            {ReservationID}
+                                        </button>
+                                        <button type="button" class="btn btn-outline-secondary btn-sm me-1 mb-1" onclick="insertVariable('RoomNumber')">
+                                            {RoomNumber}
+                                        </button>
+                                        <button type="button" class="btn btn-outline-secondary btn-sm me-1 mb-1" onclick="insertVariable('CheckInDate')">
+                                            {CheckInDate}
+                                        </button>
+                                        <button type="button" class="btn btn-outline-secondary btn-sm me-1 mb-1" onclick="insertVariable('CheckOutDate')">
+                                            {CheckOutDate}
+                                        </button>
+                                        <button type="button" class="btn btn-outline-secondary btn-sm me-1 mb-1" onclick="insertVariable('Amount')">
+                                            {Amount}
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="text-end">
+                            <button type="button" class="btn btn-outline-secondary me-2" onclick="clearForm()">
+                                <i class="fas fa-times"></i> Clear
+                            </button>
+                            <button type="submit" class="btn btn-success">
+                                <i class="fas fa-save"></i> Save Template
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Preview Modal -->
+<div class="modal fade" id="previewModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Template Preview</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="notification-preview">
+                    <div class="alert alert-info">
+                        <div class="d-flex justify-content-between align-items-start">
+                            <div class="flex-grow-1">
+                                <h6 class="alert-heading mb-2" id="previewTitle">Template Title</h6>
+                                <p class="mb-1" id="previewMessage">Template message content will appear here...</p>
+                                <small class="text-muted">
+                                    <i class="fas fa-tag me-1"></i>
+                                    Type: <span id="previewType">Email</span>
+                                </small>
+                            </div>
+                            <span class="badge bg-primary" id="previewBadge">Template</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="mt-3">
+                    <h6>Sample with Variables Replaced:</h6>
+                    <div class="alert alert-light border">
+                        <h6 class="mb-2" id="sampleTitle">Sample Title</h6>
+                        <p class="mb-0" id="sampleMessage">Sample message with variables replaced...</p>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary" onclick="useTemplateFromPreview()">
+                    <i class="fas fa-copy"></i> Use This Template
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        let currentTemplate = null;
+
+        function useTemplate(name, title, message, type) {
+            // Redirect to Send page with template data
+            const params = new URLSearchParams({
+                template: name,
+                title: title,
+                message: message,
+                type: type
+            });
+            
+            window.location.href = '@Url.Action("Send")?' + params.toString();
+        }
+
+        function previewTemplate(name, title, message, type) {
+            currentTemplate = { name, title, message, type };
+            
+            $('#previewTitle').text(title);
+            $('#previewMessage').text(message);
+            $('#previewType').text(type);
+            
+            // Generate sample data
+            const sampleData = {
+                'GuestName': 'John Doe',
+                'ReservationID': 'RES001',
+                'RoomNumber': 'A-101',
+                'RoomType': 'Deluxe Suite',
+                'CheckInDate': '25/06/2025',
+                'CheckOutDate': '28/06/2025',
+                'Amount': '1,500,000 VND'
+            };
+            
+            let sampleTitle = title;
+            let sampleMessage = message;
+            
+            // Replace variables with sample data
+            Object.keys(sampleData).forEach(key => {
+                const regex = new RegExp(`{${key}}`, 'g');
+                sampleTitle = sampleTitle.replace(regex, sampleData[key]);
+                sampleMessage = sampleMessage.replace(regex, sampleData[key]);
+            });
+            
+            $('#sampleTitle').text(sampleTitle);
+            $('#sampleMessage').text(sampleMessage);
+            
+            // Update badge color based on type
+            const badgeClass = type === 'Email' ? 'bg-primary' : 
+                              type === 'SMS' ? 'bg-success' : 
+                              type === 'Push' ? 'bg-warning' : 'bg-info';
+            $('#previewBadge').removeClass('bg-primary bg-success bg-warning bg-info').addClass(badgeClass);
+            
+            $('#previewModal').modal('show');
+        }
+
+        function useTemplateFromPreview() {
+            if (currentTemplate) {
+                useTemplate(currentTemplate.name, currentTemplate.title, currentTemplate.message, currentTemplate.type);
+            }
+        }
+
+        function insertVariable(variableName) {
+            const messageField = document.getElementById('templateMessage');
+            const cursorPos = messageField.selectionStart;
+            const textBefore = messageField.value.substring(0, cursorPos);
+            const textAfter = messageField.value.substring(cursorPos);
+            
+            messageField.value = textBefore + '{' + variableName + '}' + textAfter;
+            messageField.focus();
+            messageField.setSelectionRange(cursorPos + variableName.length + 2, cursorPos + variableName.length + 2);
+        }
+
+        function clearForm() {
+            document.getElementById('customTemplateForm').reset();
+        }
+
+        // Custom template form submission
+        document.getElementById('customTemplateForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const formData = {
+                name: document.getElementById('templateName').value,
+                type: document.getElementById('templateType').value,
+                title: document.getElementById('templateTitle').value,
+                message: document.getElementById('templateMessage').value
+            };
+            
+            // Here you would typically save to server
+            // For now, just show success message and redirect to use template
+            alert('Template saved successfully!');
+            useTemplate(formData.name, formData.title, formData.message, formData.type);
+        });
+    </script>
+}
+
+<style>
+    .template-card {
+        transition: transform 0.2s, box-shadow 0.2s;
+        border: none;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    
+    .template-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+    }
+    
+    .template-content {
+        font-size: 0.9rem;
+        max-height: 100px;
+        overflow-y: auto;
+    }
+    
+    .variables-list {
+        max-height: 80px;
+        overflow-y: auto;
+    }
+    
+    .variable-buttons .btn {
+        font-size: 0.8rem;
+    }
+    
+    .notification-preview .alert {
+        margin-bottom: 0;
+    }
+    
+    .card-footer {
+        border-top: 1px solid rgba(0,0,0,0.125);
+    }
+</style>

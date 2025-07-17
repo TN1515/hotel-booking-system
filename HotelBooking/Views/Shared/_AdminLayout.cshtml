@@ -1,0 +1,569 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - HotelBooking Admin</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/HotelBooking.styles.css" asp-append-version="true" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
+    <style>
+        .admin-body {
+            background-color: #f8f9fa;
+        }
+        .admin-nav-link {
+            color: #495057 !important;
+            font-weight: 500;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            white-space: nowrap;
+        }
+        .admin-nav-link:hover, .admin-nav-link.active {
+            background-color: #e9ecef;
+            color: #007bff !important;
+        }
+        .user-initial {
+            width: 32px;
+            height: 32px;
+            font-size: 14px;
+            font-weight: bold;
+        }
+        .notification-badge {
+            position: relative;
+        }
+        .navbar-nav {
+            flex-wrap: wrap;
+        }
+        .dropdown-menu {
+            border: none;
+            box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+        }
+        .dropdown-item {
+            padding: 0.5rem 1rem;
+            transition: all 0.2s ease;
+        }
+        .dropdown-item:hover {
+            background-color: #f8f9fa;
+            color: #007bff;
+        }
+
+        /* Admin Notification Bell Styles */
+        .notification-bell {
+            transition: all 0.3s ease;
+        }
+
+        .notification-bell:hover {
+            color: #007bff !important;
+            transform: scale(1.05);
+        }
+
+        .admin-notification-badge {
+            animation: pulse 2s infinite;
+            min-width: 18px;
+            height: 18px;
+            line-height: 1;
+            padding: 2px 4px;
+            font-size: 0.7rem;
+        }
+
+        @@keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+
+
+
+        .notification-item {
+            padding: 0.75rem 1rem;
+            border-bottom: 1px solid #f8f9fa;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+        }
+
+        .notification-item:hover {
+            background-color: #f8f9fa;
+        }
+
+        .notification-item.unread {
+            background-color: #fff3cd;
+            border-left: 3px solid #ffc107;
+        }
+
+        /* Dropdown menu improvements */
+        .dropdown-menu {
+            z-index: 1050 !important;
+            border: 1px solid rgba(0,0,0,.15) !important;
+            box-shadow: 0 6px 12px rgba(0,0,0,.175) !important;
+            position: absolute !important;
+            top: 100% !important;
+            right: 0 !important;
+            left: auto !important;
+        }
+
+        .dropdown-menu.show {
+            display: block !important;
+            opacity: 1 !important;
+            visibility: visible !important;
+        }
+
+        .dropdown {
+            position: relative !important;
+        }
+
+        /* Ensure notification dropdown is visible */
+        #adminNotificationDropdown + .dropdown-menu {
+            min-width: 380px !important;
+            margin-top: 5px !important;
+        }
+
+        /* Admin profile dropdown positioning - FORCE OVERRIDE */
+        #userDropdown + .dropdown-menu,
+        .nav-item.dropdown:last-child .dropdown-menu,
+        .dropdown-menu.dropdown-menu-end {
+            position: absolute !important;
+            top: calc(100% + 15px) !important;
+            right: 25px !important;
+            left: auto !important;
+            margin-top: 15px !important;
+            margin-right: 25px !important;
+            min-width: 220px !important;
+            transform: translateX(-25px) translateY(5px) !important;
+            z-index: 1060 !important;
+        }
+
+        /* Force admin dropdown positioning */
+        .navbar-nav .nav-item.dropdown:last-child {
+            margin-right: 25px !important;
+            position: relative !important;
+        }
+
+        /* Additional override for admin profile */
+        .navbar-nav .dropdown:last-child .dropdown-menu {
+            right: 25px !important;
+            left: auto !important;
+            margin-top: 15px !important;
+            transform: translateX(-25px) !important;
+        }
+
+
+    </style>
+</head>
+<body class="admin-body">
+    <!-- Admin Header -->
+    <nav class="navbar navbar-expand-lg navbar-light bg-white border-bottom shadow-sm">
+        <div class="container-fluid px-4">
+            <!-- Brand -->
+            <a class="navbar-brand d-flex align-items-center" href="#">
+                <div class="brand-icon me-3">
+                    <i class="fas fa-hotel text-primary fa-2x"></i>
+                </div>
+                <span class="fw-bold fs-3 text-primary">HotelBooking</span>
+            </a>
+
+            <!-- Main Navigation -->
+            <div class="navbar-nav d-flex flex-row mx-auto">
+                <a class="nav-link px-4 py-2 mx-1 admin-nav-link" href="@Url.Action("Dashboard", "Admin")">
+                    <i class="fas fa-tachometer-alt me-2"></i>Dashboard
+                </a>
+
+                <!-- Guest Management -->
+                <a class="nav-link px-4 py-2 mx-1 admin-nav-link" href="@Url.Action("Index", "GuestProfile")">
+                    <i class="fas fa-users me-2"></i>Guests
+                </a>
+
+                <!-- Rooms Management -->
+                <a class="nav-link px-4 py-2 mx-1 admin-nav-link" href="@Url.Action("Index", "Rooms")">
+                    <i class="fas fa-bed me-2"></i>Rooms
+                </a>
+
+                <!-- Reservations -->
+                <a class="nav-link px-4 py-2 mx-1 admin-nav-link" href="@Url.Action("Reservations", "Admin")">
+                    <i class="fas fa-calendar-check me-2"></i>Reservations
+                </a>
+
+
+
+                <!-- Payment Management -->
+                <a class="nav-link px-4 py-2 mx-1 admin-nav-link" href="@Url.Action("PaymentManagement", "Admin")">
+                    <i class="fas fa-credit-card me-2"></i>Payments
+                </a>
+
+                <!-- Payments -->
+                <a class="nav-link px-4 py-2 mx-1 admin-nav-link" href="@Url.Action("Index", "PaymentProcess")">
+                    <i class="fas fa-credit-card me-2"></i>Payments
+                </a>
+
+                <!-- Management Dropdown -->
+                <div class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle px-4 py-2 mx-1 admin-nav-link" href="#" id="managementDropdown" role="button" data-bs-toggle="dropdown">
+                        <i class="fas fa-cogs me-2"></i>Management
+                    </a>
+                    <ul class="dropdown-menu">
+                        <li><a class="dropdown-item" href="@Url.Action("Index", "FeedbackManagement")"><i class="fas fa-comments me-2"></i>Feedback</a></li>
+                        <li><a class="dropdown-item" href="@Url.Action("Reports", "Admin")"><i class="fas fa-chart-bar me-2"></i>Reports</a></li>
+                        <li><a class="dropdown-item" href="@Url.Action("Index", "Notification")"><i class="fas fa-bell me-2"></i>Notifications</a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item" href="@Url.Action("Index", "UserManagement")"><i class="fas fa-user-cog me-2"></i>Users</a></li>
+                        <li><a class="dropdown-item" href="@Url.Action("Index", "Amenities")"><i class="fas fa-spa me-2"></i>Amenities</a></li>
+                        <li><a class="dropdown-item" href="@Url.Action("Index", "Settings")"><i class="fas fa-cog me-2"></i>Settings</a></li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Notifications & User Menu -->
+            <div class="navbar-nav d-flex align-items-center" style="gap: 15px; margin-right: 15px;">
+                @if (User.Identity!.IsAuthenticated)
+                {
+                    <!-- Notification Bell - Adjusted position -->
+                    <div class="dropdown" style="position: relative; margin-right: 20px; margin-top: 8px;">
+                        <button class="btn position-relative notification-bell-btn" type="button" id="adminNotificationDropdown" style="background: none; border: none; padding: 12px 15px; cursor: pointer; outline: none; margin-top: 5px;">
+                            <i class="fas fa-bell" style="font-size: 1.2rem; color: #6c757d; transition: color 0.2s;"></i>
+                            <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger admin-notification-badge" style="font-size: 0.7rem; display: none; min-width: 18px; height: 18px; line-height: 16px;">0</span>
+                        </button>
+                        <div class="dropdown-menu dropdown-menu-end" id="adminNotificationMenu" style="display: none; position: absolute; top: calc(100% + 10px); right: -10px; width: 350px; max-height: 450px; overflow-y: auto; z-index: 1050; background: white; border: 1px solid #dee2e6; border-radius: 0.375rem; box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);">
+                            <div class="dropdown-header bg-light" style="font-weight: 600; color: #495057;"><i class="fas fa-bell me-2"></i>Recent Notifications</div>
+                            <div class="dropdown-divider m-0"></div>
+                            <div id="adminNotificationList">
+                                <div class="text-center py-3">
+                                    <div class="spinner-border spinner-border-sm text-primary" role="status">
+                                        <span class="visually-hidden">Loading...</span>
+                                    </div>
+                                    <p class="mb-0 mt-2 text-muted small">Loading notifications...</p>
+                                </div>
+                            </div>
+                            <div class="dropdown-divider m-0"></div>
+                            <div class="text-center">
+                                <a class="dropdown-item text-center" asp-controller="Notification" asp-action="My" style="color: #007bff;">
+                                    <i class="fas fa-eye me-2"></i>View All Notifications
+                                </a>
+                            </div>
+                            <div class="text-center">
+                                <button class="dropdown-item text-center" onclick="testAdminNotifications()" style="border: none; background: none; color: #007bff; width: 100%; cursor: pointer;">
+                                    <i class="fas fa-vial me-2"></i>Test Notifications
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- User Menu -->
+                    <div class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown">
+                            <div class="user-info d-flex align-items-center">
+                                <span class="user-initial bg-success text-white rounded-circle d-flex align-items-center justify-content-center me-2">
+                                    @(User.Identity?.Name?.Substring(0, 1).ToUpper() ?? "A")
+                                </span>
+                                <div class="d-flex flex-column">
+                                    <span class="fw-semibold">@User.Identity?.Name</span>
+                                    <small class="text-success">Admin</small>
+                                </div>
+                            </div>
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end shadow border-0" style="position: absolute !important; top: calc(100% + 15px) !important; right: 25px !important; left: auto !important; margin-top: 15px !important; transform: translateX(-25px) translateY(5px) !important; min-width: 220px !important; z-index: 1060 !important;">
+                            <li><a class="dropdown-item" href="@Url.Action("Profile", "Admin")"><i class="fas fa-user me-2"></i>Profile</a></li>
+                            <li><a class="dropdown-item" href="@Url.Action("Index", "Settings")"><i class="fas fa-cog me-2"></i>Settings</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li>
+                                <form asp-controller="Account" asp-action="Logout" method="post" class="d-inline">
+                                    <button type="submit" class="dropdown-item">
+                                        <i class="fas fa-sign-out-alt me-2"></i>Logout
+                                    </button>
+                                </form>
+                            </li>
+                        </ul>
+                    </div>
+                }
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main>
+        @RenderBody()
+    </main>
+
+    <!-- CSRF Token for AJAX requests -->
+    <form style="display: none;">
+        @Html.AntiForgeryToken()
+    </form>
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+
+    @if (User.Identity!.IsAuthenticated)
+    {
+        <script>
+            $(document).ready(function() {
+                console.log('=== ADMIN NOTIFICATION SYSTEM INITIALIZING ===');
+                console.log('jQuery version:', $.fn.jquery);
+                console.log('User authenticated:', '@User.Identity!.IsAuthenticated');
+                console.log('User name:', '@User.Identity?.Name');
+
+                // Check if elements exist
+                var $bellButton = $('#adminNotificationDropdown');
+                var $menu = $('#adminNotificationMenu');
+                var $list = $('#adminNotificationList');
+
+                console.log('Notification bell button:', $bellButton.length);
+                console.log('Notification menu element:', $menu.length);
+                console.log('Notification list element:', $list.length);
+
+                // Load notification count and recent notifications for admin
+                loadAdminNotificationCount();
+
+                // Add click event listener to notification bell
+                $bellButton.on('click', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    console.log('🔔 NOTIFICATION BELL CLICKED via EVENT LISTENER!');
+
+                    var isVisible = $menu.is(':visible');
+                    console.log('Menu currently visible:', isVisible);
+
+                    // Close all other dropdowns first
+                    $('.dropdown-menu').hide();
+
+                    if (!isVisible) {
+                        console.log('📂 Opening notification dropdown...');
+                        $menu.show();
+                        loadAdminRecentNotifications();
+                    } else {
+                        console.log('📁 Closing notification dropdown...');
+                        $menu.hide();
+                    }
+                });
+
+                // Close dropdown when clicking outside
+                $(document).on('click', function(e) {
+                    if (!$(e.target).closest('.dropdown').length) {
+                        $menu.hide();
+                        console.log('Closed dropdown by clicking outside');
+                    }
+                });
+
+                // Refresh notifications every 30 seconds
+                setInterval(loadAdminNotificationCount, 30000);
+
+                console.log('=== ADMIN NOTIFICATION SYSTEM INITIALIZED ===');
+            });
+
+
+
+            function loadAdminNotificationCount() {
+                console.log('=== LOADING ADMIN NOTIFICATION COUNT ===');
+                console.log('URL:', '@Url.Action("GetUnreadCount", "Notification")');
+
+                $.ajax({
+                    url: '@Url.Action("GetUnreadCount", "Notification")',
+                    type: 'GET',
+                    beforeSend: function() {
+                        console.log('Sending AJAX request for notification count...');
+                    },
+                    success: function(response) {
+                        console.log('✅ Admin notification count SUCCESS:', response);
+                        var count = response.count || 0;
+                        var badge = $('.admin-notification-badge');
+                        console.log('Badge element found:', badge.length);
+
+                        if (count > 0) {
+                            badge.text(count).show();
+                            console.log('✅ Badge shown with count:', count);
+                        } else {
+                            badge.hide();
+                            console.log('ℹ️ Badge hidden (no notifications)');
+                        }
+                    },
+                    error: function(xhr, status, error) {
+                        console.error('❌ FAILED to load admin notification count');
+                        console.error('Status:', status);
+                        console.error('Error:', error);
+                        console.error('Response:', xhr.responseText);
+                        console.error('Status Code:', xhr.status);
+                    }
+                });
+            }
+
+            function loadAdminRecentNotifications() {
+                console.log('=== LOADING ADMIN RECENT NOTIFICATIONS ===');
+                var listContainer = $('#adminNotificationList');
+                console.log('List container found:', listContainer.length);
+                console.log('URL:', '@Url.Action("GetRecent", "Notification")');
+
+                $.ajax({
+                    url: '@Url.Action("GetRecent", "Notification")',
+                    type: 'GET',
+                    data: { count: 5 },
+                    beforeSend: function() {
+                        console.log('Sending AJAX request for recent notifications...');
+                    },
+                    success: function(response) {
+                        console.log('✅ Admin recent notifications SUCCESS:', response);
+                        var notifications = response.notifications || [];
+                        console.log('Number of notifications:', notifications.length);
+                        var html = '';
+
+                        if (notifications.length === 0) {
+                            html = `
+                                <li class="text-center py-4">
+                                    <i class="fas fa-bell-slash fa-2x text-muted mb-2"></i>
+                                    <p class="mb-0 text-muted small">No notifications yet</p>
+                                </li>
+                            `;
+                            console.log('ℹ️ No notifications found, showing empty state');
+                        } else {
+                            console.log('✅ Processing', notifications.length, 'notifications');
+                            notifications.forEach(function(notification, index) {
+                                console.log(`Processing notification ${index + 1}:`, notification);
+                                var icon = getNotificationIcon(notification.type);
+                                var readClass = notification.isRead ? 'read' : 'unread';
+                                var newBadge = notification.isRead ? '' : '<span class="badge bg-primary ms-2">New</span>';
+                                var timeAgo = getTimeAgo(new Date(notification.createdDate));
+
+                                html += `
+                                    <li class="notification-item ${readClass}" data-id="${notification.id}">
+                                        <div class="d-flex">
+                                            <div class="me-3">${icon}</div>
+                                            <div class="flex-grow-1">
+                                                <h6 class="mb-1 fw-semibold">${truncateText(notification.title, 30)}</h6>
+                                                <p class="mb-1 small text-muted">${truncateText(notification.message, 60)}</p>
+                                                <small class="text-muted">${timeAgo}</small>
+                                                ${newBadge}
+                                            </div>
+                                        </div>
+                                    </li>
+                                `;
+                            });
+                            console.log('✅ Generated HTML for notifications');
+                        }
+
+                        console.log('✅ Setting HTML content to list container');
+                        listContainer.html(html);
+                        console.log('✅ HTML content set successfully');
+
+                        // Add click handlers for marking as read
+                        var unreadItems = $('.notification-item.unread');
+                        console.log('Found', unreadItems.length, 'unread notification items');
+
+                        unreadItems.click(function(e) {
+                            e.preventDefault();
+                            var notificationId = $(this).data('id');
+                            console.log('Marking notification as read:', notificationId);
+                            markNotificationAsRead(notificationId, $(this));
+                        });
+
+                        console.log('✅ Click handlers attached successfully');
+                    },
+                    error: function(xhr, status, error) {
+                        console.error('❌ FAILED to load admin recent notifications');
+                        console.error('Status:', status);
+                        console.error('Error:', error);
+                        console.error('Response:', xhr.responseText);
+                        console.error('Status Code:', xhr.status);
+
+                        listContainer.html(`
+                            <li class="text-center py-3">
+                                <i class="fas fa-exclamation-triangle text-warning"></i>
+                                <p class="mb-0 text-muted small">Failed to load notifications</p>
+                                <small class="text-danger">Error: ${error}</small>
+                            </li>
+                        `);
+                    }
+                });
+            }
+
+            function getNotificationIcon(type) {
+                switch(type?.toLowerCase()) {
+                    case 'booking':
+                        return '<i class="fas fa-calendar-check text-success me-2"></i>';
+                    case 'payment':
+                        return '<i class="fas fa-credit-card text-info me-2"></i>';
+                    case 'system':
+                        return '<i class="fas fa-cog text-secondary me-2"></i>';
+                    case 'promotion':
+                        return '<i class="fas fa-gift text-warning me-2"></i>';
+                    default:
+                        return '<i class="fas fa-bell text-primary me-2"></i>';
+                }
+            }
+
+            function truncateText(text, maxLength) {
+                if (text.length <= maxLength) return text;
+                return text.substring(0, maxLength) + '...';
+            }
+
+            function getTimeAgo(date) {
+                var now = new Date();
+                var diffMs = now - date;
+                var diffMins = Math.floor(diffMs / 60000);
+                var diffHours = Math.floor(diffMins / 60);
+                var diffDays = Math.floor(diffHours / 24);
+
+                if (diffMins < 1) return 'Just now';
+                if (diffMins < 60) return diffMins + ' minutes ago';
+                if (diffHours < 24) return diffHours + ' hours ago';
+                if (diffDays < 7) return diffDays + ' days ago';
+                return date.toLocaleDateString();
+            }
+
+            function markNotificationAsRead(notificationId, element) {
+                $.ajax({
+                    url: '@Url.Action("MarkAsRead", "Notification")',
+                    type: 'POST',
+                    data: {
+                        id: notificationId,
+                        __RequestVerificationToken: $('input[name="__RequestVerificationToken"]').val()
+                    },
+                    success: function(response) {
+                        if (response.success) {
+                            element.removeClass('unread').addClass('read');
+                            element.find('.badge.bg-primary').remove();
+                            loadAdminNotificationCount(); // Refresh count
+                        }
+                    },
+                    error: function() {
+                        console.log('Failed to mark notification as read');
+                    }
+                });
+            }
+
+            function testAdminNotifications() {
+                console.log('Testing admin notifications...');
+
+                // First test if we can get notification count
+                $.ajax({
+                    url: '@Url.Action("GetUnreadCount", "Notification")',
+                    type: 'GET',
+                    success: function(response) {
+                        console.log('Current notification count:', response);
+
+                        // Then create sample notifications
+                        $.ajax({
+                            url: '@Url.Action("SeedSampleNotifications", "Notification")',
+                            type: 'GET',
+                            success: function(response) {
+                                console.log('Sample notifications created:', response);
+                                loadAdminNotificationCount();
+                                alert('Test notifications created! Check the notification bell.');
+                            },
+                            error: function(xhr, status, error) {
+                                console.log('Failed to create test notifications:', error);
+                                console.log('Response:', xhr.responseText);
+                                alert('Failed to create test notifications. Check console for details.');
+                            }
+                        });
+                    },
+                    error: function(xhr, status, error) {
+                        console.log('Failed to get notification count:', error);
+                        console.log('Response:', xhr.responseText);
+                        alert('Failed to connect to notification service. Check console for details.');
+                    }
+                });
+            }
+        </script>
+    }
+
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

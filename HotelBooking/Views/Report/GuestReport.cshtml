@@ -1,0 +1,377 @@
+@model HotelBooking.Models.ViewModels.GuestReportViewModel
+@{
+    ViewData["Title"] = "Guest Report";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2><i class="fas fa-users me-2"></i>Guest Report</h2>
+                <div>
+                    <button onclick="window.print()" class="btn btn-secondary me-2">
+                        <i class="fas fa-print me-2"></i>Print Report
+                    </button>
+                    <a href="@Url.Action("Index", "Report")" class="btn btn-primary">
+                        <i class="fas fa-arrow-left me-2"></i>Back to Reports
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Summary Cards -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card bg-primary text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h4 class="card-title">@Model.TotalGuests</h4>
+                            <p class="card-text">Total Guests</p>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="fas fa-users fa-2x"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-success text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h4 class="card-title">@Model.NewGuests</h4>
+                            <p class="card-text">New Guests</p>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="fas fa-user-plus fa-2x"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-info text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h4 class="card-title">@Model.ReturningGuests</h4>
+                            <p class="card-text">Returning Guests</p>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="fas fa-user-check fa-2x"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-warning text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h4 class="card-title">@Model.AverageStayDuration.ToString("F1")</h4>
+                            <p class="card-text">Avg Stay (Days)</p>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="fas fa-calendar-alt fa-2x"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Charts Row -->
+    <div class="row mb-4">
+        <!-- Age Group Distribution -->
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5><i class="fas fa-chart-pie me-2"></i>Age Group Distribution</h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="ageGroupChart" width="400" height="200"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Geographic Distribution -->
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5><i class="fas fa-globe me-2"></i>Geographic Distribution</h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="geographicChart" width="400" height="200"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Guest Demographics -->
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5><i class="fas fa-chart-bar me-2"></i>Age Group Details</h5>
+                </div>
+                <div class="card-body">
+                    @if (Model.AgeGroupData != null && Model.AgeGroupData.Any())
+                    {
+                        <div class="table-responsive">
+                            <table class="table table-striped">
+                                <thead>
+                                    <tr>
+                                        <th>Age Group</th>
+                                        <th>Count</th>
+                                        <th>Percentage</th>
+                                        <th>Avg Bookings</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var ageGroup in Model.AgeGroupData)
+                                    {
+                                        <tr>
+                                            <td>@ageGroup.AgeGroup</td>
+                                            <td>@ageGroup.GuestCount</td>
+                                            <td>
+                                                <div class="progress" style="height: 20px;">
+                                                    <div class="progress-bar" role="progressbar" 
+                                                         style="width: @ageGroup.Percentage.ToString("F1")%" 
+                                                         aria-valuenow="@ageGroup.Percentage" aria-valuemin="0" aria-valuemax="100">
+                                                        @ageGroup.Percentage.ToString("F1")%
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td>@ageGroup.AverageBookings.ToString("F1")</td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    }
+                    else
+                    {
+                        <p class="text-muted">No age group data available.</p>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5><i class="fas fa-map-marker-alt me-2"></i>Top Countries</h5>
+                </div>
+                <div class="card-body">
+                    @if (Model.CountryData != null && Model.CountryData.Any())
+                    {
+                        <div class="table-responsive">
+                            <table class="table table-striped">
+                                <thead>
+                                    <tr>
+                                        <th>Country</th>
+                                        <th>Guests</th>
+                                        <th>Percentage</th>
+                                        <th>Revenue</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var country in Model.CountryData.Take(10))
+                                    {
+                                        <tr>
+                                            <td>@country.CountryName</td>
+                                            <td>@country.GuestCount</td>
+                                            <td>@country.Percentage.ToString("F1")%</td>
+                                            <td>$@country.TotalRevenue.ToString("N2")</td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    }
+                    else
+                    {
+                        <p class="text-muted">No country data available.</p>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Guest Loyalty Analysis -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5><i class="fas fa-star me-2"></i>Guest Loyalty Analysis</h5>
+                </div>
+                <div class="card-body">
+                    @if (Model.LoyaltyData != null && Model.LoyaltyData.Any())
+                    {
+                        <div class="table-responsive">
+                            <table class="table table-striped">
+                                <thead>
+                                    <tr>
+                                        <th>Guest Segment</th>
+                                        <th>Guest Count</th>
+                                        <th>Avg Bookings</th>
+                                        <th>Avg Spend</th>
+                                        <th>Total Revenue</th>
+                                        <th>Percentage</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var segment in Model.LoyaltyData)
+                                    {
+                                        <tr>
+                                            <td>
+                                                <span class="badge bg-@(segment.Segment == "VIP" ? "success" : 
+                                                                       segment.Segment == "Loyal" ? "primary" : 
+                                                                       segment.Segment == "Regular" ? "info" : "secondary")">
+                                                    @segment.Segment
+                                                </span>
+                                            </td>
+                                            <td>@segment.GuestCount</td>
+                                            <td>@segment.AverageBookings.ToString("F1")</td>
+                                            <td>$@segment.AverageSpend.ToString("N2")</td>
+                                            <td>$@segment.TotalRevenue.ToString("N2")</td>
+                                            <td>@segment.Percentage.ToString("F1")%</td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    }
+                    else
+                    {
+                        <p class="text-muted">No loyalty data available.</p>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Monthly Guest Trends -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5><i class="fas fa-chart-line me-2"></i>Monthly Guest Trends</h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="monthlyTrendsChart" width="400" height="200"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        // Age Group Chart
+        const ageCtx = document.getElementById('ageGroupChart').getContext('2d');
+        const ageData = @Html.Raw(Json.Serialize(Model.AgeGroupData != null ? Model.AgeGroupData : new List<object>()));
+
+        new Chart(ageCtx, {
+            type: 'doughnut',
+            data: {
+                labels: ageData.map(d => d.ageGroup),
+                datasets: [{
+                    data: ageData.map(d => d.guestCount),
+                    backgroundColor: [
+                        '#007bff', // Blue
+                        '#28a745', // Green
+                        '#ffc107', // Yellow
+                        '#dc3545', // Red
+                        '#6f42c1', // Purple
+                        '#fd7e14'  // Orange
+                    ]
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        position: 'bottom'
+                    }
+                }
+            }
+        });
+
+        // Geographic Chart
+        const geoCtx = document.getElementById('geographicChart').getContext('2d');
+        const geoData = @Html.Raw(Json.Serialize(Model.CountryData?.Take(5).ToList() != null ? Model.CountryData.Take(5).ToList() : new List<object>()));
+
+        new Chart(geoCtx, {
+            type: 'bar',
+            data: {
+                labels: geoData.map(d => d.countryName),
+                datasets: [{
+                    label: 'Guests',
+                    data: geoData.map(d => d.guestCount),
+                    backgroundColor: '#007bff',
+                    borderColor: '#0056b3',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+
+        // Monthly Trends Chart
+        const trendsCtx = document.getElementById('monthlyTrendsChart').getContext('2d');
+        const trendsData = @Html.Raw(Json.Serialize(Model.MonthlyData != null ? Model.MonthlyData : new List<object>()));
+        
+        new Chart(trendsCtx, {
+            type: 'line',
+            data: {
+                labels: trendsData.map(d => d.month),
+                datasets: [{
+                    label: 'New Guests',
+                    data: trendsData.map(d => d.newGuests),
+                    borderColor: '#28a745',
+                    backgroundColor: 'rgba(40, 167, 69, 0.1)',
+                    tension: 0.4
+                }, {
+                    label: 'Returning Guests',
+                    data: trendsData.map(d => d.returningGuests),
+                    borderColor: '#007bff',
+                    backgroundColor: 'rgba(0, 123, 255, 0.1)',
+                    tension: 0.4
+                }]
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+    </script>
+}
+
+<style>
+    @@media print {
+        .btn, .navbar, .sidebar {
+            display: none !important;
+        }
+        .container-fluid {
+            margin: 0 !important;
+            padding: 0 !important;
+        }
+    }
+</style>

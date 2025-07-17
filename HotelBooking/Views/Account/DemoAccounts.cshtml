@@ -1,0 +1,157 @@
+@model List<object>
+@{
+    ViewData["Title"] = "Demo Accounts";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-12">
+            <div class="text-center mb-5">
+                <h1 class="display-4 text-primary">
+                    <i class="fas fa-users me-3"></i>Demo Accounts
+                </h1>
+                <p class="lead text-muted">
+                    Sử dụng các tài khoản demo sau để trải nghiệm hệ thống với các quyền khác nhau
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        @foreach (dynamic account in Model)
+        {
+            <div class="col-lg-4 col-md-6 mb-4">
+                <div class="card h-100 shadow-sm border-0">
+                    <div class="card-header text-white @(account.Role == "Admin" ? "bg-danger" : account.Role == "Staff" ? "bg-warning" : "bg-success")">
+                        <div class="d-flex align-items-center">
+                            <i class="fas fa-@(account.Role == "Admin" ? "crown" : account.Role == "Staff" ? "user-tie" : "user") fa-2x me-3"></i>
+                            <div>
+                                <h4 class="card-title mb-0">@account.Role</h4>
+                                <small class="opacity-75">@account.Username</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <p class="card-text text-muted mb-3">@account.Description</p>
+                        
+                        <div class="mb-3">
+                            <h6 class="fw-bold text-dark">
+                                <i class="fas fa-key me-2"></i>Thông tin đăng nhập:
+                            </h6>
+                            <div class="bg-light p-3 rounded">
+                                <div class="row">
+                                    <div class="col-sm-4">
+                                        <strong>Email:</strong>
+                                    </div>
+                                    <div class="col-sm-8">
+                                        <code>@account.Email</code>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-sm-4">
+                                        <strong>Username:</strong>
+                                    </div>
+                                    <div class="col-sm-8">
+                                        <code>@account.Username</code>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-sm-4">
+                                        <strong>Password:</strong>
+                                    </div>
+                                    <div class="col-sm-8">
+                                        <code>@account.Password</code>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <h6 class="fw-bold text-dark">
+                                <i class="fas fa-cogs me-2"></i>Chức năng:
+                            </h6>
+                            <ul class="list-unstyled">
+                                @foreach (string feature in account.Features)
+                                {
+                                    <li class="mb-1">
+                                        <i class="fas fa-check text-success me-2"></i>@feature
+                                    </li>
+                                }
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="card-footer bg-transparent">
+                        <form asp-action="DemoLogin" method="post" class="d-inline">
+                            <input type="hidden" name="role" value="@account.Role.ToString().ToLower()" />
+                            <button type="submit" class="btn btn-@(account.Role == "Admin" ? "danger" : account.Role == "Staff" ? "warning" : "success") w-100">
+                                <i class="fas fa-sign-in-alt me-2"></i>Đăng nhập với @account.Role
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+
+    <div class="row mt-5">
+        <div class="col-12">
+            <div class="card border-info">
+                <div class="card-header bg-info text-white">
+                    <h5 class="mb-0">
+                        <i class="fas fa-info-circle me-2"></i>Hướng dẫn sử dụng
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6 class="fw-bold">Cách đăng nhập:</h6>
+                            <ol>
+                                <li>Nhấn nút "Đăng nhập với [Role]" trên thẻ tài khoản</li>
+                                <li>Hoặc sử dụng form đăng nhập thông thường với thông tin trên</li>
+                                <li>Khám phá các chức năng theo quyền của từng role</li>
+                            </ol>
+                        </div>
+                        <div class="col-md-6">
+                            <h6 class="fw-bold">Lưu ý:</h6>
+                            <ul>
+                                <li>Tất cả tài khoản đều sử dụng password: <code>123456</code></li>
+                                <li>Dữ liệu demo sẽ được reset khi khởi động lại ứng dụng</li>
+                                <li>Admin có quyền truy cập tất cả chức năng</li>
+                                <li>Staff có quyền quản lý booking và khách hàng</li>
+                                <li>Customer chỉ có quyền đặt phòng và xem thông tin cá nhân</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="text-center mt-4">
+        <a href="@Url.Action("Login", "Account")" class="btn btn-outline-primary btn-lg">
+            <i class="fas fa-arrow-left me-2"></i>Quay lại trang đăng nhập
+        </a>
+    </div>
+</div>
+
+<style>
+    .card {
+        transition: transform 0.2s ease-in-out;
+    }
+    
+    .card:hover {
+        transform: translateY(-5px);
+    }
+    
+    .bg-light {
+        background-color: #f8f9fa !important;
+    }
+    
+    code {
+        background-color: #e9ecef;
+        padding: 2px 4px;
+        border-radius: 3px;
+        font-size: 0.9em;
+    }
+</style>

@@ -1,0 +1,266 @@
+@model HotelBooking.Models.ModifyReservationViewModel
+@{
+    ViewData["Title"] = "Modify Booking";
+}
+
+<div class="container-fluid py-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card shadow-lg border-0">
+                <div class="card-header bg-info text-white">
+                    <h2 class="card-title mb-0">
+                        <i class="fas fa-edit me-2"></i>Modify Booking
+                    </h2>
+                </div>
+                <div class="card-body p-4">
+                    <!-- Info Alert -->
+                    <div class="alert alert-info" role="alert">
+                        <i class="fas fa-info-circle me-2"></i>
+                        <strong>Note:</strong> You can modify your booking dates and number of guests. Changes are subject to room availability.
+                    </div>
+
+                    @if (Model.Room != null)
+                    {
+                        <!-- Room Information -->
+                        <div class="card mb-4">
+                            <div class="card-header bg-light">
+                                <h5 class="mb-0">
+                                    <i class="fas fa-bed me-2"></i>Room Information
+                                </h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-md-4">
+                                        <div class="room-image-placeholder bg-light rounded d-flex align-items-center justify-content-center" style="height: 150px;">
+                                            <i class="fas fa-bed fa-3x text-muted"></i>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-8">
+                                        <h4 class="text-primary">@Model.Room.RoomNumber</h4>
+                                        <p class="text-muted mb-2">
+                                            <i class="fas fa-tag me-2"></i>@Model.Room.RoomType?.TypeName
+                                        </p>
+                                        <p class="h5 text-success mb-2">
+                                            <i class="fas fa-dollar-sign me-1"></i>@Model.Room.Price.ToString("C") / night
+                                        </p>
+                                        @if (!string.IsNullOrEmpty(Model.Room.Description))
+                                        {
+                                            <p class="text-muted">@Model.Room.Description</p>
+                                        }
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Current vs New Booking Comparison -->
+                        <div class="row mb-4">
+                            <div class="col-md-6">
+                                <div class="card bg-light">
+                                    <div class="card-header">
+                                        <h6 class="mb-0 text-muted">
+                                            <i class="fas fa-calendar me-2"></i>Current Booking
+                                        </h6>
+                                    </div>
+                                    <div class="card-body">
+                                        <dl class="row mb-0">
+                                            <dt class="col-sm-6">Check-in:</dt>
+                                            <dd class="col-sm-6">@Model.OriginalCheckInDate.ToString("MMM dd, yyyy")</dd>
+                                            
+                                            <dt class="col-sm-6">Check-out:</dt>
+                                            <dd class="col-sm-6">@Model.OriginalCheckOutDate.ToString("MMM dd, yyyy")</dd>
+                                            
+                                            <dt class="col-sm-6">Nights:</dt>
+                                            <dd class="col-sm-6">@((Model.OriginalCheckOutDate - Model.OriginalCheckInDate).Days)</dd>
+                                            
+                                            <dt class="col-sm-6">Total:</dt>
+                                            <dd class="col-sm-6 text-success fw-bold">@Model.OriginalTotalPrice.ToString("C")</dd>
+                                        </dl>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="card border-info">
+                                    <div class="card-header bg-info text-white">
+                                        <h6 class="mb-0">
+                                            <i class="fas fa-calendar-plus me-2"></i>New Booking
+                                        </h6>
+                                    </div>
+                                    <div class="card-body">
+                                        <dl class="row mb-0">
+                                            <dt class="col-sm-6">Check-in:</dt>
+                                            <dd class="col-sm-6" id="newCheckIn">-</dd>
+                                            
+                                            <dt class="col-sm-6">Check-out:</dt>
+                                            <dd class="col-sm-6" id="newCheckOut">-</dd>
+                                            
+                                            <dt class="col-sm-6">Nights:</dt>
+                                            <dd class="col-sm-6" id="newNights">-</dd>
+                                            
+                                            <dt class="col-sm-6">Total:</dt>
+                                            <dd class="col-sm-6 fw-bold" id="newTotal">$0.00</dd>
+                                        </dl>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Modification Form -->
+                        <form asp-action="Modify" method="post" class="needs-validation" novalidate>
+                            <input type="hidden" asp-for="ReservationID" />
+                            <input type="hidden" asp-for="RoomID" />
+                            <input type="hidden" asp-for="OriginalCheckInDate" />
+                            <input type="hidden" asp-for="OriginalCheckOutDate" />
+                            
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label asp-for="CheckInDate" class="form-label fw-bold">
+                                        <i class="fas fa-calendar-alt me-2"></i>New Check-in Date
+                                    </label>
+                                    <input asp-for="CheckInDate" class="form-control form-control-lg" type="date" required />
+                                    <span asp-validation-for="CheckInDate" class="text-danger"></span>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label asp-for="CheckOutDate" class="form-label fw-bold">
+                                        <i class="fas fa-calendar-alt me-2"></i>New Check-out Date
+                                    </label>
+                                    <input asp-for="CheckOutDate" class="form-control form-control-lg" type="date" required />
+                                    <span asp-validation-for="CheckOutDate" class="text-danger"></span>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label asp-for="NumberOfGuests" class="form-label fw-bold">
+                                        <i class="fas fa-users me-2"></i>Number of Guests
+                                    </label>
+                                    <select asp-for="NumberOfGuests" class="form-select form-select-lg" required>
+                                        <option value="">Select guests</option>
+                                        @for (int i = 1; i <= 10; i++)
+                                        {
+                                            <option value="@i">@i Guest@(i > 1 ? "s" : "")</option>
+                                        }
+                                    </select>
+                                    <span asp-validation-for="NumberOfGuests" class="text-danger"></span>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label fw-bold">
+                                        <i class="fas fa-calculator me-2"></i>Price Difference
+                                    </label>
+                                    <div class="form-control form-control-lg" id="priceDifference" style="background-color: #f8f9fa;">
+                                        $0.00
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Price Summary -->
+                            <div class="card bg-light mb-4">
+                                <div class="card-body">
+                                    <h5 class="card-title">
+                                        <i class="fas fa-receipt me-2"></i>Price Summary
+                                    </h5>
+                                    <div class="row">
+                                        <div class="col-6">
+                                            <p class="mb-1">Original Total:</p>
+                                            <p class="mb-1">New Total:</p>
+                                            <hr class="my-2">
+                                            <p class="mb-0 fw-bold">Difference:</p>
+                                        </div>
+                                        <div class="col-6 text-end">
+                                            <p class="mb-1">@Model.OriginalTotalPrice.ToString("C")</p>
+                                            <p class="mb-1" id="summaryNewTotal">$0.00</p>
+                                            <hr class="my-2">
+                                            <p class="mb-0 fw-bold" id="summaryDifference">$0.00</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Action Buttons -->
+                            <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                                <a asp-action="Details" asp-route-id="@Model.ReservationID" class="btn btn-outline-secondary btn-lg me-md-2">
+                                    <i class="fas fa-arrow-left me-2"></i>Cancel Changes
+                                </a>
+                                <button type="submit" class="btn btn-info btn-lg">
+                                    <i class="fas fa-save me-2"></i>Save Changes
+                                </button>
+                            </div>
+                        </form>
+                    }
+                    else
+                    {
+                        <div class="alert alert-danger">
+                            <i class="fas fa-exclamation-triangle me-2"></i>
+                            Room information not found.
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    
+    <script>
+        $(document).ready(function() {
+            const roomPrice = @Model.Room?.Price ?? 0;
+            const originalTotal = @Model.OriginalTotalPrice;
+            
+            function calculateChanges() {
+                const checkIn = new Date($('#CheckInDate').val());
+                const checkOut = new Date($('#CheckOutDate').val());
+                
+                if (checkIn && checkOut && checkOut > checkIn) {
+                    const timeDiff = checkOut.getTime() - checkIn.getTime();
+                    const nights = Math.ceil(timeDiff / (1000 * 3600 * 24));
+                    const newTotal = nights * roomPrice;
+                    const difference = newTotal - originalTotal;
+                    
+                    // Update new booking display
+                    $('#newCheckIn').text(checkIn.toLocaleDateString());
+                    $('#newCheckOut').text(checkOut.toLocaleDateString());
+                    $('#newNights').text(nights);
+                    $('#newTotal').text('$' + newTotal.toFixed(2));
+                    
+                    // Update price difference
+                    const diffClass = difference >= 0 ? 'text-danger' : 'text-success';
+                    const diffSign = difference >= 0 ? '+' : '';
+                    $('#priceDifference').text(diffSign + '$' + Math.abs(difference).toFixed(2))
+                                        .removeClass('text-success text-danger')
+                                        .addClass(diffClass);
+                    
+                    // Update summary
+                    $('#summaryNewTotal').text('$' + newTotal.toFixed(2));
+                    $('#summaryDifference').text(diffSign + '$' + Math.abs(difference).toFixed(2))
+                                          .removeClass('text-success text-danger')
+                                          .addClass(diffClass);
+                } else {
+                    // Reset displays
+                    $('#newCheckIn, #newCheckOut, #newNights').text('-');
+                    $('#newTotal, #summaryNewTotal').text('$0.00');
+                    $('#priceDifference, #summaryDifference').text('$0.00')
+                                                           .removeClass('text-success text-danger');
+                }
+            }
+            
+            $('#CheckInDate, #CheckOutDate').on('change', calculateChanges);
+            
+            // Set minimum dates
+            const today = new Date().toISOString().split('T')[0];
+            $('#CheckInDate').attr('min', today);
+            
+            $('#CheckInDate').on('change', function() {
+                const checkInDate = $(this).val();
+                if (checkInDate) {
+                    const nextDay = new Date(checkInDate);
+                    nextDay.setDate(nextDay.getDate() + 1);
+                    $('#CheckOutDate').attr('min', nextDay.toISOString().split('T')[0]);
+                }
+            });
+            
+            // Initial calculation
+            calculateChanges();
+        });
+    </script>
+}
