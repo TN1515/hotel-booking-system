@@ -188,12 +188,15 @@ namespace HotelBooking.Controllers
 
         // GET: Notification/Send
         [Authorize(Roles = "Admin,Staff")]
-        public async Task<IActionResult> Send()
+        public async Task<IActionResult> Send(string? title, string? message, string? type)
         {
             var viewModel = new SendNotificationViewModel
             {
                 SendImmediately = true,
-                Users = await _context.Users.Where(u => u.IsActive).ToListAsync()
+                Users = await _context.Users.Where(u => u.IsActive).ToListAsync(),
+                Title = title ?? string.Empty,
+                Message = message ?? string.Empty,
+                Type = type ?? string.Empty
             };
 
             return View(viewModel);

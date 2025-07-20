@@ -10,10 +10,7 @@
             <!-- Header -->
             <div class="d-flex justify-content-between align-items-center mb-4">
                 <div>
-                    <h2 class="mb-1">
-                        <i class="fas fa-star text-warning me-2"></i>
-                        Loyalty Tiers Management
-                    </h2>
+                    <h1 class="page-title"><i class="fas fa-star text-warning me-2"></i>Loyalty Tiers Management</h1>
                     <p class="text-muted mb-0">Manage loyalty program tiers and rewards</p>
                 </div>
                 <div>
@@ -102,13 +99,22 @@
                                                         </span>
                                                     </td>
                                                     <td>
-                                                        <div class="btn-group btn-group-sm">
+                                                        <div class="d-flex flex-row">
                                                             <button type="button" 
-                                                                    class="btn btn-outline-@(tier.IsActive ? "warning" : "success")"
+                                                                    class="btn btn-outline-@(tier.IsActive ? "warning" : "success") btn-xs action-btn"
                                                                     onclick="toggleStatus('loyaltytier', @tier.LoyaltyTierID)">
                                                                 <i class="fas fa-@(tier.IsActive ? "pause" : "play") me-1"></i>
                                                                 @(tier.IsActive ? "Deactivate" : "Activate")
                                                             </button>
+                                                            <a href="@Url.Action("EditLoyaltyTier", new { id = tier.LoyaltyTierID })" class="btn btn-outline-primary btn-xs action-btn">
+                                                                <i class="fas fa-edit me-1"></i>Edit
+                                                            </a>
+                                                            <form asp-action="DeleteLoyaltyTier" method="post" style="display:inline;" onsubmit="return confirm('Are you sure you want to delete this tier?');">
+                                                                <input type="hidden" name="id" value="@tier.LoyaltyTierID" />
+                                                                <button type="submit" class="btn btn-outline-danger btn-xs action-btn">
+                                                                    <i class="fas fa-trash me-1"></i>Delete
+                                                                </button>
+                                                            </form>
                                                         </div>
                                                     </td>
                                                 </tr>
@@ -169,6 +175,26 @@
 </div>
 
 @section Scripts {
+    <style>
+        .btn-xs {
+            font-size: 0.95rem !important;
+            padding: 0.3rem 0.7rem !important;
+            border-radius: 0.7rem !important;
+        }
+        .btn-xs i {
+            font-size: 1em !important;
+        }
+        .action-btn {
+            margin-right: 0.5rem;
+            border-radius: 0.7rem !important;
+        }
+        .action-btn:last-child {
+            margin-right: 0;
+        }
+        .d-flex.flex-row > form {
+            margin-bottom: 0;
+        }
+    </style>
     <script>
         function toggleStatus(entityType, id) {
             if (confirm('Are you sure you want to change the status of this item?')) {

@@ -217,8 +217,11 @@ namespace HotelBooking.Controllers
 
             // Monthly trends (last 12 months)
             var twelveMonthsAgo = DateTime.Now.AddMonths(-12);
-            var monthlyTrends = await _context.Feedbacks
+            var feedbacksForTrends = await _context.Feedbacks
                 .Where(f => f.FeedbackDate >= twelveMonthsAgo)
+                .ToListAsync();
+
+            var monthlyTrends = feedbacksForTrends
                 .GroupBy(f => new { f.FeedbackDate.Year, f.FeedbackDate.Month })
                 .Select(g => new FeedbackTrendData
                 {
@@ -227,7 +230,7 @@ namespace HotelBooking.Controllers
                     FeedbackCount = g.Count()
                 })
                 .OrderBy(x => x.Month)
-                .ToListAsync();
+                .ToList();
 
             // Recent feedbacks
             var recentFeedbacks = await _context.Feedbacks

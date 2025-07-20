@@ -191,6 +191,35 @@ p, .lead {
   border-radius: 0.5rem;
 }
 
+/* Custom badge text color for better contrast */
+.badge-success {
+  color: #155724 !important;
+  background-color: #d4edda !important;
+  font-weight: bold;
+}
+.badge-danger {
+  color: #721c24 !important;
+  background-color: #f8d7da !important;
+  font-weight: bold;
+}
+.badge-info {
+  color: #0c5460 !important;
+  background-color: #d1ecf1 !important;
+  font-weight: bold;
+}
+
+/* Custom badge-secondary text color for better contrast */
+.badge-secondary {
+  color: #1565c0 !important;
+  background-color: #e3f2fd !important;
+  font-weight: bold;
+  border-radius: 1rem;
+  padding: 0.4rem 1rem;
+  font-size: 1rem;
+  letter-spacing: 0.5px;
+  box-shadow: 0 1px 4px rgba(21,101,192,0.07);
+}
+
 /* Enhanced Spacing */
 .container {
   padding-left: 2rem;
@@ -264,4 +293,36 @@ p, .lead {
 
 .user-info {
     font-size: 14px;
+}
+
+.dropdown-caret {
+  position: absolute;
+  right: 16px;
+  top: 50%;
+  transform: translateY(-50%);
+  pointer-events: none;
+  color: #888;
+  font-size: 1.1em;
+}
+.form-control.pr-5 {
+  padding-right: 2.5rem !important;
+}
+
+.page-title, h1.page-title, h2.page-title, h3.page-title {
+  font-size: 2.2rem;
+  font-weight: 700;
+  color: #111;
+  margin-bottom: 1.5rem;
+  margin-top: 0.5rem;
+  padding-top: 0.5rem;
+  text-align: left;
+  letter-spacing: -0.5px;
+}
+
+@media (max-width: 768px) {
+  .page-title, h1.page-title, h2.page-title, h3.page-title {
+    font-size: 1.5rem;
+    margin-bottom: 1rem;
+    padding-top: 0.3rem;
+  }
 }

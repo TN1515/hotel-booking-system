@@ -27,22 +27,26 @@
                                        class="form-control" placeholder="Search amenities...">
                             </div>
                             <div class="col-md-2">
-                                <select name="categoryFilter" class="form-control">
-                                    <option value="">All Categories</option>
-                                    @foreach (var category in Model.Categories)
-                                    {
-                                        <option value="@category" selected="@(Model.CategoryFilter == category)">
-                                            @category
-                                        </option>
-                                    }
-                                </select>
+                                <div class="position-relative">
+                                    <select name="categoryFilter" class="form-control pr-5">
+                                        <option value="">All Categories</option>
+                                        @foreach (var category in Model.Categories)
+                                        {
+                                            <option value="@category" selected="@(Model.CategoryFilter == category)">@category</option>
+                                        }
+                                    </select>
+                                    <span class="dropdown-caret"><i class="fas fa-chevron-down"></i></span>
+                                </div>
                             </div>
                             <div class="col-md-2">
-                                <select name="statusFilter" class="form-control">
-                                    <option value="">All Status</option>
-                                    <option value="Active" selected="@(Model.StatusFilter == "Active")">Active</option>
-                                    <option value="Inactive" selected="@(Model.StatusFilter == "Inactive")">Inactive</option>
-                                </select>
+                                <div class="position-relative">
+                                    <select name="statusFilter" class="form-control pr-5">
+                                        <option value="">All Status</option>
+                                        <option value="Active" selected="@(Model.StatusFilter == "Active")">Active</option>
+                                        <option value="Inactive" selected="@(Model.StatusFilter == "Inactive")">Inactive</option>
+                                    </select>
+                                    <span class="dropdown-caret"><i class="fas fa-chevron-down"></i></span>
+                                </div>
                             </div>
                             <div class="col-md-2">
                                 <button type="submit" class="btn btn-secondary">

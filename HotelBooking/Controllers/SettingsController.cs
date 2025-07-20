@@ -302,6 +302,14 @@ namespace HotelBooking.Controllers
         // GET: Settings/SystemInfo
         public async Task<IActionResult> SystemInfo()
         {
+            var confirmedReservations = await _context.Reservations
+                .Where(r => r.Status == "Confirmed")
+                .Join(_context.Rooms, r => r.RoomID, room => room.RoomID, (r, room) => new { r, room })
+                .ToListAsync();
+
+            var totalRevenue = confirmedReservations
+                .Sum(x => x.room.Price * (x.r.CheckOutDate - x.r.CheckInDate).Days);
+
             var systemInfo = new
             {
                 DatabaseTables = new
@@ -319,10 +327,7 @@ namespace HotelBooking.Controllers
                 },
                 SystemStats = new
                 {
-                    TotalRevenue = await _context.Reservations
-                        .Where(r => r.Status == "Confirmed")
-                        .Join(_context.Rooms, r => r.RoomID, room => room.RoomID, (r, room) => new { r, room })
-                        .SumAsync(x => x.room.Price * (x.r.CheckOutDate - x.r.CheckInDate).Days),
+                    TotalRevenue = totalRevenue,
                     ActiveUsers = await _context.Users.CountAsync(u => u.IsActive),
                     AvailableRooms = await _context.Rooms.CountAsync(r => r.Status == "Available"),
                     PendingReservations = await _context.Reservations.CountAsync(r => r.Status == "Pending")

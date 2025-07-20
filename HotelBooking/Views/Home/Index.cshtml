@@ -273,6 +273,19 @@
         0%, 100% { transform: translateY(0px); }
         50% { transform: translateY(-20px); }
     }
+
+    /* Custom style cho search-box để căn giữa và đồng bộ kích thước */
+    .search-box .form-control-sm, .search-box .btn-sm {
+        font-size: 1.05rem;
+        padding: 0.6rem 0.9rem;
+        border-radius: 0.5rem;
+    }
+    .search-box label.form-label {
+        font-size: 1.05rem;
+    }
+    .search-box .row.g-2 {
+        align-items: center;
+    }
 </style>
 
 <!-- Hero Banner -->
@@ -287,27 +300,26 @@
                 <div class="col-lg-8">
                     <div class="search-box">
                         <form method="post" asp-controller="Rooms" asp-action="Search">
-                            <div class="row g-3">
+                            <div class="row g-2 align-items-end justify-content-center">
                                 <div class="col-md-3">
                                     <label class="form-label text-dark fw-bold">Check-in</label>
-                                    <input type="date" name="checkIn" class="form-control form-control-lg" value="@DateTime.Today.AddDays(1).ToString("yyyy-MM-dd")" required>
+                                    <input type="date" name="checkIn" class="form-control form-control-sm" value="@DateTime.Today.AddDays(1).ToString("yyyy-MM-dd")" required>
                                 </div>
                                 <div class="col-md-3">
                                     <label class="form-label text-dark fw-bold">Check-out</label>
-                                    <input type="date" name="checkOut" class="form-control form-control-lg" value="@DateTime.Today.AddDays(2).ToString("yyyy-MM-dd")" required>
+                                    <input type="date" name="checkOut" class="form-control form-control-sm" value="@DateTime.Today.AddDays(2).ToString("yyyy-MM-dd")" required>
                                 </div>
                                 <div class="col-md-2">
                                     <label class="form-label text-dark fw-bold">Guests</label>
-                                    <select name="guests" class="form-control form-control-lg" required>
+                                    <select name="guests" class="form-control form-control-sm" required>
                                         <option value="1">1 Guest</option>
                                         <option value="2" selected>2 Guests</option>
                                         <option value="3">3 Guests</option>
                                         <option value="4">4 Guests</option>
                                     </select>
                                 </div>
-                                <div class="col-md-4">
-                                    <label class="form-label text-dark fw-bold">&nbsp;</label>
-                                    <button type="submit" class="btn btn-explore w-100 form-control-lg">
+                                <div class="col-md-4 d-flex align-items-end justify-content-center">
+                                    <button type="submit" class="btn btn-explore btn-sm w-100" style="font-size:1.1rem; padding:0.6rem 1.2rem; border-radius:18px; min-width:180px;">
                                         <i class="fas fa-search me-2"></i>Search Available Rooms
                                     </button>
                                 </div>
