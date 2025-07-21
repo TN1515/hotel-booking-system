@@ -46,6 +46,42 @@
             height: auto !important;
         }
 
+        /* Modern Search Button Styles */
+        .btn-search {
+            background: linear-gradient(135deg, #ff7e5f, #feb47b);
+            border: none;
+            color: white;
+            padding: 0.8rem 1.5rem;
+            border-radius: 50px;
+            font-weight: 600;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(255, 126, 95, 0.4);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-size: 0.9rem;
+        }
+
+        .btn-search:hover, .btn-search:focus {
+            background: linear-gradient(135deg, #ff6b4a, #ffa76b);
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(255, 126, 95, 0.5);
+            color: white;
+        }
+
+        .btn-search:active {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 10px rgba(255, 126, 95, 0.4);
+        }
+
+        .btn-search i {
+            margin-right: 8px;
+            font-size: 1rem;
+        }
+
         /* Ensure proper spacing */
         .container, .container-fluid {
             padding-bottom: 0;

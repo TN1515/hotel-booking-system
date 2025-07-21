@@ -3,6 +3,91 @@
     ViewData["Title"] = "Amenities Management";
 }
 
+<style>
+    .table th {
+        background-color: #343a40;
+        color: white;
+        border-color: #454d55;
+        font-weight: 600;
+        font-size: 0.9em;
+    }
+
+    .table td {
+        vertical-align: middle;
+        font-size: 0.9em;
+    }
+
+    .table-hover tbody tr:hover {
+        background-color: #f8f9fa;
+    }
+
+    .btn-group .btn {
+        margin-right: 2px;
+    }
+
+    .btn-group .btn:last-child {
+        margin-right: 0;
+    }
+
+    .badge {
+        font-size: 0.8em;
+        padding: 0.4em 0.6em;
+    }
+
+    .card-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+    }
+
+    .card-header .card-title {
+        color: white;
+        font-weight: 600;
+    }
+
+    .card-header .btn-primary {
+        background-color: rgba(255, 255, 255, 0.2);
+        border-color: rgba(255, 255, 255, 0.3);
+        color: white;
+    }
+
+    .card-header .btn-primary:hover {
+        background-color: rgba(255, 255, 255, 0.3);
+        border-color: rgba(255, 255, 255, 0.4);
+    }
+
+    /* Modern minimalist icons */
+    .amenity-icon-modern {
+        width: 40px;
+        height: 40px;
+        border-radius: 8px;
+        background: #f8f9fa;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto;
+        transition: all 0.3s ease;
+        border: 1px solid #e9ecef;
+    }
+
+    .amenity-icon-modern:hover {
+        background: #e9ecef;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+
+    .amenity-icon-modern i {
+        font-size: 1.2em;
+        color: #495057;
+        transition: color 0.3s ease;
+    }
+
+    .amenity-icon-modern:hover i {
+        color: #212529;
+    }
+
+    /* Dark mode support - removed for compatibility */
+</style>
+
 <div class="container-fluid">
     <div class="row">
         <div class="col-12">
@@ -54,60 +139,148 @@
 
                     <!-- Amenities Table -->
                     <div class="table-responsive">
-                        <table class="table table-bordered table-striped">
-                            <thead>
+                        <table class="table table-bordered table-striped table-hover">
+                            <thead class="thead-dark">
                                 <tr>
-                                    <th>Icon</th>
-                                    <th>Name</th>
-                                    <th>Category</th>
-                                    <th>Description</th>
-                                    <th>Status</th>
-                                    <th>Created Date</th>
-                                    <th>Actions</th>
+                                    <th class="text-center" style="width: 60px;"><i class="fas fa-icons"></i> Icon</th>
+                                    <th><i class="fas fa-tag"></i> Name</th>
+                                    <th style="width: 120px;"><i class="fas fa-folder"></i> Category</th>
+                                    <th><i class="fas fa-info-circle"></i> Description</th>
+                                    <th class="text-center" style="width: 100px;"><i class="fas fa-toggle-on"></i> Status</th>
+                                    <th class="text-center" style="width: 120px;"><i class="fas fa-calendar"></i> Created Date</th>
+                                    <th class="text-center" style="width: 200px;"><i class="fas fa-cogs"></i> Actions</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 @foreach (var amenity in Model.Amenities)
                                 {
                                     <tr>
-                                        <td>
-                                            @if (!string.IsNullOrEmpty(amenity.Icon))
-                                            {
-                                                <i class="@amenity.Icon"></i>
+                                        <td class="text-center">
+                                            @{
+                                                string iconClass = "fas fa-star";
+                                                string amenityName = amenity.AmenityName?.ToLower() ?? "";
+
+                                                // Icons phù hợp với từng loại tiện nghi
+                                                if (amenityName.Contains("áo choàng") || amenityName.Contains("áo"))
+                                                {
+                                                    iconClass = "fas fa-tshirt";
+                                                }
+                                                else if (amenityName.Contains("ban công") || amenityName.Contains("view"))
+                                                {
+                                                    iconClass = "fas fa-eye";
+                                                }
+                                                else if (amenityName.Contains("bàn làm việc") || amenityName.Contains("bàn"))
+                                                {
+                                                    iconClass = "fas fa-desk";
+                                                }
+                                                else if (amenityName.Contains("dép") || amenityName.Contains("cotton"))
+                                                {
+                                                    iconClass = "fas fa-socks";
+                                                }
+                                                else if (amenityName.Contains("dịch vụ") || amenityName.Contains("24/7"))
+                                                {
+                                                    iconClass = "fas fa-clock";
+                                                }
+                                                else if (amenityName.Contains("điện thoại"))
+                                                {
+                                                    iconClass = "fas fa-phone";
+                                                }
+                                                else if (amenityName.Contains("điều hòa") || amenityName.Contains("không khí"))
+                                                {
+                                                    iconClass = "fas fa-snowflake";
+                                                }
+                                                else if (amenityName.Contains("két") || amenityName.Contains("an toàn"))
+                                                {
+                                                    iconClass = "fas fa-lock";
+                                                }
+                                                else if (amenityName.Contains("máy pha") || amenityName.Contains("cà phê"))
+                                                {
+                                                    iconClass = "fas fa-coffee";
+                                                }
+                                                else if (amenityName.Contains("máy sấy") || amenityName.Contains("sấy tóc"))
+                                                {
+                                                    iconClass = "fas fa-wind";
+                                                }
+                                                else if (amenityName.Contains("wifi") || amenityName.Contains("internet"))
+                                                {
+                                                    iconClass = "fas fa-wifi";
+                                                }
+                                                else if (amenityName.Contains("tv") || amenityName.Contains("màn hình"))
+                                                {
+                                                    iconClass = "fas fa-tv";
+                                                }
+                                                else if (amenityName.Contains("mini bar") || amenityName.Contains("bar"))
+                                                {
+                                                    iconClass = "fas fa-wine-glass";
+                                                }
+                                                else if (amenityName.Contains("phòng tắm") || amenityName.Contains("tắm"))
+                                                {
+                                                    iconClass = "fas fa-shower";
+                                                }
+                                                else if (amenityName.Contains("tủ") || amenityName.Contains("quần áo"))
+                                                {
+                                                    iconClass = "fas fa-door-closed";
+                                                }
                                             }
+                                            <div class="amenity-icon-modern">
+                                                <i class="@iconClass"></i>
+                                            </div>
                                         </td>
-                                        <td>@amenity.AmenityName</td>
+                                        <td><strong>@amenity.AmenityName</strong></td>
                                         <td>
-                                            <span class="badge badge-secondary">@amenity.Category</span>
+                                            @{
+                                                var categoryColor = amenity.Category?.ToLower() switch
+                                                {
+                                                    "technology" => "badge-primary",
+                                                    "comfort" => "badge-info",
+                                                    "entertainment" => "badge-warning",
+                                                    "business" => "badge-secondary",
+                                                    "wellness" => "badge-success",
+                                                    "kitchen" => "badge-danger",
+                                                    "bathroom" => "badge-info",
+                                                    "connectivity" => "badge-primary",
+                                                    "safety" => "badge-dark",
+                                                    "accessibility" => "badge-light text-dark",
+                                                    "outdoor" => "badge-success",
+                                                    "basic" => "badge-secondary",
+                                                    _ => "badge-secondary"
+                                                };
+                                            }
+                                            <span class="badge @categoryColor">@amenity.Category</span>
                                         </td>
                                         <td>@amenity.Description</td>
                                         <td>
                                             @if (amenity.IsActive)
                                             {
-                                                <span class="badge badge-success">Active</span>
+                                                <span class="badge badge-success"><i class="fas fa-check-circle"></i> Active</span>
                                             }
                                             else
                                             {
-                                                <span class="badge badge-danger">Inactive</span>
+                                                <span class="badge badge-danger"><i class="fas fa-times-circle"></i> Inactive</span>
                                             }
                                         </td>
-                                        <td>@amenity.CreatedDate.ToString("dd/MM/yyyy")</td>
-                                        <td>
+                                        <td class="text-center">
+                                            <small class="text-muted">
+                                                <i class="fas fa-calendar-alt"></i> @amenity.CreatedDate.ToString("dd/MM/yyyy")
+                                            </small>
+                                        </td>
+                                        <td class="text-center">
                                             <div class="btn-group" role="group">
-                                                <a href="@Url.Action("Details", new { id = amenity.AmenityID })" 
-                                                   class="btn btn-sm btn-info">
-                                                    <i class="fas fa-eye"></i> View
+                                                <a href="@Url.Action("Details", new { id = amenity.AmenityID })"
+                                                   class="btn btn-sm btn-info" title="View Details">
+                                                    <i class="fas fa-eye"></i>
                                                 </a>
-                                                <a href="@Url.Action("Edit", new { id = amenity.AmenityID })" 
-                                                   class="btn btn-sm btn-warning">
-                                                    <i class="fas fa-edit"></i> Edit
+                                                <a href="@Url.Action("Edit", new { id = amenity.AmenityID })"
+                                                   class="btn btn-sm btn-warning" title="Edit">
+                                                    <i class="fas fa-edit"></i>
                                                 </a>
-                                                <a href="@Url.Action("AssignToRoom", new { id = amenity.AmenityID })" 
-                                                   class="btn btn-sm btn-primary">
-                                                    <i class="fas fa-link"></i> Assign
+                                                <a href="@Url.Action("AssignToRoom", new { id = amenity.AmenityID })"
+                                                   class="btn btn-sm btn-primary" title="Assign to Rooms">
+                                                    <i class="fas fa-link"></i>
                                                 </a>
-                                                <button type="button" class="btn btn-sm btn-secondary" 
-                                                        onclick="toggleAmenityStatus(@amenity.AmenityID)">
+                                                <button type="button" class="btn btn-sm @(amenity.IsActive ? "btn-secondary" : "btn-success")"
+                                                        onclick="toggleAmenityStatus(@amenity.AmenityID)"
+                                                        title="@(amenity.IsActive ? "Deactivate" : "Activate")">
                                                     @if (amenity.IsActive)
                                                     {
                                                         <i class="fas fa-ban"></i>
@@ -117,8 +290,8 @@
                                                         <i class="fas fa-check"></i>
                                                     }
                                                 </button>
-                                                <a href="@Url.Action("Delete", new { id = amenity.AmenityID })" 
-                                                   class="btn btn-sm btn-danger"
+                                                <a href="@Url.Action("Delete", new { id = amenity.AmenityID })"
+                                                   class="btn btn-sm btn-danger" title="Delete"
                                                    onclick="return confirm('Are you sure you want to delete this amenity?')">
                                                     <i class="fas fa-trash"></i>
                                                 </a>

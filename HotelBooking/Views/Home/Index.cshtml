@@ -204,6 +204,7 @@
         color: white;
     }
 
+
     .btn-outline-light {
         border: 2px solid rgba(255,255,255,0.8);
         color: white;
@@ -289,26 +290,32 @@
                         <form method="post" asp-controller="Rooms" asp-action="Search">
                             <div class="row g-3">
                                 <div class="col-md-3">
-                                    <label class="form-label text-dark fw-bold">Check-in</label>
-                                    <input type="date" name="checkIn" class="form-control form-control-lg" value="@DateTime.Today.AddDays(1).ToString("yyyy-MM-dd")" required>
+                                    <label for="checkIn" class="form-label text-dark fw-bold">Check-in</label>
+                                    <input type="date" id="checkIn" name="checkIn" class="form-control form-control-lg" value="@DateTime.Today.AddDays(1).ToString("yyyy-MM-dd")" required>
                                 </div>
                                 <div class="col-md-3">
-                                    <label class="form-label text-dark fw-bold">Check-out</label>
-                                    <input type="date" name="checkOut" class="form-control form-control-lg" value="@DateTime.Today.AddDays(2).ToString("yyyy-MM-dd")" required>
+                                    <label for="checkOut" class="form-label text-dark fw-bold">Check-out</label>
+                                    <input type="date" id="checkOut" name="checkOut" class="form-control form-control-lg" value="@DateTime.Today.AddDays(2).ToString("yyyy-MM-dd")" required>
                                 </div>
                                 <div class="col-md-2">
-                                    <label class="form-label text-dark fw-bold">Guests</label>
-                                    <select name="guests" class="form-control form-control-lg" required>
+                                    <label for="guests" class="form-label text-dark fw-bold">Guests</label>
+                                    <select id="guests" name="guests" class="form-control form-control-lg" required>
                                         <option value="1">1 Guest</option>
                                         <option value="2" selected>2 Guests</option>
                                         <option value="3">3 Guests</option>
                                         <option value="4">4 Guests</option>
+                                        <option value="5">5 Guests</option>
+                                        <option value="6">6 Guests</option>
+                                        <option value="7">7 Guests</option>
+                                        <option value="8">8 Guests</option>
+                                        <option value="9">9 Guests</option>
+                                        <option value="10">10 Guests</option>
                                     </select>
                                 </div>
                                 <div class="col-md-4">
                                     <label class="form-label text-dark fw-bold">&nbsp;</label>
-                                    <button type="submit" class="btn btn-explore w-100 form-control-lg">
-                                        <i class="fas fa-search me-2"></i>Search Available Rooms
+                                    <button type="submit" class="btn btn-search w-100 form-control-lg">
+                                        <i class="fas fa-search"></i>Search Available Rooms
                                     </button>
                                 </div>
                             </div>
@@ -696,3 +703,35 @@
         }
     </div>
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Set minimum date to today for both check-in and check-out
+    const today = new Date().toISOString().split('T')[0];
+    const checkInInput = document.getElementById('checkIn');
+    const checkOutInput = document.getElementById('checkOut');
+
+    if (checkInInput) {
+        checkInInput.setAttribute('min', today);
+    }
+
+    if (checkOutInput) {
+        checkOutInput.setAttribute('min', today);
+    }
+
+    // Update checkout minimum date when checkin changes
+    if (checkInInput && checkOutInput) {
+        checkInInput.addEventListener('change', function() {
+            const checkInDate = new Date(this.value);
+            checkInDate.setDate(checkInDate.getDate() + 1);
+            const minCheckOut = checkInDate.toISOString().split('T')[0];
+            checkOutInput.setAttribute('min', minCheckOut);
+
+            // If checkout is before new minimum, update it
+            if (checkOutInput.value <= this.value) {
+                checkOutInput.value = minCheckOut;
+            }
+        });
+    }
+});
+</script>

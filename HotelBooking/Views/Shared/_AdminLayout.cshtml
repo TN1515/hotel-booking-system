@@ -147,144 +147,552 @@
             transform: translateX(-25px) !important;
         }
 
+        /* Navigation Styles - Same as Home Layout */
+        .nav-item-simple {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-decoration: none;
+            color: #6c757d;
+            padding: 8px 12px;
+            border-radius: 6px;
+            transition: all 0.3s ease;
+            font-size: 0.85rem;
+            min-width: 70px;
+        }
+
+        .nav-item-simple:hover {
+            color: #007bff;
+            background-color: #e7f3ff;
+            text-decoration: none;
+        }
+
+        .nav-item-simple i {
+            font-size: 1.1rem;
+            margin-bottom: 4px;
+        }
+
+        .nav-item-simple span {
+            font-weight: 500;
+            white-space: nowrap;
+        }
+
+        /* Dropdown Navigation */
+        .nav-item.dropdown .nav-item-simple {
+            cursor: pointer;
+        }
+
+        .nav-item.dropdown .dropdown-menu {
+            border: none;
+            box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+            border-radius: 8px;
+            margin-top: 8px;
+        }
+
+        .nav-item.dropdown .dropdown-item {
+            padding: 0.5rem 1rem;
+            transition: all 0.2s ease;
+            border-radius: 4px;
+            margin: 2px 4px;
+        }
+
+        .nav-item.dropdown .dropdown-item:hover {
+            background-color: #e7f3ff;
+            color: #007bff;
+        }
+
+        /* Active navigation state */
+        .nav-item-simple.active {
+            background-color: #007bff;
+            color: white !important;
+        }
+
+        .nav-item-simple.active:hover {
+            background-color: #0056b3;
+            color: white !important;
+        }
+
+        /* Notification Bell Styles */
+        .notification-bell {
+            transition: all 0.3s ease;
+            border-radius: 50% !important;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 5px;
+        }
+
+        .notification-bell:hover {
+            transform: scale(1.1);
+            color: #007bff !important;
+            background-color: rgba(0, 123, 255, 0.1) !important;
+        }
+
+        .notification-bell:focus {
+            box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+            outline: none;
+        }
+
+        .notification-badge {
+            animation: pulse 2s infinite;
+            min-width: 18px;
+            height: 18px;
+            font-size: 0.65rem !important;
+            line-height: 1;
+            padding: 2px 4px;
+        }
+
+        @@keyframes pulse {
+            0% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.1);
+            }
+            100% {
+                transform: scale(1);
+            }
+        }
+
+        /* Body Layout Styles - Same as Home Layout */
+        * {
+            box-sizing: border-box;
+        }
+
+        html, body {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        .main-content {
+            flex: 1 0 auto;
+        }
+
+        .modern-footer {
+            flex-shrink: 0;
+            margin-top: 0 !important;
+        }
+
+        /* Footer Styles */
+        .modern-footer {
+            background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+            color: #ecf0f1;
+            margin-top: 50px;
+        }
+
+        .footer-main {
+            padding: 40px 0 20px;
+        }
+
+        .footer-brand .footer-title {
+            color: #3498db;
+            font-size: 1.5rem;
+            margin-bottom: 15px;
+            font-weight: 700;
+        }
+
+        .footer-description {
+            color: #bdc3c7;
+            font-size: 0.9rem;
+            line-height: 1.6;
+            margin-bottom: 0;
+        }
+
+        .footer-links-simple a {
+            color: #bdc3c7;
+            text-decoration: none;
+            font-size: 0.9rem;
+            transition: color 0.3s ease;
+        }
+
+        .footer-links-simple a:hover {
+            color: #3498db;
+        }
+
+        .social-links-simple {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .social-link {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 35px;
+            height: 35px;
+            background: rgba(52, 152, 219, 0.1);
+            color: #3498db;
+            border-radius: 50%;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            font-size: 0.9rem;
+        }
+
+        .social-link:hover {
+            background: #3498db;
+            color: white;
+            transform: translateY(-2px);
+        }
+
+        .footer-bottom {
+            background: rgba(0, 0, 0, 0.2);
+            padding: 20px 0;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .copyright {
+            color: #bdc3c7;
+            font-size: 0.9rem;
+        }
+
+        .footer-bottom-links {
+            display: flex;
+            gap: 20px;
+            justify-content: flex-end;
+        }
+
+        .footer-bottom-links a {
+            color: #bdc3c7;
+            text-decoration: none;
+            font-size: 0.9rem;
+            transition: color 0.3s ease;
+        }
+
+        .footer-bottom-links a:hover {
+            color: #3498db;
+        }
+
+        /* Admin Content Styles */
+        .admin-content {
+            padding: 20px;
+            min-height: calc(100vh - 200px);
+        }
+
+        /* Consistent container styling for admin pages */
+        .container-fluid {
+            padding: 20px;
+        }
+
+        /* Card styling consistency */
+        .card {
+            border: none;
+            box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+            border-radius: 0.5rem;
+        }
+
+        .card-header {
+            background-color: #f8f9fa;
+            border-bottom: 1px solid #dee2e6;
+            border-radius: 0.5rem 0.5rem 0 0 !important;
+            padding: 1rem 1.25rem;
+        }
+
+        .card-title {
+            margin-bottom: 0;
+            font-weight: 600;
+            color: #495057;
+        }
+
+        /* Responsive Design */
+        @@media (max-width: 768px) {
+            .nav-item-simple span {
+                display: none;
+            }
+
+            .nav-item-simple {
+                min-width: 50px;
+                padding: 8px;
+            }
+
+            .nav-item-simple i {
+                margin-bottom: 0;
+                font-size: 1.2rem;
+            }
+
+            .admin-content {
+                padding: 10px;
+            }
+
+            .container-fluid {
+                padding: 10px;
+            }
+        }
+
+        @@media (max-width: 576px) {
+            .nav-item-simple {
+                min-width: 40px;
+                padding: 6px;
+            }
+
+            .nav-item-simple i {
+                font-size: 1rem;
+            }
+        }
+
+        /* Breadcrumb Styles */
+        .breadcrumb {
+            background-color: transparent;
+            padding: 0.5rem 0;
+            margin-bottom: 1rem;
+            font-size: 0.9rem;
+        }
+
+        .breadcrumb-item + .breadcrumb-item::before {
+            content: ">";
+            color: #6c757d;
+        }
+
+        .breadcrumb-item a {
+            color: #007bff;
+            transition: color 0.2s ease;
+        }
+
+        .breadcrumb-item a:hover {
+            color: #0056b3;
+        }
+
+        .breadcrumb-item.active {
+            color: #6c757d;
+        }
 
     </style>
 </head>
-<body class="admin-body">
-    <!-- Admin Header -->
-    <nav class="navbar navbar-expand-lg navbar-light bg-white border-bottom shadow-sm">
-        <div class="container-fluid px-4">
-            <!-- Brand -->
-            <a class="navbar-brand d-flex align-items-center" href="#">
-                <div class="brand-icon me-3">
-                    <i class="fas fa-hotel text-primary fa-2x"></i>
-                </div>
-                <span class="fw-bold fs-3 text-primary">HotelBooking</span>
-            </a>
-
-            <!-- Main Navigation -->
-            <div class="navbar-nav d-flex flex-row mx-auto">
-                <a class="nav-link px-4 py-2 mx-1 admin-nav-link" href="@Url.Action("Dashboard", "Admin")">
-                    <i class="fas fa-tachometer-alt me-2"></i>Dashboard
-                </a>
-
-                <!-- Guest Management -->
-                <a class="nav-link px-4 py-2 mx-1 admin-nav-link" href="@Url.Action("Index", "GuestProfile")">
-                    <i class="fas fa-users me-2"></i>Guests
-                </a>
-
-                <!-- Rooms Management -->
-                <a class="nav-link px-4 py-2 mx-1 admin-nav-link" href="@Url.Action("Index", "Rooms")">
-                    <i class="fas fa-bed me-2"></i>Rooms
-                </a>
-
-                <!-- Reservations -->
-                <a class="nav-link px-4 py-2 mx-1 admin-nav-link" href="@Url.Action("Reservations", "Admin")">
-                    <i class="fas fa-calendar-check me-2"></i>Reservations
-                </a>
-
-                <!-- Reports -->
-                <a class="nav-link px-4 py-2 mx-1 admin-nav-link" href="@Url.Action("Reports", "Admin")">
-                    <i class="fas fa-chart-bar me-2"></i>Reports
-                </a>
-
-                <!-- Payment Management -->
-                <a class="nav-link px-4 py-2 mx-1 admin-nav-link" href="@Url.Action("PaymentManagement", "Admin")">
-                    <i class="fas fa-credit-card me-2"></i>Payments
-                </a>
-
-                <!-- Payments -->
-                <a class="nav-link px-4 py-2 mx-1 admin-nav-link" href="@Url.Action("Index", "PaymentProcess")">
-                    <i class="fas fa-credit-card me-2"></i>Payments
-                </a>
-
-                <!-- Management Dropdown -->
-                <div class="nav-item dropdown">
-                    <a class="nav-link dropdown-toggle px-4 py-2 mx-1 admin-nav-link" href="#" id="managementDropdown" role="button" data-bs-toggle="dropdown">
-                        <i class="fas fa-cogs me-2"></i>Management
+<body>
+    <!-- Admin Header - Using same style as Home layout -->
+    <header>
+        <div style="background: #f8f9fa; border-bottom: 1px solid #dee2e6; padding: 15px 0;">
+            <div style="display: flex; align-items: center; justify-content: space-between; max-width: 1200px; margin: 0 auto; padding: 0 20px;">
+                <!-- Brand -->
+                <div>
+                    <a asp-controller="Home" asp-action="Index" style="text-decoration: none; color: #007bff; font-size: 1.5rem; font-weight: bold;">
+                        <i class="fas fa-building me-2"></i>HotelBooking
                     </a>
-                    <ul class="dropdown-menu">
-                        <li><a class="dropdown-item" href="@Url.Action("Index", "FeedbackManagement")"><i class="fas fa-comments me-2"></i>Feedback</a></li>
-                        <li><a class="dropdown-item" href="@Url.Action("Index", "Report")"><i class="fas fa-chart-bar me-2"></i>Reports</a></li>
-                        <li><a class="dropdown-item" href="@Url.Action("Index", "Notification")"><i class="fas fa-bell me-2"></i>Notifications</a></li>
-                        <li><hr class="dropdown-divider"></li>
-                        <li><a class="dropdown-item" href="@Url.Action("Index", "UserManagement")"><i class="fas fa-user-cog me-2"></i>Users</a></li>
-                        <li><a class="dropdown-item" href="@Url.Action("Index", "Amenities")"><i class="fas fa-spa me-2"></i>Amenities</a></li>
-                        <li><a class="dropdown-item" href="@Url.Action("Index", "Settings")"><i class="fas fa-cog me-2"></i>Settings</a></li>
-                    </ul>
                 </div>
-            </div>
 
-            <!-- Notifications & User Menu -->
-            <div class="navbar-nav d-flex align-items-center" style="gap: 15px; margin-right: 15px;">
-                @if (User.Identity!.IsAuthenticated)
-                {
-                    <!-- Notification Bell - Adjusted position -->
-                    <div class="dropdown" style="position: relative; margin-right: 20px; margin-top: 8px;">
-                        <button class="btn position-relative notification-bell-btn" type="button" id="adminNotificationDropdown" style="background: none; border: none; padding: 12px 15px; cursor: pointer; outline: none; margin-top: 5px;">
-                            <i class="fas fa-bell" style="font-size: 1.2rem; color: #6c757d; transition: color 0.2s;"></i>
-                            <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger admin-notification-badge" style="font-size: 0.7rem; display: none; min-width: 18px; height: 18px; line-height: 16px;">0</span>
-                        </button>
-                        <div class="dropdown-menu dropdown-menu-end" id="adminNotificationMenu" style="display: none; position: absolute; top: calc(100% + 10px); right: -10px; width: 350px; max-height: 450px; overflow-y: auto; z-index: 1050; background: white; border: 1px solid #dee2e6; border-radius: 0.375rem; box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);">
-                            <div class="dropdown-header bg-light" style="font-weight: 600; color: #495057;"><i class="fas fa-bell me-2"></i>Recent Notifications</div>
-                            <div class="dropdown-divider m-0"></div>
-                            <div id="adminNotificationList">
-                                <div class="text-center py-3">
-                                    <div class="spinner-border spinner-border-sm text-primary" role="status">
-                                        <span class="visually-hidden">Loading...</span>
+                <!-- Navigation Items -->
+                <div style="display: flex; gap: 20px;">
+                    @{
+                        var controller = ViewContext.RouteData.Values["controller"]?.ToString();
+                        var action = ViewContext.RouteData.Values["action"]?.ToString();
+                    }
+                    <!-- ADMIN NAVIGATION -->
+                    <a asp-controller="Admin" asp-action="Dashboard" class="nav-item-simple @(controller == "Admin" && action == "Dashboard" ? "active" : "")">
+                        <i class="fas fa-tachometer-alt"></i>
+                        <span>Admin Dashboard</span>
+                    </a>
+                    <a asp-controller="GuestProfile" asp-action="Index" class="nav-item-simple @(controller == "GuestProfile" ? "active" : "")">
+                        <i class="fas fa-users"></i>
+                        <span>Guests</span>
+                    </a>
+                    <a asp-controller="Rooms" asp-action="Index" class="nav-item-simple @(controller == "Rooms" ? "active" : "")">
+                        <i class="fas fa-bed"></i>
+                        <span>Rooms</span>
+                    </a>
+                    <a asp-controller="UserManagement" asp-action="Index" class="nav-item-simple @(controller == "UserManagement" ? "active" : "")">
+                        <i class="fas fa-users-cog"></i>
+                        <span>User Management</span>
+                    </a>
+                    <a asp-controller="Reservations" asp-action="Index" class="nav-item-simple @(controller == "Reservations" || (controller == "Admin" && (action == "Reservations" || action == "ReservationDetails")) ? "active" : "")">
+                        <i class="fas fa-calendar-check"></i>
+                        <span>All Reservations</span>
+                    </a>
+                    <div class="nav-item dropdown">
+                        @{
+                            var isManagementActive = controller == "FeedbackManagement" || controller == "Report" || controller == "Notification" || controller == "Amenities" || controller == "Settings";
+                        }
+                        <a class="nav-item-simple dropdown-toggle @(isManagementActive ? "active" : "")" href="#" role="button" data-bs-toggle="dropdown">
+                            <i class="fas fa-cogs"></i>
+                            <span>Management</span>
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="@Url.Action("Index", "FeedbackManagement")"><i class="fas fa-comments me-2"></i>Feedback</a></li>
+                            <li><a class="dropdown-item" href="@Url.Action("Index", "Report")"><i class="fas fa-chart-bar me-2"></i>Reports</a></li>
+                            <li><a class="dropdown-item" href="@Url.Action("Index", "Notification")"><i class="fas fa-bell me-2"></i>Notifications</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="@Url.Action("Index", "UserManagement")"><i class="fas fa-user-cog me-2"></i>Users</a></li>
+                            <li><a class="dropdown-item" href="@Url.Action("Index", "Amenities")"><i class="fas fa-spa me-2"></i>Amenities</a></li>
+                            <li><a class="dropdown-item" href="@Url.Action("Index", "Settings")"><i class="fas fa-cog me-2"></i>Settings</a></li>
+                        </ul>
+                    </div>
+
+                <!-- User Actions -->
+                <div style="display: flex; align-items: center; gap: 15px;">
+                    @if (User.Identity!.IsAuthenticated)
+                    {
+                        <!-- Notification Bell -->
+                        <div class="dropdown">
+                            <button class="btn notification-bell" type="button" id="adminNotificationDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                                <i class="fas fa-bell"></i>
+                                <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger admin-notification-badge" style="display: none;">0</span>
+                            </button>
+                            <div class="dropdown-menu dropdown-menu-end" id="adminNotificationMenu" style="width: 350px; max-height: 450px; overflow-y: auto;">
+                                <div class="dropdown-header"><i class="fas fa-bell me-2"></i>Recent Notifications</div>
+                                <div class="dropdown-divider"></div>
+                                <div id="adminNotificationList">
+                                    <div class="text-center py-3">
+                                        <div class="spinner-border spinner-border-sm text-primary" role="status">
+                                            <span class="visually-hidden">Loading...</span>
+                                        </div>
+                                        <p class="mb-0 mt-2 text-muted small">Loading notifications...</p>
                                     </div>
-                                    <p class="mb-0 mt-2 text-muted small">Loading notifications...</p>
+                                </div>
+                                <div class="dropdown-divider"></div>
+                                <div class="text-center">
+                                    <a class="dropdown-item text-center" asp-controller="Notification" asp-action="My">
+                                        <i class="fas fa-eye me-2"></i>View All Notifications
+                                    </a>
                                 </div>
                             </div>
-                            <div class="dropdown-divider m-0"></div>
-                            <div class="text-center">
-                                <a class="dropdown-item text-center" asp-controller="Notification" asp-action="My" style="color: #007bff;">
-                                    <i class="fas fa-eye me-2"></i>View All Notifications
-                                </a>
-                            </div>
-                            <div class="text-center">
-                                <button class="dropdown-item text-center" onclick="testAdminNotifications()" style="border: none; background: none; color: #007bff; width: 100%; cursor: pointer;">
-                                    <i class="fas fa-vial me-2"></i>Test Notifications
-                                </button>
+                        </div>
+
+                        <!-- User Menu -->
+                        <div class="dropdown">
+                            <a class="nav-item-simple dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                                <div style="display: flex; align-items: center; gap: 8px;">
+                                    <div style="width: 32px; height: 32px; background: #28a745; color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 600; font-size: 14px;">
+                                        @(User.Identity?.Name?.Substring(0, 1).ToUpper() ?? "A")
+                                    </div>
+                                    <div style="display: flex; flex-direction: column; align-items: flex-start;">
+                                        <span style="font-weight: 600; font-size: 14px;">@User.Identity?.Name</span>
+                                        <small style="color: #28a745; font-size: 12px;">Admin</small>
+                                    </div>
+                                </div>
+                            </a>
+                            <ul class="dropdown-menu dropdown-menu-end">
+                                <li><a class="dropdown-item" href="@Url.Action("Profile", "Admin")"><i class="fas fa-user me-2"></i>Profile</a></li>
+                                <li><a class="dropdown-item" href="@Url.Action("Index", "Settings")"><i class="fas fa-cog me-2"></i>Settings</a></li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li>
+                                    <form asp-controller="Account" asp-action="Logout" method="post" class="d-inline">
+                                        <button type="submit" class="dropdown-item">
+                                            <i class="fas fa-sign-out-alt me-2"></i>Logout
+                                        </button>
+                                    </form>
+                                </li>
+                            </ul>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <div class="container-fluid">
+            <!-- Breadcrumb -->
+            @{
+                var controllerName = ViewContext.RouteData.Values["controller"]?.ToString();
+                var actionName = ViewContext.RouteData.Values["action"]?.ToString();
+                var pageTitle = ViewData["Title"]?.ToString() ?? "Admin";
+            }
+            @if (controllerName != "Admin" || actionName != "Dashboard")
+            {
+                <nav aria-label="breadcrumb" class="mb-3">
+                    <ol class="breadcrumb">
+                        <li class="breadcrumb-item">
+                            <a asp-controller="Admin" asp-action="Dashboard" class="text-decoration-none">
+                                <i class="fas fa-home me-1"></i>Dashboard
+                            </a>
+                        </li>
+                        <li class="breadcrumb-item active" aria-current="page">@pageTitle</li>
+                    </ol>
+                </nav>
+            }
+            @RenderBody()
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="modern-footer">
+        <div class="footer-main">
+            <div class="container">
+                <div class="row">
+                    <div class="col-md-3">
+                        <div class="footer-brand">
+                            <h5 class="footer-title">
+                                <i class="fas fa-building me-2"></i>HotelBooking
+                            </h5>
+                            <p class="footer-description">
+                                Professional hotel booking system for modern hospitality.
+                            </p>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="footer-links-simple">
+                            <h6 style="color: #3498db; margin-bottom: 15px; font-weight: 600;">Admin Links</h6>
+                            <div style="display: flex; flex-direction: column; gap: 8px;">
+                                <a asp-controller="Admin" asp-action="Dashboard">Dashboard</a>
+                                <a asp-controller="Rooms" asp-action="Index">Rooms</a>
+                                <a asp-controller="Reservations" asp-action="Index">Reservations</a>
+                                <a asp-controller="GuestProfile" asp-action="Index">Guests</a>
                             </div>
                         </div>
                     </div>
-
-                    <!-- User Menu -->
-                    <div class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown">
-                            <div class="user-info d-flex align-items-center">
-                                <span class="user-initial bg-success text-white rounded-circle d-flex align-items-center justify-content-center me-2">
-                                    @(User.Identity?.Name?.Substring(0, 1).ToUpper() ?? "A")
-                                </span>
-                                <div class="d-flex flex-column">
-                                    <span class="fw-semibold">@User.Identity?.Name</span>
-                                    <small class="text-success">Admin</small>
-                                </div>
+                    <div class="col-md-3">
+                        <h6 style="color: #3498db; margin-bottom: 15px; font-weight: 600;">Contact Us</h6>
+                        <div style="display: flex; flex-direction: column; gap: 8px;">
+                            <div style="display: flex; align-items: center;">
+                                <i class="fas fa-envelope me-2" style="color: #3498db; width: 20px;"></i>
+                                <a href="mailto:Hotelbooking@gmail.com" style="color: #bdc3c7; text-decoration: none; font-size: 0.9rem;">
+                                    Hotelbooking@gmail.com
+                                </a>
                             </div>
-                        </a>
-                        <ul class="dropdown-menu dropdown-menu-end shadow border-0" style="position: absolute !important; top: calc(100% + 15px) !important; right: 25px !important; left: auto !important; margin-top: 15px !important; transform: translateX(-25px) translateY(5px) !important; min-width: 220px !important; z-index: 1060 !important;">
-                            <li><a class="dropdown-item" href="@Url.Action("Profile", "Admin")"><i class="fas fa-user me-2"></i>Profile</a></li>
-                            <li><a class="dropdown-item" href="@Url.Action("Index", "Settings")"><i class="fas fa-cog me-2"></i>Settings</a></li>
-                            <li><hr class="dropdown-divider"></li>
-                            <li>
-                                <form asp-controller="Account" asp-action="Logout" method="post" class="d-inline">
-                                    <button type="submit" class="dropdown-item">
-                                        <i class="fas fa-sign-out-alt me-2"></i>Logout
-                                    </button>
-                                </form>
-                            </li>
-                        </ul>
+                            <div style="display: flex; align-items: center;">
+                                <i class="fas fa-phone me-2" style="color: #3498db; width: 20px;"></i>
+                                <a href="tel:+84868686899" style="color: #bdc3c7; text-decoration: none; font-size: 0.9rem;">
+                                    +84 868 686 899
+                                </a>
+                            </div>
+                        </div>
                     </div>
-                }
+                    <div class="col-md-3">
+                        <h6 style="color: #3498db; margin-bottom: 15px; font-weight: 600;">About Us</h6>
+                        <p style="color: #bdc3c7; font-size: 0.85rem; line-height: 1.5; margin-bottom: 10px;">
+                            Your trusted partner in hospitality management, providing innovative booking solutions worldwide.
+                        </p>
+                        <div class="social-links-simple">
+                            <a href="#" class="social-link"><i class="fab fa-facebook-f"></i></a>
+                            <a href="#" class="social-link"><i class="fab fa-twitter"></i></a>
+                            <a href="#" class="social-link"><i class="fab fa-instagram"></i></a>
+                            <a href="#" class="social-link"><i class="fab fa-linkedin-in"></i></a>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
-    </nav>
 
-    <!-- Main Content -->
-    <main>
-        @RenderBody()
-    </main>
+        <!-- Footer Bottom -->
+        <div class="footer-bottom">
+            <div class="container">
+                <div class="row align-items-center">
+                    <div class="col-md-6">
+                        <div class="copyright">
+                            <i class="fas fa-copyright me-2"></i>
+                            2025 <strong>HotelBooking</strong>. All rights reserved.
+                        </div>
+                    </div>
+                    <div class="col-md-6 text-end">
+                        <div class="footer-bottom-links">
+                            <a asp-controller="Home" asp-action="Privacy">Privacy</a>
+                            <a href="#">Terms</a>
+                            <a href="#">Support</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </footer>
 
     <!-- CSRF Token for AJAX requests -->
     <form style="display: none;">

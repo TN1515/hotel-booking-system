@@ -65,6 +65,25 @@ namespace HotelBooking.Controllers
 
                 if (result.Succeeded)
                 {
+                    // Update LastLogin timestamp using DbContext directly
+                    if (user != null)
+                    {
+                        try
+                        {
+                            var userToUpdate = await _context.Users.FindAsync(user.Id);
+                            if (userToUpdate != null)
+                            {
+                                userToUpdate.LastLogin = DateTime.Now;
+                                await _context.SaveChangesAsync();
+                                Console.WriteLine($"LastLogin updated for user {user.UserName} at {DateTime.Now}");
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            Console.WriteLine($"Error updating LastLogin: {ex.Message}");
+                        }
+                    }
+
                     TempData["Message"] = $"Welcome back, {user?.UserName}!";
 
                     if (!string.IsNullOrEmpty(returnUrl) && Url.IsLocalUrl(returnUrl))
