@@ -6,6 +6,7 @@ namespace HotelBooking.Models
 {
     public class CustomRole : IdentityRole<int>
     {
+        public int RoleID { get; set; }
         [StringLength(100)]
         public string? RoleName { get; set; }
         [StringLength(255)]

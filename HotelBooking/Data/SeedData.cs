@@ -13,29 +13,29 @@ namespace HotelBooking.Data
                 using var context = new HotelBookingContext(
                     serviceProvider.GetRequiredService<DbContextOptions<HotelBookingContext>>());
 
-                var roleManager = serviceProvider.GetRequiredService<RoleManager<CustomRole>>();
-                var userManager = serviceProvider.GetRequiredService<UserManager<CustomUser>>();
+            var roleManager = serviceProvider.GetRequiredService<RoleManager<CustomRole>>();
+            var userManager = serviceProvider.GetRequiredService<UserManager<CustomUser>>();
 
-                // Create roles if they don't exist
-                string[] roleNames = { "Admin", "Customer", "Staff" };
-                foreach (var roleName in roleNames)
+            // Create roles if they don't exist
+            string[] roleNames = { "Admin", "Customer", "Staff" };
+            foreach (var roleName in roleNames)
+            {
+                var roleExist = await roleManager.RoleExistsAsync(roleName);
+                if (!roleExist)
                 {
-                    var roleExist = await roleManager.RoleExistsAsync(roleName);
-                    if (!roleExist)
+                    var role = new CustomRole
                     {
-                        var role = new CustomRole
-                        {
-                            Name = roleName,
+                        Name = roleName,
                             NormalizedName = roleName.ToUpper(),
-                            RoleName = roleName,
-                            Description = $"{roleName} role",
-                            IsActive = true,
-                            CreatedBy = "System",
-                            CreatedDate = DateTime.Now
-                        };
-                        await roleManager.CreateAsync(role);
-                    }
+                        RoleName = roleName,
+                        Description = $"{roleName} role",
+                        IsActive = true,
+                        CreatedBy = "System",
+                        CreatedDate = DateTime.Now
+                    };
+                    await roleManager.CreateAsync(role);
                 }
+            }
 
                 // Create demo users with correct emails and strong passwords
                 var testUsers = new[]
@@ -49,25 +49,25 @@ namespace HotelBooking.Data
                 {
                     var user = await userManager.FindByEmailAsync(userData.Email);
                     if (user == null)
-                    {
+            {
                         // Get role ID first
                         var role = await roleManager.FindByNameAsync(userData.Role);
 
                         user = new CustomUser
-                        {
+                {
                             UserName = userData.UserName,
                             Email = userData.Email,
-                            EmailConfirmed = true,
+                    EmailConfirmed = true,
                             PhoneNumber = "0123456789",
-                            IsActive = true,
-                            CreatedBy = "System",
-                            CreatedDate = DateTime.Now,
+                    IsActive = true,
+                    CreatedBy = "System",
+                    CreatedDate = DateTime.Now,
                             CustomRoleId = role?.Id ?? 1 // Set CustomRoleId
-                        };
+                };
 
                         var result = await userManager.CreateAsync(user, userData.Password);
-                        if (result.Succeeded)
-                        {
+                if (result.Succeeded)
+                {
                             await userManager.AddToRoleAsync(user, userData.Role);
                             Console.WriteLine($"Created user {userData.UserName} with role {userData.Role}");
                         }
@@ -140,7 +140,7 @@ namespace HotelBooking.Data
                 };
                 context.RoomTypes.AddRange(roomTypes);
                 await context.SaveChangesAsync();
-            }
+                }
 
             // Seed Amenities
             if (!context.Amenities.Any())
@@ -180,10 +180,10 @@ namespace HotelBooking.Data
                         Description = $"Beautiful {roomType.TypeName?.ToLower()} with modern amenities and comfortable furnishing.",
                         BedType = i % 2 == 0 ? "King Bed" : "Queen Bed",
                         ViewType = i % 3 == 0 ? "Ocean View" : (i % 3 == 1 ? "City View" : "Garden View"),
-                        IsActive = true,
-                        CreatedBy = "System",
+                    IsActive = true,
+                    CreatedBy = "System",
                         CreatedDate = DateTime.Now
-                    };
+                };
                     rooms.Add(room);
                 }
 

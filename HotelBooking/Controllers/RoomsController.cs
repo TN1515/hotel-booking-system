@@ -141,6 +141,7 @@ namespace HotelBooking.Controllers
         }
 
         // GET: Rooms/Book/5
+        [Authorize]
         public async Task<IActionResult> Book(int? id, DateTime? checkIn, DateTime? checkOut, int? guests)
         {
             if (id == null)

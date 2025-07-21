@@ -209,26 +209,30 @@
                     else if (User.IsInRole("Staff"))
                     {
                         <!-- STAFF NAVIGATION -->
-                        <a asp-controller="Dashboard" asp-action="Index" class="nav-item-simple">
-                            <i class="fas fa-chart-line"></i>
-                            <span>Dashboard</span>
-                        </a>
+                    <a asp-controller="Dashboard" asp-action="Index" class="nav-item-simple">
+                        <i class="fas fa-chart-line"></i>
+                        <span>Dashboard</span>
+                    </a>
                         <a asp-controller="GuestProfile" asp-action="Index" class="nav-item-simple">
                             <i class="fas fa-users"></i>
                             <span>Guests</span>
-                        </a>
-                        <a asp-controller="Rooms" asp-action="Index" class="nav-item-simple">
-                            <i class="fas fa-bed"></i>
-                            <span>Rooms</span>
-                        </a>
-                        <a asp-controller="Reservations" asp-action="Index" class="nav-item-simple">
-                            <i class="fas fa-calendar-check"></i>
-                            <span>Reservations</span>
-                        </a>
+                    </a>
+                    <a asp-controller="Hotels" asp-action="Index" class="nav-item-simple">
+                        <i class="fas fa-building"></i>
+                        <span>Hotels</span>
+                    </a>
+                    <a asp-controller="Rooms" asp-action="Index" class="nav-item-simple">
+                        <i class="fas fa-bed"></i>
+                        <span>Rooms</span>
+                    </a>
+                    <a asp-controller="Reservations" asp-action="Index" class="nav-item-simple">
+                        <i class="fas fa-calendar-check"></i>
+                        <span>Reservations</span>
+                    </a>
                         <a asp-controller="PaymentProcess" asp-action="Index" class="nav-item-simple">
                             <i class="fas fa-credit-card"></i>
                             <span>Payments</span>
-                        </a>
+                    </a>
                     }
                     else
                     {
@@ -241,13 +245,13 @@
                             <i class="fas fa-bed"></i>
                             <span>Rooms</span>
                         </a>
-                        @if (User.Identity!.IsAuthenticated)
-                        {
-                            <a asp-controller="Reservations" asp-action="Index" class="nav-item-simple">
-                                <i class="fas fa-bookmark"></i>
-                                <span>My Bookings</span>
-                            </a>
-                        }
+                    @if (User.Identity!.IsAuthenticated)
+                    {
+                        <a asp-controller="Reservations" asp-action="Index" class="nav-item-simple">
+                            <i class="fas fa-bookmark"></i>
+                            <span>My Bookings</span>
+                        </a>
+                    }
                     }
                 </div>
 
@@ -289,7 +293,7 @@
                             <ul class="dropdown-menu dropdown-menu-end">
                                 @if (User.IsInRole("Admin"))
                                 {
-                                    <li>
+                                <li>
                                         <a class="dropdown-item" asp-controller="Admin" asp-action="Profile">
                                             <i class="fas fa-user-edit me-2"></i>Admin Profile
                                         </a>
@@ -321,7 +325,7 @@
                                 else if (User.IsInRole("Customer"))
                                 {
                                     <li>
-                                        <a class="dropdown-item" asp-controller="Reservations" asp-action="Index">
+                                    <a class="dropdown-item" asp-controller="Reservations" asp-action="Index">
                                             <i class="fas fa-bookmark me-2"></i>My Bookings
                                         </a>
                                     </li>
@@ -343,8 +347,10 @@
                                     <li>
                                         <a class="dropdown-item" asp-controller="Customer" asp-action="Feedback">
                                             <i class="fas fa-comment-dots me-2"></i>Give Feedback
-                                        </a>
-                                    </li>
+                                    </a>
+                                </li>
+                                @if (User.IsInRole("Admin"))
+                                {
                                     <li>
                                         <a class="dropdown-item" asp-controller="Customer" asp-action="Notifications">
                                             <i class="fas fa-bell me-2"></i>Notifications
@@ -429,7 +435,7 @@
                                     }
                                     else
                                     {
-                                        <a asp-controller="Reservations" asp-action="Index">Reservations</a>
+                                <a asp-controller="Reservations" asp-action="Index">Reservations</a>
                                     }
                                 }
                             </div>
@@ -527,7 +533,7 @@
         /* Dropdown Navigation */
         .nav-item.dropdown .nav-item-simple {
             cursor: pointer;
-        }
+            }
 
         .nav-item.dropdown .dropdown-menu {
             border: none;
@@ -541,7 +547,7 @@
             transition: all 0.2s ease;
             border-radius: 4px;
             margin: 2px 4px;
-        }
+            }
 
         .nav-item.dropdown .dropdown-item:hover {
             background-color: #e7f3ff;
@@ -691,7 +697,7 @@
                 $(document).on('click', function(e) {
                     if (!$(e.target).closest('.dropdown').length) {
                         $('.dropdown-menu').removeClass('show');
-                    }
+            }
                 });
 
                 // Refresh notifications every 30 seconds
@@ -764,7 +770,7 @@
                                     html += '<li><hr class="dropdown-divider"></li>';
                                 }
                             });
-                        }
+            }
 
                         listContainer.html(html);
 
@@ -804,7 +810,7 @@
             function truncateText(text, maxLength) {
                 if (text.length <= maxLength) return text;
                 return text.substring(0, maxLength) + '...';
-            }
+        }
 
             function getTimeAgo(dateTime) {
                 var now = new Date();
@@ -823,7 +829,7 @@
                 if (weeks < 4) return weeks + ' weeks ago';
                 if (months < 12) return months + ' months ago';
                 return years + ' years ago';
-            }
+        }
 
             function markNotificationAsRead(notificationId, element) {
                 $.ajax({
@@ -842,11 +848,11 @@
                     },
                     error: function() {
                         console.log('Failed to mark notification as read');
-                    }
+            }
                 });
             }
         </script>
-    }
+        }
 
     @await RenderSectionAsync("Scripts", required: false)
 </body>

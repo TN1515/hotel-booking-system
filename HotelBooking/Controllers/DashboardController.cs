@@ -88,7 +88,7 @@ namespace HotelBooking.Controllers
         }
 
         private async Task<List<HotelCardViewModel>> GetFeaturedHotelsAsync()
-        {
+            {
             // For single hotel system, show featured rooms instead
             var featuredRooms = await _context.Rooms
                 .Include(r => r.RoomType)
@@ -99,7 +99,7 @@ namespace HotelBooking.Controllers
                 .ToListAsync();
 
             return featuredRooms.Select(room => new HotelCardViewModel
-            {
+                {
                 HotelId = room.RoomID,
                 Name = $"Room {room.RoomNumber} - {room.RoomType?.TypeName}",
                 Location = "Khách sạn của chúng tôi",
@@ -108,15 +108,15 @@ namespace HotelBooking.Controllers
                 ImageUrl = room.RoomImages?.FirstOrDefault()?.ImageData != null ?
                     $"data:image/jpeg;base64,{Convert.ToBase64String(room.RoomImages.First().ImageData!)}" :
                     "/images/default-room.jpg",
-                Rating = 4.5m,
+                    Rating = 4.5m,
                 Phone = "+84 123 456 789",
                 Email = "info@hotel.com",
-                IsActive = true
+                    IsActive = true
             }).ToList();
         }
 
         private async Task<List<RoomOccupancyData>> GetRoomOccupancyDataAsync()
-        {
+                {
             var roomOccupancy = await _context.Rooms
                 .Include(r => r.RoomType)
                 .Where(r => r.IsActive)
@@ -147,7 +147,7 @@ namespace HotelBooking.Controllers
                 var groupedData = confirmedReservations
                     .GroupBy(r => new { r.CreatedDate.Year, r.CreatedDate.Month })
                     .Select(g => new RevenueData
-                    {
+        {
                         Month = $"{g.Key.Year}-{g.Key.Month:00}",
                         Revenue = g.Sum(r => r.Room != null ? r.Room.Price * (r.CheckOutDate - r.CheckInDate).Days : 0),
                         Bookings = g.Count()

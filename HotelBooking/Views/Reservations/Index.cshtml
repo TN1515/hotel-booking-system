@@ -89,7 +89,7 @@
                                                 </a>
                                             }
                                             else if (reservation.CheckInDate > DateTime.Today.AddDays(1))
-                                            {
+                                        {
                                                 <!-- Future reservation - allow cancel -->
                                                 <a asp-action="Cancel" asp-route-id="@reservation.ReservationID" class="btn btn-outline-danger btn-sm flex-fill">
                                                     <i class="fas fa-times me-1"></i>Cancel

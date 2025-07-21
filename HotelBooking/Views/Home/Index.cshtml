@@ -316,15 +316,15 @@
                     <div class="search-box">
                         <form method="post" asp-controller="Rooms" asp-action="Search">
                             <div class="row g-2 align-items-end justify-content-center">
-                                <div class="col-md-3">
+                            <div class="col-md-3">
                                     <label class="form-label text-dark fw-bold">Check-in</label>
                                     <input type="date" name="checkIn" class="form-control form-control-sm" value="@DateTime.Today.AddDays(1).ToString("yyyy-MM-dd")" required>
-                                </div>
-                                <div class="col-md-3">
+                            </div>
+                            <div class="col-md-3">
                                     <label class="form-label text-dark fw-bold">Check-out</label>
                                     <input type="date" name="checkOut" class="form-control form-control-sm" value="@DateTime.Today.AddDays(2).ToString("yyyy-MM-dd")" required>
-                                </div>
-                                <div class="col-md-2">
+                            </div>
+                            <div class="col-md-2">
                                     <label class="form-label text-dark fw-bold">Guests</label>
                                     <select name="guests" class="form-control form-control-sm" required>
                                         <option value="1">1 Guest</option>
@@ -332,19 +332,19 @@
                                         <option value="3">3 Guests</option>
                                         <option value="4">4 Guests</option>
                                     </select>
-                                </div>
+                            </div>
                                 <div class="col-md-4 d-flex align-items-end justify-content-center">
                                     <button type="submit" class="btn btn-explore btn-sm w-100" style="font-size:1.1rem; padding:0.6rem 1.2rem; border-radius:18px; min-width:180px;">
                                         <i class="fas fa-search me-2"></i>Search Available Rooms
                                     </button>
-                                </div>
-                            </div>
-                        </form>
+                        </div>
                     </div>
+                        </form>
                 </div>
             </div>
         </div>
     </div>
+</div>
 </div>
 
 <!-- Featured Hotels -->
@@ -352,15 +352,15 @@
     <div class="text-center mb-5">
         <h2 class="section-title">Featured Hotels</h2>
         <p class="section-subtitle">Discover our handpicked selection of premium accommodations</p>
-    </div>
+        </div>
 
     <div class="row">
         @if (Model.FeaturedRooms?.Any() == true)
         {
             @foreach (var room in Model.FeaturedRooms)
             {
-                <div class="col-lg-4 col-md-6 mb-4">
-                    <div class="destination-card">
+        <div class="col-lg-4 col-md-6 mb-4">
+            <div class="destination-card">
                         @{
                             var firstImage = room.RoomImages?.FirstOrDefault(ri => ri.IsActive);
                             var backgroundImage = "https://images.unsplash.com/photo-1566665797739-1674de7a421a?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80";
@@ -380,10 +380,10 @@
                             {
                                 <div class="image-count-badge">
                                     <i class="fas fa-images"></i> @room.RoomImages.Count(ri => ri.IsActive)
-                                </div>
+        </div>
                             }
-                            <div class="destination-overlay">
-                                <div class="destination-info">
+                    <div class="destination-overlay">
+                        <div class="destination-info">
                                     <h3 class="destination-name">Room @room.RoomNumber</h3>
                                     <p class="destination-location">
                                         <i class="fas fa-bed"></i> @room.RoomType?.TypeName
@@ -399,12 +399,22 @@
                                     <div class="d-flex gap-2">
                                         <a href="@Url.Action("Details", "Rooms", new { id = room.RoomID })" class="btn btn-explore btn-sm">View Details</a>
                                         <a href="@Url.Action("Book", "Rooms", new { id = room.RoomID })" class="btn btn-outline-light btn-sm">Book Now</a>
-                                    </div>
-                                </div>
-                            </div>
                         </div>
                     </div>
                 </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4 col-md-6 mb-4">
+            <div class="destination-card">
+                <div class="destination-image" style="background-image: url('https://images.unsplash.com/photo-1506905925346-21bda4d32df4?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80');">
+                    <div class="price-badge">From $249/night</div>
+                    <div class="destination-overlay">
+                        <div class="destination-info">
+                            <h3 class="destination-name">Maldives Resort</h3>
+                            <p class="destination-location"><i class="fas fa-map-marker-alt"></i> Malé, Maldives</p>
+                            <a href="@Url.Action("Index", "Rooms")" class="btn btn-explore">Explore Rooms</a>
+                        </div>
             }
         }
         else
@@ -415,9 +425,26 @@
                     <h4>No featured rooms available</h4>
                     <p class="text-muted">Check back later for amazing room deals!</p>
                     <a href="@Url.Action("Index", "Rooms")" class="btn btn-primary">Browse All Rooms</a>
+                    </div>
+                </div>
+        }
+            </div>
+        </div>
+
+        <div class="col-lg-4 col-md-6 mb-4">
+            <div class="destination-card">
+                <div class="destination-image" style="background-image: url('https://images.unsplash.com/photo-1551882547-ff40c63fe5fa?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80');">
+                    <div class="price-badge">From $179/night</div>
+                    <div class="destination-overlay">
+                        <div class="destination-info">
+                            <h3 class="destination-name">Paris Boutique</h3>
+                            <p class="destination-location"><i class="fas fa-map-marker-alt"></i> Montmartre, Paris</p>
+                            <a href="@Url.Action("Index", "Rooms")" class="btn btn-explore">Explore Rooms</a>
+                        </div>
+                    </div>
                 </div>
             </div>
-        }
+        </div>
     </div>
 </div>
 
@@ -565,8 +592,8 @@
             <div class="col-12">
                 <h2 class="section-title">Welcome, @User.Identity!.Name!</h2>
                 <p class="text-center text-muted mb-4">Here are your available features based on your role</p>
-            </div>
-        </div>
+    </div>
+</div>
 
         @if (ViewBag.IsAdmin)
         {
@@ -735,7 +762,7 @@
         <a href="@Url.Action("Index", "Rooms")" class="btn btn-explore btn-lg me-3">Browse All Rooms</a>
         @if (ViewBag.IsAuthenticated)
         {
-            <a href="@Url.Action("Index", "Reservations")" class="btn btn-outline-primary btn-lg">My Bookings</a>
+        <a href="@Url.Action("Index", "Reservations")" class="btn btn-outline-primary btn-lg">My Bookings</a>
         }
         else
         {

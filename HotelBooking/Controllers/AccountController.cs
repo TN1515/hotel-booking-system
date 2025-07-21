@@ -65,6 +65,7 @@ namespace HotelBooking.Controllers
 
                 if (result.Succeeded)
                 {
+                    var user = await _userManager.FindByEmailAsync(model.Email!);
                     TempData["Message"] = $"Welcome back, {user?.UserName}!";
 
                     if (!string.IsNullOrEmpty(returnUrl) && Url.IsLocalUrl(returnUrl))
@@ -105,7 +106,26 @@ namespace HotelBooking.Controllers
             return View(model);
         }
 
+        [HttpPost]
+        public IActionResult DemoLogin(string role)
+        {
+            // Demo accounts for testing
+            var accounts = new Dictionary<string, (string email, string password)>
+            {
+                { "admin", ("admin@hotelpro.com", "Admin123!") },
+                { "manager", ("manager@hotelpro.com", "Manager123!") },
+                { "guest", ("guest@hotelpro.com", "Guest123!") }
+            };
 
+            if (accounts.ContainsKey(role.ToLower()))
+            {
+                var account = accounts[role.ToLower()];
+                TempData["Message"] = $"Demo login as {role} - Email: {account.email}";
+                return RedirectToAction("Index", "Home");
+            }
+
+            return RedirectToAction("Login");
+        }
 
         [HttpGet]
         public IActionResult Register()
@@ -181,8 +201,8 @@ namespace HotelBooking.Controllers
                     }
                     else
                     {
-                        return RedirectToAction("Index", "Home");
-                    }
+                    return RedirectToAction("Index", "Home");
+                }
                 }
 
                 foreach (var error in result.Errors)

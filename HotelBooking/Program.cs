@@ -23,6 +23,9 @@ builder.Services.AddScoped<IQRPaymentService, QRPaymentService>();
 builder.Services.AddIdentity<CustomUser, CustomRole>(options =>
 {
     options.Password.RequireDigit = true;
+    options.Password.RequiredLength = 6;
+    options.Password.RequireNonAlphanumeric = false;
+    options.Password.RequireUppercase = true;
     options.Password.RequireLowercase = true;
     options.Password.RequireUppercase = true;
     options.Password.RequireNonAlphanumeric = true;
@@ -41,6 +44,8 @@ builder.Services.ConfigureApplicationCookie(options =>
     options.LogoutPath = "/Account/Logout";
     options.AccessDeniedPath = "/Account/AccessDenied";
 });
+
+builder.Services.AddControllersWithViews();
 
 var app = builder.Build();
 
@@ -63,7 +68,7 @@ if (app.Environment.IsDevelopment())
 }
 else
 {
-    app.UseHttpsRedirection();
+app.UseHttpsRedirection();
 }
 app.UseStaticFiles();
 
