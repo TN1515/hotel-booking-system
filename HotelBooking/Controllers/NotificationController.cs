@@ -379,6 +379,7 @@ namespace HotelBooking.Controllers
                 CreatedDate = notification.CreatedDate,
                 SentDate = notification.SentDate,
                 IsRead = notification.IsRead,
+                ReadDate = notification.ReadDate,
                 UserName = notification.User?.UserName,
                 UserEmail = notification.User?.Email
             };
@@ -400,6 +401,7 @@ namespace HotelBooking.Controllers
             if (notification != null && (notification.UserID == userId || User.IsInRole("Admin") || User.IsInRole("Staff")))
             {
                 notification.IsRead = true;
+                notification.ReadDate = DateTime.Now;
                 await _context.SaveChangesAsync();
                 return Json(new { success = true });
             }
@@ -574,6 +576,41 @@ namespace HotelBooking.Controllers
                     count = notifications.Count,
                     target = targetDescription
                 });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = ex.Message });
+            }
+        }
+
+        // POST: Notification/Resend
+        [HttpPost]
+        [Authorize(Roles = "Admin,Staff")]
+        public async Task<IActionResult> Resend(int id)
+        {
+            try
+            {
+                var oldNotification = await _context.Notifications.FindAsync(id);
+                if (oldNotification == null)
+                {
+                    return Json(new { success = false, message = "Notification not found." });
+                }
+
+                var newNotification = new Notification
+                {
+                    UserID = oldNotification.UserID,
+                    Title = oldNotification.Title,
+                    Message = oldNotification.Message,
+                    Type = oldNotification.Type,
+                    Status = "Sent",
+                    CreatedDate = DateTime.Now,
+                    SentDate = DateTime.Now,
+                    IsRead = false,
+                    CreatedBy = User.Identity?.Name ?? "System"
+                };
+                _context.Notifications.Add(newNotification);
+                await _context.SaveChangesAsync();
+                return Json(new { success = true });
             }
             catch (Exception ex)
             {

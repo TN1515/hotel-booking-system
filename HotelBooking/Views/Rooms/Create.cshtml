@@ -277,10 +277,30 @@
     .form-switch .form-check-input {
         width: 3rem;
         height: 1.5rem;
+        margin-left: 1.2rem;
+        vertical-align: middle;
+        background-color: #e9ecef;
+        transition: background 0.3s;
     }
-
     .form-switch .form-check-input:checked {
-        background: var(--success-gradient);
+        background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+        border-color: #43e97b;
+    }
+    .form-switch .form-check-input::before {
+        content: '';
+        display: block;
+        width: 1.2rem;
+        height: 1.2rem;
+        border-radius: 50%;
+        background: #bdbdbd;
+        position: absolute;
+        top: 0.15rem;
+        left: 0.15rem;
+        transition: left 0.3s, background 0.3s;
+    }
+    .form-switch .form-check-input:checked::before {
+        left: 1.65rem;
+        background: #f5f5f5;
     }
 </style>
 
@@ -359,8 +379,8 @@
                                 </div>
                             </div>
 
-                            <div class="row">
-                                <div class="col-md-6 mb-3">
+                            <div class="row align-items-center">
+                                <div class="col-md-6">
                                     <label asp-for="Status" class="form-label fw-bold"></label>
                                     <select asp-for="Status" class="form-select form-select-lg">
                                         @foreach (var status in Model.StatusOptions)
@@ -370,10 +390,10 @@
                                     </select>
                                     <span asp-validation-for="Status" class="text-danger"></span>
                                 </div>
-                                <div class="col-md-6 mb-3 d-flex align-items-end">
-                                    <div class="form-check form-switch">
-                                        <input asp-for="IsActive" class="form-check-input" type="checkbox" style="transform: scale(1.5);" />
-                                        <label asp-for="IsActive" class="form-check-label fw-bold ms-2"></label>
+                                <div class="col-md-6 py-0 d-flex align-items-center" style="height: 58px;">
+                                    <div class="form-check form-switch d-flex align-items-center w-100" style="margin-top: 12px;">
+                                        <input asp-for="IsActive" class="form-check-input position-relative" type="checkbox" style="transform: scale(1.5); margin-left: 0.5rem;" />
+                                        <label asp-for="IsActive" class="form-check-label fw-bold ms-4 mb-0" style="white-space:nowrap;">Active</label>
                                     </div>
                                 </div>
                             </div>

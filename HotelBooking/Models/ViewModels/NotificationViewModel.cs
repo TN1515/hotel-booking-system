@@ -23,6 +23,7 @@ namespace HotelBooking.Models.ViewModels
         public DateTime CreatedDate { get; set; }
         public DateTime? SentDate { get; set; }
         public bool IsRead { get; set; }
+        public DateTime? ReadDate { get; set; }
 
         // User details
         public string? UserName { get; set; }

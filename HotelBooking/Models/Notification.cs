@@ -17,6 +17,7 @@ namespace HotelBooking.Models
         public DateTime CreatedDate { get; set; }
         public DateTime? SentDate { get; set; }
         public bool IsRead { get; set; }
+        public DateTime? ReadDate { get; set; }
         [StringLength(100)]
         public string? CreatedBy { get; set; }
 

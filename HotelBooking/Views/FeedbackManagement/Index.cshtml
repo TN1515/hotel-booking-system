@@ -24,14 +24,17 @@
                                 <input type="text" name="searchTerm" value="@Model.SearchTerm" class="form-control" placeholder="Search feedback..." />
                             </div>
                             <div class="col-md-2">
-                                <select name="ratingFilter" class="form-control">
-                                    <option value="">All Ratings</option>
-                                    <option value="5" selected="@(Model.RatingFilter == 5)">5 Stars</option>
-                                    <option value="4" selected="@(Model.RatingFilter == 4)">4 Stars</option>
-                                    <option value="3" selected="@(Model.RatingFilter == 3)">3 Stars</option>
-                                    <option value="2" selected="@(Model.RatingFilter == 2)">2 Stars</option>
-                                    <option value="1" selected="@(Model.RatingFilter == 1)">1 Star</option>
-                                </select>
+                                <div class="position-relative">
+                                    <select name="ratingFilter" class="form-control pr-5">
+                                        <option value="">All Ratings</option>
+                                        <option value="5" selected="@(Model.RatingFilter == 5)">5 Stars</option>
+                                        <option value="4" selected="@(Model.RatingFilter == 4)">4 Stars</option>
+                                        <option value="3" selected="@(Model.RatingFilter == 3)">3 Stars</option>
+                                        <option value="2" selected="@(Model.RatingFilter == 2)">2 Stars</option>
+                                        <option value="1" selected="@(Model.RatingFilter == 1)">1 Star</option>
+                                    </select>
+                                    <span class="dropdown-caret"><i class="fas fa-chevron-down"></i></span>
+                                </div>
                             </div>
                             <div class="col-md-2">
                                 <input type="date" name="fromDate" value="@Model.FromDate?.ToString("yyyy-MM-dd")" class="form-control" />

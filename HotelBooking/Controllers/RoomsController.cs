@@ -51,7 +51,7 @@ namespace HotelBooking.Controllers
         }
 
         // GET: Rooms/Available
-        public async Task<IActionResult> Available(DateTime? checkIn, DateTime? checkOut, int? guests)
+        public async Task<IActionResult> Available(DateTime? checkIn, DateTime? checkOut, int? guests, int? roomTypeId)
         {
             var query = _context.Rooms
                 .Include(r => r.RoomType)
@@ -74,11 +74,17 @@ namespace HotelBooking.Controllers
                 query = query.Where(r => r.RoomType!.MaxOccupancy >= guests);
             }
 
+            if (roomTypeId.HasValue)
+            {
+                query = query.Where(r => r.RoomTypeID == roomTypeId.Value);
+            }
+
             var availableRooms = await query.ToListAsync();
 
             ViewBag.CheckIn = checkIn?.ToString("yyyy-MM-dd");
             ViewBag.CheckOut = checkOut?.ToString("yyyy-MM-dd");
             ViewBag.Guests = guests;
+            ViewBag.RoomTypeId = roomTypeId;
 
             return View(availableRooms);
         }

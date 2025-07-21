@@ -243,6 +243,48 @@ namespace HotelBooking.Controllers
             return RedirectToAction(nameof(Services));
         }
 
+        // GET: Settings/EditService/5
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> EditService(int id)
+        {
+            var service = await _context.Services.FindAsync(id);
+            if (service == null)
+            {
+                return NotFound();
+            }
+            return View(service);
+        }
+
+        // POST: Settings/EditService/5
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> EditService(int id, Service model)
+        {
+            if (id != model.ServiceID)
+            {
+                return NotFound();
+            }
+            if (ModelState.IsValid)
+            {
+                var service = await _context.Services.FindAsync(id);
+                if (service == null)
+                {
+                    return NotFound();
+                }
+                service.ServiceName = model.ServiceName;
+                service.Description = model.Description;
+                service.Category = model.Category;
+                service.IsActive = model.IsActive;
+                service.ModifiedBy = User.Identity?.Name ?? "System";
+                service.ModifiedDate = DateTime.Now;
+                await _context.SaveChangesAsync();
+                TempData["SuccessMessage"] = "Service updated successfully.";
+                return RedirectToAction(nameof(Services));
+            }
+            return View(model);
+        }
+
         // POST: Settings/ToggleStatus
         [HttpPost]
         public async Task<IActionResult> ToggleStatus(string entityType, int id)

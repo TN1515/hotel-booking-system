@@ -213,7 +213,16 @@
                                             <div class="timeline-marker bg-info"></div>
                                             <div class="timeline-content">
                                                 <h6 class="mb-1">Notification Read</h6>
-                                                <p class="text-muted mb-0">Read by recipient</p>
+                                                <p class="text-muted mb-0">
+                                                    @if (Model.ReadDate.HasValue)
+                                                    {
+                                                        @Model.ReadDate.Value.ToString("dd/MM/yyyy HH:mm")
+                                                    }
+                                                    else
+                                                    {
+                                                        <span>Read by recipient</span>
+                                                    }
+                                                </p>
                                             </div>
                                         </div>
                                     }

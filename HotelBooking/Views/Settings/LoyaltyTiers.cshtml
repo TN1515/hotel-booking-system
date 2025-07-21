@@ -67,8 +67,8 @@
                             @if (Model.Any())
                             {
                                 <div class="table-responsive">
-                                    <table class="table table-hover mb-0">
-                                        <thead class="table-light">
+                                    <table class="table table-striped table-hover">
+                                        <thead class="table-dark">
                                             <tr>
                                                 <th>Tier Name</th>
                                                 <th>Points Range</th>
@@ -87,17 +87,9 @@
                                                             <strong>@tier.TierName</strong>
                                                         </div>
                                                     </td>
-                                                    <td>
-                                                        <span class="badge bg-info">@tier.MinPoints - @tier.MaxPoints points</span>
-                                                    </td>
-                                                    <td>
-                                                        <span class="badge bg-success">@tier.DiscountPercentage%</span>
-                                                    </td>
-                                                    <td>
-                                                        <span class="badge bg-@(tier.IsActive ? "success" : "secondary")">
-                                                            @(tier.IsActive ? "Active" : "Inactive")
-                                                        </span>
-                                                    </td>
+                                                    <td><span class="badge bg-info">@tier.MinPoints - @tier.MaxPoints points</span></td>
+                                                    <td><span class="badge bg-success">@tier.DiscountPercentage%</span></td>
+                                                    <td><span class="badge bg-@(tier.IsActive ? "success" : "secondary")">@(tier.IsActive ? "Active" : "Inactive")</span></td>
                                                     <td>
                                                         <div class="d-flex flex-row">
                                                             <button type="button" 
