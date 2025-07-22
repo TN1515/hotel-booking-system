@@ -163,9 +163,18 @@
 
             <!-- Main Navigation -->
             <div class="navbar-nav d-flex flex-row mx-auto">
-                <a class="nav-link px-4 py-2 mx-1 admin-nav-link" href="@Url.Action("Dashboard", "Admin")">
-                    <i class="fas fa-tachometer-alt me-2"></i>Dashboard
-                </a>
+                @if (User.IsInRole("Admin"))
+                {
+                    <a class="nav-link px-4 py-2 mx-1 admin-nav-link" href="@Url.Action("Dashboard", "Admin")">
+                        <i class="fas fa-tachometer-alt me-2"></i>Dashboard
+                    </a>
+                }
+                else if (User.IsInRole("Staff"))
+                {
+                    <a class="nav-link px-4 py-2 mx-1 admin-nav-link" href="@Url.Action("Index", "Dashboard")">
+                        <i class="fas fa-tachometer-alt me-2"></i>Dashboard
+                    </a>
+                }
 
                 <!-- Guest Management -->
                 <a class="nav-link px-4 py-2 mx-1 admin-nav-link" href="@Url.Action("Index", "GuestProfile")">
@@ -178,9 +187,18 @@
                 </a>
 
                 <!-- Reservations -->
-                <a class="nav-link px-4 py-2 mx-1 admin-nav-link" href="@Url.Action("Reservations", "Admin")">
-                    <i class="fas fa-calendar-check me-2"></i>Reservations
-                </a>
+                @if (User.IsInRole("Admin"))
+                {
+                    <a class="nav-link px-4 py-2 mx-1 admin-nav-link" href="@Url.Action("Reservations", "Admin")">
+                        <i class="fas fa-calendar-check me-2"></i>Reservations
+                    </a>
+                }
+                else if (User.IsInRole("Staff"))
+                {
+                    <a class="nav-link px-4 py-2 mx-1 admin-nav-link" href="@Url.Action("Index", "Reservations")">
+                        <i class="fas fa-calendar-check me-2"></i>Reservations
+                    </a>
+                }
 
                 <!-- Reports -->
                 <a class="nav-link px-4 py-2 mx-1 admin-nav-link" href="@Url.Action("Reports", "Admin")">
@@ -209,7 +227,14 @@
                         <li><hr class="dropdown-divider"></li>
                         <li><a class="dropdown-item" href="@Url.Action("Index", "UserManagement")"><i class="fas fa-user-cog me-2"></i>Users</a></li>
                         <li><a class="dropdown-item" href="@Url.Action("Index", "Amenities")"><i class="fas fa-spa me-2"></i>Amenities</a></li>
-                        <li><a class="dropdown-item" href="@Url.Action("Index", "Settings")"><i class="fas fa-cog me-2"></i>Settings</a></li>
+                        @if (User.IsInRole("Admin"))
+                        {
+                            <li><a class="dropdown-item" href="@Url.Action("Index", "Settings")"><i class="fas fa-cog me-2"></i>Settings</a></li>
+                        }
+                        else if (User.IsInRole("Staff"))
+                        {
+                            <li><a class="dropdown-item" href="@Url.Action("RoomTypes", "Settings")"><i class="fas fa-cog me-2"></i>Settings</a></li>
+                        }
                     </ul>
                 </div>
             </div>
@@ -258,13 +283,31 @@
                                 </span>
                                 <div class="d-flex flex-column">
                                     <span class="fw-semibold">@User.Identity?.Name</span>
-                                    <small class="text-success">Admin</small>
+                                    @if (User.IsInRole("Admin"))
+                                    {
+                                        <small class="text-success">Admin</small>
+                                    }
+                                    else if (User.IsInRole("Staff"))
+                                    {
+                                        <small class="text-info">Staff</small>
+                                    }
+                                    else if (User.IsInRole("Customer"))
+                                    {
+                                        <small class="text-primary">Customer</small>
+                                    }
                                 </div>
                             </div>
                         </a>
                         <ul class="dropdown-menu dropdown-menu-end shadow border-0">
-                            <li><a class="dropdown-item" href="@Url.Action("Profile", "Admin")"><i class="fas fa-user me-2"></i>Profile</a></li>
-                            <li><a class="dropdown-item" href="@Url.Action("Index", "Settings")"><i class="fas fa-cog me-2"></i>Settings</a></li>
+                            @if (User.IsInRole("Admin"))
+                            {
+                                <li><a class="dropdown-item" href="@Url.Action("Profile", "Admin")"><i class="fas fa-user me-2"></i>Profile</a></li>
+                                <li><a class="dropdown-item" href="@Url.Action("Index", "Settings")"><i class="fas fa-cog me-2"></i>Settings</a></li>
+                            }
+                            else if (User.IsInRole("Staff"))
+                            {
+                                <li><a class="dropdown-item" href="@Url.Action("Profile", "Staff")"><i class="fas fa-user me-2"></i>Profile</a></li>
+                            }
                             <li><hr class="dropdown-divider"></li>
                             <li>
                                 <form asp-controller="Account" asp-action="Logout" method="post" class="d-inline">

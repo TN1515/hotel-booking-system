@@ -2,9 +2,11 @@ using Microsoft.AspNetCore.Mvc;
 using HotelBooking.Models;
 using HotelBooking.Data;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Authorization;
 
 namespace HotelBooking.Controllers
 {
+    [Authorize(Roles = "Admin,Staff")]
     public class DashboardController : Controller
     {
         private readonly HotelBookingContext _context;

@@ -1,128 +1,231 @@
 @model IEnumerable<HotelBooking.Models.Reservation>
 @{
-    ViewData["Title"] = "My Bookings";
+    ViewData["Title"] = "Reservations Management";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
 }
 
-<div class="container-fluid py-4">
-    <div class="row">
-        <div class="col-12">
-            <div class="d-flex justify-content-between align-items-center mb-4">
-                <h1 class="display-6 fw-bold text-primary">
-                    <i class="fas fa-calendar-check me-3"></i>My Bookings
-                </h1>
-                <a asp-controller="Rooms" asp-action="Index" class="btn btn-primary btn-lg">
-                    <i class="fas fa-plus me-2"></i>Book New Room
-                </a>
-            </div>
+<div class="admin-content">
+    <!-- Header Section -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="page-title">Reservations</h1>
+            <p class="text-muted mb-0">Manage guest bookings and reservations across all properties.</p>
+        </div>
+        <button class="btn btn-primary btn-lg">
+            <i class="fas fa-plus me-2"></i>New Reservation
+        </button>
+    </div>
 
+    <!-- Search and Filter Section -->
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <form method="get" class="d-flex">
+                <div class="input-group input-group-lg">
+                    <span class="input-group-text bg-white border-end-0">
+                        <i class="fas fa-search text-muted"></i>
+                    </span>
+                    <input type="text" class="form-control border-start-0 ps-0"
+                           name="search" value="@ViewBag.Search"
+                           placeholder="Search by guest name, email, or hotel...">
+                </div>
+                <div class="col-md-4">
+                    <select name="status" class="form-select form-select-lg" onchange="this.form.submit()">
+                        <option value="">All Statuses</option>
+                        <option value="Confirmed" selected="@(ViewBag.Status == "Confirmed")">Confirmed</option>
+                        <option value="Pending" selected="@(ViewBag.Status == "Pending")">Pending</option>
+                        <option value="Cancelled" selected="@(ViewBag.Status == "Cancelled")">Cancelled</option>
+                    </select>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Stats Cards -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body text-center">
+                    <div class="d-flex align-items-center justify-content-between">
+                        <div>
+                            <h6 class="text-muted mb-1">Total Reservations</h6>
+                            <h3 class="mb-0 fw-bold">@ViewBag.TotalReservations</h3>
+                            <small class="text-muted">All time</small>
+                        </div>
+                        <div class="text-primary">
+                            <i class="fas fa-calendar-alt fa-2x"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body text-center">
+                    <div class="d-flex align-items-center justify-content-between">
+                        <div>
+                            <h6 class="text-muted mb-1">Confirmed</h6>
+                            <h3 class="mb-0 fw-bold text-success">@ViewBag.ConfirmedReservations</h3>
+                            <small class="text-muted">Active bookings</small>
+                        </div>
+                        <div class="text-success">
+                            <i class="fas fa-check-circle fa-2x"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body text-center">
+                    <div class="d-flex align-items-center justify-content-between">
+                        <div>
+                            <h6 class="text-muted mb-1">Pending</h6>
+                            <h3 class="mb-0 fw-bold text-warning">@ViewBag.PendingReservations</h3>
+                            <small class="text-muted">Awaiting confirmation</small>
+                        </div>
+                        <div class="text-warning">
+                            <i class="fas fa-clock fa-2x"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body text-center">
+                    <div class="d-flex align-items-center justify-content-between">
+                        <div>
+                            <h6 class="text-muted mb-1">Revenue</h6>
+                            <h3 class="mb-0 fw-bold text-info">$@ViewBag.TotalRevenue</h3>
+                            <small class="text-muted">Total bookings value</small>
+                        </div>
+                        <div class="text-info">
+                            <i class="fas fa-dollar-sign fa-2x"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Reservations List -->
+    <div class="card border-0 shadow-sm">
+        <div class="card-body p-0">
             @if (Model.Any())
             {
-                <div class="row">
-                    @foreach (var reservation in Model)
-                    {
-                        <div class="col-lg-6 col-xl-4 mb-4">
-                            <div class="card h-100 shadow-sm border-0">
-                                <div class="card-header bg-white border-0 pb-0">
-                                    <div class="d-flex justify-content-between align-items-center">
-                                        <h5 class="card-title mb-0 fw-bold">Room @reservation.Room?.RoomNumber</h5>
-                                        <span class="badge @(reservation.Status == "Confirmed" ? "bg-success" : 
-                                                            reservation.Status == "Pending" ? "bg-warning" : 
-                                                            reservation.Status == "Cancelled" ? "bg-danger" : "bg-secondary") fs-6">
-                                            @reservation.Status
-                                        </span>
-                                    </div>
-                                    <p class="text-muted mb-0">@reservation.Room?.RoomType?.TypeName</p>
+                @foreach (var reservation in Model)
+                {
+                    var nights = (reservation.CheckOutDate - reservation.CheckInDate).Days;
+                    var totalAmount = reservation.Room?.Price * nights ?? 0;
+
+                    <div class="reservation-item p-4 border-bottom">
+                        <div class="row align-items-center">
+                            <div class="col-md-1">
+                                <div class="user-avatar">
+                                    <i class="fas fa-user-circle fa-3x text-primary"></i>
                                 </div>
-                                <div class="card-body">
-                                    <div class="row mb-3">
-                                        <div class="col-6">
-                                            <small class="text-muted">Check-in</small>
-                                            <div class="fw-semibold">@reservation.CheckInDate.ToString("MMM dd, yyyy")</div>
-                                        </div>
-                                        <div class="col-6">
-                                            <small class="text-muted">Check-out</small>
-                                            <div class="fw-semibold">@reservation.CheckOutDate.ToString("MMM dd, yyyy")</div>
-                                        </div>
-                                    </div>
-                                    <div class="row mb-3">
-                                        <div class="col-6">
-                                            <small class="text-muted">Guests</small>
-                                            <div class="fw-semibold">@reservation.NumberOfGuests</div>
-                                        </div>
-                                        <div class="col-6">
-                                            <small class="text-muted">Booked on</small>
-                                            <div class="fw-semibold">@reservation.BookingDate.ToString("MMM dd, yyyy")</div>
-                                        </div>
-                                    </div>
+                            </div>
+                            <div class="col-md-3">
+                                <h6 class="mb-1 fw-bold">@reservation.User?.UserName</h6>
+                                <small class="text-muted">@reservation.User?.Email</small>
+                            </div>
+                            <div class="col-md-2">
+                                <div class="text-center">
+                                    <strong>@reservation.Room?.RoomNumber - @reservation.Room?.RoomType?.TypeName</strong>
+                                    <div class="small text-muted">@reservation.Room?.RoomType?.TypeName</div>
                                 </div>
-                                <div class="card-footer bg-white border-0 pt-0">
-                                    <div class="d-flex gap-1 mb-2">
-                                        <a asp-action="Details" asp-route-id="@reservation.ReservationID" class="btn btn-outline-primary btn-sm flex-fill">
-                                            <i class="fas fa-eye me-1"></i>Details
-                                        </a>
-                                        @if (reservation.Status == "Confirmed")
-                                        {
-                                            @if (reservation.CheckInDate <= DateTime.Today && reservation.CheckOutDate > DateTime.Today)
-                                            {
-                                                <!-- Currently staying - show in-stay options -->
-                                                <a asp-action="ChangeRoom" asp-route-id="@reservation.ReservationID" class="btn btn-outline-warning btn-sm flex-fill">
-                                                    <i class="fas fa-exchange-alt me-1"></i>Change Room
-                                                </a>
-                                            }
-                                            @if (reservation.CheckOutDate > DateTime.Today)
-                                            {
-                                                <!-- Future or current stay - show add service -->
-                                                <a asp-action="AddService" asp-route-id="@reservation.ReservationID" class="btn btn-outline-success btn-sm flex-fill">
-                                                    <i class="fas fa-plus-circle me-1"></i>Add Service
-                                                </a>
-                                            }
-                                        }
-                                    </div>
-                                    <div class="d-flex gap-1">
-                                        @if (reservation.Status == "Confirmed")
-                                        {
-                                            @if (reservation.CheckOutDate <= DateTime.Today.AddDays(1))
-                                            {
-                                                <!-- Ready for checkout -->
-                                                <a asp-action="Checkout" asp-route-id="@reservation.ReservationID" class="btn btn-primary btn-sm flex-fill">
-                                                    <i class="fas fa-receipt me-1"></i>Checkout
-                                                </a>
-                                            }
-                                            else if (reservation.CheckInDate > DateTime.Today.AddDays(1))
-                                            {
-                                                <!-- Future reservation - allow cancel -->
-                                                <a asp-action="Cancel" asp-route-id="@reservation.ReservationID" class="btn btn-outline-danger btn-sm flex-fill">
-                                                    <i class="fas fa-times me-1"></i>Cancel
-                                                </a>
-                                            }
-                                        }
-                                        @if (reservation.Status != "Cancelled" && reservation.CheckInDate > DateTime.Today.AddDays(2))
-                                        {
-                                            <!-- Allow modification if more than 2 days before check-in -->
-                                            <a asp-action="Modify" asp-route-id="@reservation.ReservationID" class="btn btn-outline-info btn-sm flex-fill">
-                                                <i class="fas fa-edit me-1"></i>Modify
-                                            </a>
-                                        }
-                                    </div>
+                            </div>
+                            <div class="col-md-2">
+                                <div class="text-center">
+                                    <strong>@reservation.CheckInDate.ToString("dd/MM/yyyy")</strong>
+                                    <div class="small text-muted">Check-in</div>
+                                </div>
+                            </div>
+                            <div class="col-md-2">
+                                <div class="text-center">
+                                    <strong>$@totalAmount.ToString("F2")</strong>
+                                    <div class="small text-muted">@nights night@(nights > 1 ? "s" : "")</div>
+                                </div>
+                            </div>
+                            <div class="col-md-1">
+                                @if (reservation.Status == "Confirmed")
+                                {
+                                    <span class="badge bg-success fs-6 px-3 py-2">
+                                        <i class="fas fa-check me-1"></i>Confirmed
+                                    </span>
+                                }
+                                else if (reservation.Status == "Pending")
+                                {
+                                    <span class="badge bg-warning fs-6 px-3 py-2">
+                                        <i class="fas fa-clock me-1"></i>Pending
+                                    </span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-secondary fs-6 px-3 py-2">@reservation.Status</span>
+                                }
+                            </div>
+                            <div class="col-md-1">
+                                <div class="dropdown">
+                                    <button class="btn btn-outline-secondary btn-sm" type="button" data-bs-toggle="dropdown">
+                                        <i class="fas fa-ellipsis-h"></i>
+                                    </button>
+                                    <ul class="dropdown-menu">
+                                        <li><a class="dropdown-item" href="#"><i class="fas fa-eye me-2"></i>View</a></li>
+                                        <li><a class="dropdown-item" href="#"><i class="fas fa-edit me-2"></i>Edit</a></li>
+                                        <li><hr class="dropdown-divider"></li>
+                                        <li><a class="dropdown-item text-danger" href="#"><i class="fas fa-trash me-2"></i>Delete</a></li>
+                                    </ul>
                                 </div>
                             </div>
                         </div>
-                    }
-                </div>
+                    </div>
+                }
             }
             else
             {
                 <div class="text-center py-5">
-                    <div class="mb-4">
-                        <i class="fas fa-calendar-times text-muted" style="font-size: 4rem;"></i>
-                    </div>
-                    <h3 class="text-muted mb-3">No Bookings Yet</h3>
-                    <p class="text-muted mb-4">You haven't made any reservations yet. Start exploring our rooms!</p>
-                    <a asp-controller="Rooms" asp-action="Index" class="btn btn-primary btn-lg">
-                        <i class="fas fa-search me-2"></i>Browse Rooms
-                    </a>
+                    <i class="fas fa-calendar-times fa-3x text-muted mb-3"></i>
+                    <h5 class="text-muted">No reservations found</h5>
+                    <p class="text-muted">Try adjusting your search criteria or create a new reservation.</p>
                 </div>
             }
         </div>
     </div>
 </div>
+
+<style>
+.admin-content {
+    padding: 2rem;
+    background-color: #f8f9fa;
+    min-height: 100vh;
+}
+
+.reservation-item:hover {
+    background-color: #f8f9fa;
+}
+
+.reservation-item:last-child {
+    border-bottom: none !important;
+}
+
+.user-avatar {
+    text-align: center;
+}
+
+.card {
+    border-radius: 12px;
+}
+
+.input-group-text {
+    border-radius: 8px 0 0 8px;
+}
+
+.form-control, .form-select {
+    border-radius: 0 8px 8px 0;
+}
+
+.badge {
+    border-radius: 8px;
+}
+</style>

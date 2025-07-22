@@ -13,7 +13,7 @@
                      controller == "Home" ||
                      controller == "Rooms";
 
-    if (User.IsInRole("Admin") && isAdminArea)
+    if ((User.IsInRole("Admin") || User.IsInRole("Staff")) && isAdminArea)
     {
         Layout = "_AdminLayout";
     }

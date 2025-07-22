@@ -7,7 +7,6 @@ using HotelBooking.Models.ViewModels;
 
 namespace HotelBooking.Controllers
 {
-    [Authorize(Roles = "Admin")]
     public class SettingsController : Controller
     {
         private readonly HotelBookingContext _context;
@@ -18,6 +17,7 @@ namespace HotelBooking.Controllers
         }
 
         // GET: Settings
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Index()
         {
             var viewModel = new SettingsViewModel
@@ -50,6 +50,7 @@ namespace HotelBooking.Controllers
         }
 
         // GET: Settings/RoomTypes
+        [Authorize(Roles = "Admin,Staff")]
         public async Task<IActionResult> RoomTypes()
         {
             var roomTypes = await _context.RoomTypes.ToListAsync();
@@ -145,6 +146,7 @@ namespace HotelBooking.Controllers
         }
 
         // GET: Settings/Countries
+        [Authorize(Roles = "Admin,Staff")]
         public async Task<IActionResult> Countries()
         {
             var countries = await _context.Countries.ToListAsync();
@@ -177,6 +179,7 @@ namespace HotelBooking.Controllers
         }
 
         // GET: Settings/LoyaltyTiers
+        [Authorize(Roles = "Admin,Staff")]
         public async Task<IActionResult> LoyaltyTiers()
         {
             var loyaltyTiers = await _context.LoyaltyTiers.ToListAsync();
@@ -211,6 +214,7 @@ namespace HotelBooking.Controllers
         }
 
         // GET: Settings/Services
+        [Authorize(Roles = "Admin,Staff")]
         public async Task<IActionResult> Services()
         {
             var services = await _context.Services.ToListAsync();
@@ -342,6 +346,7 @@ namespace HotelBooking.Controllers
         }
 
         // GET: Settings/SystemInfo
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> SystemInfo()
         {
             var confirmedReservations = await _context.Reservations

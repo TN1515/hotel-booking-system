@@ -9,7 +9,7 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 
 namespace HotelBooking.Controllers
 {
-    [Authorize]
+    [Authorize(Roles = "Admin,Staff")]
     public class ReservationsController : Controller
     {
         private readonly HotelBookingContext _context;
@@ -41,6 +41,11 @@ namespace HotelBooking.Controllers
                 .Where(r => r.UserID == userId)
                 .OrderByDescending(r => r.CreatedDate)
                 .ToListAsync();
+
+            ViewBag.TotalReservations = reservations.Count;
+            ViewBag.ConfirmedReservations = reservations.Count(r => r.Status == "Confirmed");
+            ViewBag.PendingReservations = reservations.Count(r => r.Status == "Pending");
+            ViewBag.TotalRevenue = reservations.Where(r => r.Status == "Confirmed").Sum(r => (r.Room?.Price ?? 0) * (r.CheckOutDate - r.CheckInDate).Days);
 
             return View(reservations);
         }
