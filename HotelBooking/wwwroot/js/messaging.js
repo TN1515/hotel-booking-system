@@ -273,6 +273,7 @@ class MessagingSystem {
     createStaffListHtml(users) {
         let html = '';
         users.forEach((user) => {
+            if (user.Role === 'Customer') return; // Ẩn customer khỏi UI
             html += `
                 <div class="staff-item" data-user-id="${user.Id}" data-user-name="${user.UserName}">
                     <div class="d-flex align-items-center">

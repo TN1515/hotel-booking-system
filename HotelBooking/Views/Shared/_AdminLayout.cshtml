@@ -216,9 +216,12 @@
                 }
 
                 <!-- Payment Management -->
+                @if (User.IsInRole("Admin"))
+                {
                 <a class="nav-link px-4 py-2 mx-1 admin-nav-link" href="@Url.Action("PaymentManagement", "Admin")">
                     <i class="fas fa-credit-card me-2"></i>Payments
                 </a>
+                }
 
                 <!-- Payments -->
                 <a class="nav-link px-4 py-2 mx-1 admin-nav-link" href="@Url.Action("Index", "PaymentProcess")">

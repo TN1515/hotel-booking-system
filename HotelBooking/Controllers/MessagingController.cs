@@ -338,6 +338,7 @@ namespace HotelBooking.Controllers
                 // Admin: chỉ chat với staff (không trả về admin khác, không trả về customer)
                 var staffUsers = await _userManager.GetUsersInRoleAsync("Staff");
                 users = staffUsers.Where(u => u.Id != currentUserId && u.IsActive).ToList();
+                // Đảm bảo không có customer lọt vào danh sách
             } else if (isCustomer) {
                 // Customer: chỉ chat với staff
                 var staffUsers = await _userManager.GetUsersInRoleAsync("Staff");

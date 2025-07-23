@@ -644,7 +644,15 @@
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title">
-                    <i class="fas fa-users me-2"></i>Select Staff Member
+                    <i class="fas fa-users me-2"></i>
+                    @if (User.IsInRole("Admin"))
+                    {
+                        <text>Chọn nhân viên để trò chuyện</text>
+                    }
+                    else
+                    {
+                        <text>Select Staff Member</text>
+                    }
                 </h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
@@ -654,7 +662,16 @@
                         <div class="spinner-border text-primary" role="status">
                             <span class="visually-hidden">Loading...</span>
                         </div>
-                        <p class="mt-2 text-muted">Loading staff members...</p>
+                        <p class="mt-2 text-muted">
+                            @if (User.IsInRole("Admin"))
+                            {
+                                <text>Đang tải danh sách nhân viên...</text>
+                            }
+                            else
+                            {
+                                <text>Loading staff members...</text>
+                            }
+                        </p>
                     </div>
                 </div>
             </div>
