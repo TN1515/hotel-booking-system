@@ -44,7 +44,7 @@ namespace HotelBooking.Hubs
             await base.OnConnectedAsync();
         }
 
-        public override async Task OnDisconnectedAsync(Exception exception)
+        public override async Task OnDisconnectedAsync(Exception? exception)
         {
             if (_connections.TryGetValue(Context.ConnectionId, out var connection))
             {
@@ -189,5 +189,11 @@ namespace HotelBooking.Hubs
         public string ConnectionId { get; set; }
         public DateTime ConnectedAt { get; set; }
         public bool IsOnline { get; set; }
+
+        public UserConnection()
+        {
+            UserName = string.Empty;
+            ConnectionId = string.Empty;
+        }
     }
 }

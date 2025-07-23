@@ -34,7 +34,12 @@ namespace HotelBooking.Controllers
         // GET: Messaging
         public async Task<IActionResult> Index(int? chatUserId = null)
         {
-            var currentUserId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
+            var userIdStr = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (string.IsNullOrEmpty(userIdStr))
+            {
+                return Forbid();
+            }
+            var currentUserId = int.Parse(userIdStr);
             
             // Get conversations (unique users the current user has messaged with)
             var conversations = await _context.Messages
@@ -77,7 +82,12 @@ namespace HotelBooking.Controllers
         [HttpGet("api/messaging/conversations")]
         public async Task<IActionResult> GetConversations()
         {
-            var currentUserId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
+            var userIdStr = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (string.IsNullOrEmpty(userIdStr))
+            {
+                return Forbid();
+            }
+            var currentUserId = int.Parse(userIdStr);
 
             var conversations = await _context.Messages
                 .Where(m => m.SenderId == currentUserId || m.ReceiverId == currentUserId)
@@ -109,7 +119,12 @@ namespace HotelBooking.Controllers
         [HttpGet("api/messaging/messages/{userId}")]
         public async Task<IActionResult> GetMessages(int userId)
         {
-            var currentUserId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
+            var userIdStr = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (string.IsNullOrEmpty(userIdStr))
+            {
+                return Forbid();
+            }
+            var currentUserId = int.Parse(userIdStr);
 
             var messages = await _context.Messages
                 .Where(m => (m.SenderId == currentUserId && m.ReceiverId == userId) ||

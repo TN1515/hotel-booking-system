@@ -18,7 +18,7 @@ namespace HotelBooking.Controllers
         private readonly ISmsService _smsService;
         private readonly ILogger<NotificationController> _logger;
 
-        public NotificationController(HotelBookingContext context, UserManager<CustomUser> userManager)
+        public NotificationController(HotelBookingContext context, UserManager<CustomUser> userManager, IEmailService emailService, ISmsService smsService, ILogger<NotificationController> logger)
         {
             _context = context;
             _userManager = userManager;
