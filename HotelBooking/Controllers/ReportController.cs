@@ -27,6 +27,88 @@ namespace HotelBooking.Controllers
                 RoomTypes = await _context.RoomTypes.Where(rt => rt.IsActive).ToListAsync()
             };
 
+            // Tổng quan doanh thu và booking
+            var today = DateTime.Today;
+            var thisMonth = new DateTime(today.Year, today.Month, 1);
+            var lastMonth = thisMonth.AddMonths(-1);
+
+            // Today
+            var todayBookings = await _context.Reservations.CountAsync(r => r.Status == "Confirmed" && r.BookingDate.Date == today);
+            var todayReservations = await _context.Reservations
+                .Where(r => r.Status == "Confirmed" && r.BookingDate.Date == today)
+                .Include(r => r.Payments)
+                .ToListAsync();
+            var todayRevenue = todayReservations.Sum(r => r.Payments?.Sum(p => (decimal?)p.Amount) ?? 0);
+
+            // This month
+            var thisMonthBookings = await _context.Reservations.CountAsync(r => r.Status == "Confirmed" && r.BookingDate >= thisMonth);
+            var thisMonthReservations = await _context.Reservations
+                .Where(r => r.Status == "Confirmed" && r.BookingDate >= thisMonth)
+                .Include(r => r.Payments)
+                .ToListAsync();
+            var thisMonthRevenue = thisMonthReservations.Sum(r => r.Payments?.Sum(p => (decimal?)p.Amount) ?? 0);
+
+            // Last month
+            var lastMonthBookings = await _context.Reservations.CountAsync(r => r.Status == "Confirmed" && r.BookingDate >= lastMonth && r.BookingDate < thisMonth);
+            var lastMonthReservations = await _context.Reservations
+                .Where(r => r.Status == "Confirmed" && r.BookingDate >= lastMonth && r.BookingDate < thisMonth)
+                .Include(r => r.Payments)
+                .ToListAsync();
+            var lastMonthRevenue = lastMonthReservations.Sum(r => r.Payments?.Sum(p => (decimal?)p.Amount) ?? 0);
+
+            // Monthly revenue trend (12 tháng gần nhất)
+            var monthlyReservations = await _context.Reservations
+                .Where(r => r.Status == "Confirmed" && r.BookingDate >= today.AddMonths(-11))
+                .Include(r => r.Payments)
+                .ToListAsync();
+            var monthlyRevenue = monthlyReservations
+                .GroupBy(r => new { r.BookingDate.Year, r.BookingDate.Month })
+                .Select(g => new MonthlyRevenueData
+                {
+                    month = g.Key.Year + "-" + g.Key.Month.ToString("D2"),
+                    revenue = g.Sum(r => r.Payments?.Sum(p => (decimal?)p.Amount) ?? 0),
+                    bookings = g.Count()
+                })
+                .OrderBy(g => g.month)
+                .ToList();
+
+            // Top customers (top 5)
+            var topCustomerReservations = await _context.Reservations
+                .Where(r => r.Status == "Confirmed")
+                .Include(r => r.User)
+                .Include(r => r.Payments)
+                .ToListAsync();
+            var topCustomers = topCustomerReservations
+                .GroupBy(r => r.User?.UserName)
+                .Select(g => new TopCustomerData
+                {
+                    CustomerName = g.Key ?? "Unknown",
+                    TotalBookings = g.Count(),
+                    TotalSpent = g.Sum(r => r.Payments?.Sum(p => (decimal?)p.Amount) ?? 0)
+                })
+                .OrderByDescending(c => c.TotalSpent)
+                .Take(5)
+                .ToList();
+
+            // Room stats
+            viewModel.TotalRooms = await _context.Rooms.CountAsync();
+            viewModel.OccupiedRooms = await _context.Rooms.CountAsync(r => r.Status == "Occupied");
+
+            // Payment stats
+            viewModel.CompletedPayments = 0; // Không có property Status, nên không phân loại được
+            viewModel.PendingPayments = 0;
+            viewModel.TotalPayments = await _context.PaymentBatches.SumAsync(p => (decimal?)p.TotalAmount) ?? 0;
+
+            // Gán các biến tổng quan
+            viewModel.TodayRevenue = todayRevenue;
+            viewModel.TodayBookings = todayBookings;
+            viewModel.ThisMonthRevenue = thisMonthRevenue;
+            viewModel.ThisMonthBookings = thisMonthBookings;
+            viewModel.LastMonthRevenue = lastMonthRevenue;
+            viewModel.LastMonthBookings = lastMonthBookings;
+            viewModel.MonthlyRevenue = monthlyRevenue;
+            viewModel.TopCustomers = topCustomers;
+
             return View(viewModel);
         }
 

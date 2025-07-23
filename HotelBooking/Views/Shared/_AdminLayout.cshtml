@@ -201,9 +201,18 @@
                 }
 
                 <!-- Reports -->
-                <a class="nav-link px-4 py-2 mx-1 admin-nav-link" href="@Url.Action("Reports", "Admin")">
-                    <i class="fas fa-chart-bar me-2"></i>Reports
-                </a>
+                @if (User.IsInRole("Admin"))
+                {
+                    <a class="nav-link px-4 py-2 mx-1 admin-nav-link" href="@Url.Action("Reports", "Admin")">
+                        <i class="fas fa-chart-bar me-2"></i>Reports
+                    </a>
+                }
+                else if (User.IsInRole("Staff"))
+                {
+                    <a class="nav-link px-4 py-2 mx-1 admin-nav-link" href="@Url.Action("Index", "Report")">
+                        <i class="fas fa-chart-bar me-2"></i>Reports
+                    </a>
+                }
 
                 <!-- Payment Management -->
                 <a class="nav-link px-4 py-2 mx-1 admin-nav-link" href="@Url.Action("PaymentManagement", "Admin")">
@@ -222,7 +231,10 @@
                     </a>
                     <ul class="dropdown-menu">
                         <li><a class="dropdown-item" href="@Url.Action("Index", "FeedbackManagement")"><i class="fas fa-comments me-2"></i>Feedback</a></li>
-                        <li><a class="dropdown-item" href="@Url.Action("Index", "Report")"><i class="fas fa-chart-bar me-2"></i>Reports</a></li>
+                        @if (User.IsInRole("Admin"))
+                        {
+                            <li><a class="dropdown-item" href="@Url.Action("Index", "Report")"><i class="fas fa-chart-bar me-2"></i>Reports</a></li>
+                        }
                         <li><a class="dropdown-item" href="@Url.Action("Index", "Notification")"><i class="fas fa-bell me-2"></i>Notifications</a></li>
                         <li><hr class="dropdown-divider"></li>
                         <li><a class="dropdown-item" href="@Url.Action("Index", "UserManagement")"><i class="fas fa-user-cog me-2"></i>Users</a></li>

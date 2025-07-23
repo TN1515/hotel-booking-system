@@ -20,6 +20,19 @@ namespace HotelBooking.Models.ViewModels
         public string? Status { get; set; }
         
         public List<RoomType>? RoomTypes { get; set; }
+        public int TotalRooms { get; set; }
+        public int OccupiedRooms { get; set; }
+        public List<MonthlyRevenueData> MonthlyRevenue { get; set; } = new();
+        public List<TopCustomerData> TopCustomers { get; set; } = new();
+        public decimal TodayRevenue { get; set; }
+        public decimal ThisMonthRevenue { get; set; }
+        public decimal LastMonthRevenue { get; set; }
+        public int TodayBookings { get; set; }
+        public int ThisMonthBookings { get; set; }
+        public int LastMonthBookings { get; set; }
+        public decimal CompletedPayments { get; set; }
+        public decimal PendingPayments { get; set; }
+        public decimal TotalPayments { get; set; }
     }
 
     public class BookingReportViewModel
@@ -190,5 +203,19 @@ namespace HotelBooking.Models.ViewModels
         public decimal TotalSpent { get; set; }
         public DateTime LastBooking { get; set; }
         public DateTime FirstBooking { get; set; }
+    }
+
+    public class MonthlyRevenueData
+    {
+        public string month { get; set; }
+        public decimal revenue { get; set; }
+        public int bookings { get; set; }
+    }
+
+    public class TopCustomerData
+    {
+        public string CustomerName { get; set; }
+        public int TotalBookings { get; set; }
+        public decimal TotalSpent { get; set; }
     }
 }
