@@ -623,5 +623,12 @@
     }
 
     @await RenderSectionAsync("Scripts", required: false)
+
+    <!-- Messenger Widget -->
+    @if (User.Identity.IsAuthenticated)
+    {
+        @await Html.PartialAsync("_MessengerWidget")
+        <script src="~/js/messenger-widget.js" asp-append-version="true"></script>
+    }
 </body>
 </html>

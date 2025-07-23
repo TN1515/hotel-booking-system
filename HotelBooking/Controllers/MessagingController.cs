@@ -10,7 +10,7 @@ using HotelBooking.Hubs;
 
 namespace HotelBooking.Controllers
 {
-    [Authorize(Roles = "Staff,Customer")]
+    [Authorize(Roles = "Admin,Staff,Customer")]
     public class MessagingController : BaseController
     {
         private readonly HotelBookingContext _context;
@@ -156,6 +156,18 @@ namespace HotelBooking.Controllers
         public async Task<IActionResult> SendMessage([FromBody] SendMessageRequest request)
         {
             var currentUserId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
+            var sender = await _userManager.FindByIdAsync(currentUserId.ToString());
+            var senderRoles = await _userManager.GetRolesAsync(sender);
+            var isAdmin = senderRoles.Contains("Admin");
+
+            var receiver = await _userManager.FindByIdAsync(request.ReceiverId.ToString());
+            var receiverRoles = await _userManager.GetRolesAsync(receiver);
+            var isReceiverCustomer = receiverRoles.Contains("Customer");
+
+            if (isAdmin && isReceiverCustomer)
+            {
+                return BadRequest(new { success = false, message = "Admin không được phép chat với Customer." });
+            }
 
             var message = new Message
             {
@@ -170,9 +182,9 @@ namespace HotelBooking.Controllers
             await _context.SaveChangesAsync();
 
             // Send via SignalR
-            var sender = await _userManager.FindByIdAsync(currentUserId.ToString());
+            var senderUser = await _userManager.FindByIdAsync(currentUserId.ToString());
             await _hubContext.Clients.User(request.ReceiverId.ToString())
-                .SendAsync("ReceiveMessage", currentUserId, sender.UserName, request.Content);
+                .SendAsync("ReceiveMessage", currentUserId, senderUser.UserName, request.Content);
 
             return Ok();
         }
@@ -208,7 +220,18 @@ namespace HotelBooking.Controllers
             try
             {
                 var currentUserId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
-                
+                var sender = await _userManager.FindByIdAsync(currentUserId.ToString());
+                var senderRoles = await _userManager.GetRolesAsync(sender);
+                var isAdmin = senderRoles.Contains("Admin");
+
+                var receiver = await _userManager.FindByIdAsync(receiverId.ToString());
+                var receiverRoles = await _userManager.GetRolesAsync(receiver);
+                var isReceiverCustomer = receiverRoles.Contains("Customer");
+
+                if (isAdmin && isReceiverCustomer)
+                {
+                    return Json(new { success = false, message = "Admin không được phép chat với Customer." });
+                }
                 if (string.IsNullOrWhiteSpace(content))
                 {
                     return Json(new { success = false, message = "Message content cannot be empty." });
@@ -229,7 +252,7 @@ namespace HotelBooking.Controllers
                 await _context.SaveChangesAsync();
 
                 // Get sender info for response
-                var sender = await _userManager.FindByIdAsync(currentUserId.ToString());
+                var senderUser = await _userManager.FindByIdAsync(currentUserId.ToString());
 
                 return Json(new
                 {
@@ -239,7 +262,7 @@ namespace HotelBooking.Controllers
                         messageId = message.MessageId,
                         content = message.Content,
                         sentAt = message.SentAt,
-                        senderName = sender?.UserName,
+                        senderName = senderUser?.UserName,
                         senderId = currentUserId,
                         isRead = false,
                         isFromCurrentUser = true
@@ -296,22 +319,42 @@ namespace HotelBooking.Controllers
         public async Task<IActionResult> StaffList()
         {
             var currentUserId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
-            
-            // Get all staff and admin users except current user
-            var staffUsers = await _userManager.GetUsersInRoleAsync("Staff");
-            var adminUsers = await _userManager.GetUsersInRoleAsync("Admin");
-            
-            var allUsers = staffUsers.Concat(adminUsers)
-                .Where(u => u.Id != currentUserId && u.IsActive)
-                .Select(u => new
-                {
+            var currentUser = await _userManager.FindByIdAsync(currentUserId.ToString());
+            var userRoles = await _userManager.GetRolesAsync(currentUser);
+            var isAdmin = userRoles.Contains("Admin");
+            var isStaff = userRoles.Contains("Staff");
+            var isCustomer = userRoles.Contains("Customer");
+
+            List<CustomUser> users = new List<CustomUser>();
+            if (isStaff) {
+                // Staff: chat với admin, staff, customer (trừ chính mình)
+                var staffUsers = await _userManager.GetUsersInRoleAsync("Staff");
+                var adminUsers = await _userManager.GetUsersInRoleAsync("Admin");
+                var customerUsers = await _userManager.GetUsersInRoleAsync("Customer");
+                users = staffUsers.Concat(adminUsers).Concat(customerUsers)
+                    .Where(u => u.Id != currentUserId && u.IsActive)
+                    .Distinct().ToList();
+            } else if (isAdmin) {
+                // Admin: chỉ chat với staff (không trả về admin khác, không trả về customer)
+                var staffUsers = await _userManager.GetUsersInRoleAsync("Staff");
+                users = staffUsers.Where(u => u.Id != currentUserId && u.IsActive).ToList();
+            } else if (isCustomer) {
+                // Customer: chỉ chat với staff
+                var staffUsers = await _userManager.GetUsersInRoleAsync("Staff");
+                users = staffUsers.Where(u => u.Id != currentUserId && u.IsActive).ToList();
+            }
+
+            var allUsers = new List<object>();
+            foreach (var u in users)
+            {
+                var roles = await _userManager.GetRolesAsync(u);
+                allUsers.Add(new {
                     Id = u.Id,
                     UserName = u.UserName,
                     Email = u.Email,
-                    Role = staffUsers.Contains(u) ? "Staff" : "Admin"
-                })
-                .OrderBy(u => u.UserName)
-                .ToList();
+                    Role = roles.FirstOrDefault() ?? "Unknown"
+                });
+            }
 
             return Json(new { success = true, users = allUsers });
         }

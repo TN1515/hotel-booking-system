@@ -7,10 +7,11 @@ using HotelBooking.Models;
 using HotelBooking.Data;
 using Microsoft.EntityFrameworkCore;
 using System;
+using System.Linq;
 
 namespace HotelBooking.Hubs
 {
-    [Authorize(Roles = "Staff,Customer")]
+    [Authorize(Roles = "Admin,Staff,Customer")]
     public class ChatHub : Hub
     {
         private readonly HotelBookingContext _context;
@@ -66,6 +67,28 @@ namespace HotelBooking.Hubs
                 return;
 
             var senderId = int.Parse(userId);
+
+            // Lấy role sender
+            var sender = await _context.Users.FindAsync(senderId);
+            var senderRoles = await _context.UserRoles.Where(r => r.UserId == senderId).ToListAsync();
+            var isAdmin = senderRoles.Any(r => r.RoleId == 1); // RoleId=1 là Admin
+
+            // Nếu là admin thì chỉ cho gửi tới staff (RoleId=3), không gửi tới customer (RoleId=2)
+            if (isAdmin)
+            {
+                var receiver = await _context.Users.FindAsync(receiverId);
+                var receiverRoles = await _context.UserRoles.Where(r => r.UserId == receiverId).ToListAsync();
+                var isReceiverStaff = receiverRoles.Any(r => r.RoleId == 3); // RoleId=3 là Staff
+                var isReceiverCustomer = receiverRoles.Any(r => r.RoleId == 2); // RoleId=2 là Customer
+                if (!isReceiverStaff || isReceiverCustomer)
+                {
+                    // Không gửi nếu không phải staff hoặc là customer
+                    await Clients.Caller.SendAsync("MessageSent", new {
+                        error = "Admin chỉ được chat với staff!"
+                    });
+                    return;
+                }
+            }
 
             // Save message to database
             var newMessage = new Message

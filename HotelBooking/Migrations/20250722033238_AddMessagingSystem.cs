@@ -11,18 +11,6 @@ namespace HotelBooking.Migrations
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropForeignKey(
-                name: "FK_ServiceInventories_Services_ServiceID1",
-                table: "ServiceInventories");
-
-            migrationBuilder.DropIndex(
-                name: "IX_ServiceInventories_ServiceID1",
-                table: "ServiceInventories");
-
-            migrationBuilder.DropColumn(
-                name: "ServiceID1",
-                table: "ServiceInventories");
-
             migrationBuilder.CreateTable(
                 name: "Messages",
                 columns: table => new

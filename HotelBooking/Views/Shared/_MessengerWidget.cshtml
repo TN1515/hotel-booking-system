@@ -1,8 +1,8 @@
 @{
-    var isStaffOrCustomer = User.IsInRole("Staff") || User.IsInRole("Customer");
+    var isShowMessenger = User.IsInRole("Admin") || User.IsInRole("Staff") || User.IsInRole("Customer");
 }
 
-@if (isStaffOrCustomer)
+@if (isShowMessenger)
 {
 <!-- Messenger Widget -->
 <div id="messengerWidget" class="messenger-widget">
