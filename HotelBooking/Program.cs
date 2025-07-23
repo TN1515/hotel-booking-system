@@ -2,12 +2,16 @@ using Microsoft.EntityFrameworkCore;
 using HotelBooking.Data;
 using HotelBooking.Models;
 using HotelBooking.Services;
+using HotelBooking.Hubs;
 using Microsoft.AspNetCore.Identity;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
+
+// Add SignalR
+builder.Services.AddSignalR();
 
 // Configure SQL Server database
 builder.Services.AddDbContext<HotelBookingContext>(options =>
@@ -75,6 +79,9 @@ app.UseAuthorization();
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}");
+
+// Map SignalR Hub
+app.MapHub<ChatHub>("/chatHub");
 
 // Create database and seed data
 using (var scope = app.Services.CreateScope())
