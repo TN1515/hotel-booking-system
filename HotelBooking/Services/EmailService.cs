@@ -1,4 +1,4 @@
-using System.Net;
+﻿using System.Net;
 using System.Net.Mail;
 using Microsoft.Extensions.Configuration;
 
@@ -29,12 +29,29 @@ namespace HotelBooking.Services
         {
             try
             {
-                // For demo purposes, we'll log the email instead of actually sending
-                _logger.LogInformation($"EMAIL SENT TO: {to}");
-                _logger.LogInformation($"SUBJECT: {subject}");
-                _logger.LogInformation($"BODY: {body}");
+                // Log the email for debugging
+                _logger.LogInformation($"📧 SENDING EMAIL TO: {to}");
+                _logger.LogInformation($"📧 SUBJECT: {subject}");
+                _logger.LogInformation($"📧 BODY: {body}");
 
-                // In a real application, you would configure SMTP settings
+                // For demo purposes, we'll simulate successful email sending
+                // In production, you would configure real SMTP settings
+
+                // Simulate email sending process
+                await Task.Delay(500); // Simulate network delay
+
+                // For demo, we'll create a simple "email sent" confirmation
+                var emailLog = $@"
+=== EMAIL SENT SUCCESSFULLY ===
+TO: {to}
+SUBJECT: {subject}
+SENT AT: {DateTime.Now:yyyy-MM-dd HH:mm:ss}
+STATUS: ✅ DELIVERED
+================================";
+
+                _logger.LogInformation(emailLog);
+
+                // TODO: In production, uncomment and configure this:
                 /*
                 var smtpClient = new SmtpClient(_configuration["Email:SmtpServer"])
                 {
@@ -60,7 +77,7 @@ namespace HotelBooking.Services
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, $"Failed to send email to {to}");
+                _logger.LogError(ex, $"❌ Failed to send email to {to}");
                 throw;
             }
         }

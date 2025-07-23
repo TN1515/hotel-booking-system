@@ -52,6 +52,7 @@ namespace HotelBooking.Data
         public DbSet<SystemLog> SystemLogs { get; set; }
         public DbSet<AuditLog> AuditLogs { get; set; }
         public DbSet<Setting> Settings { get; set; }
+        public DbSet<Message> Messages { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -279,6 +280,19 @@ namespace HotelBooking.Data
                 .HasOne(q => q.CreatedByUser)
                 .WithMany()
                 .HasForeignKey(q => q.CreatedByUserID)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            // Configure Message relationships
+            modelBuilder.Entity<Message>()
+                .HasOne(m => m.Sender)
+                .WithMany()
+                .HasForeignKey(m => m.SenderId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<Message>()
+                .HasOne(m => m.Receiver)
+                .WithMany()
+                .HasForeignKey(m => m.ReceiverId)
                 .OnDelete(DeleteBehavior.Restrict);
 
             // UserRole configuration is handled by Identity framework

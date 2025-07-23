@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Identity;
 using HotelBooking.Data;
 using HotelBooking.Models;
 using HotelBooking.Models.ViewModels;
+using HotelBooking.Services;
 
 namespace HotelBooking.Controllers
 {
@@ -13,11 +14,17 @@ namespace HotelBooking.Controllers
     {
         private readonly HotelBookingContext _context;
         private readonly UserManager<CustomUser> _userManager;
+        private readonly IEmailService _emailService;
+        private readonly ISmsService _smsService;
+        private readonly ILogger<NotificationController> _logger;
 
         public NotificationController(HotelBookingContext context, UserManager<CustomUser> userManager)
         {
             _context = context;
             _userManager = userManager;
+            _emailService = emailService;
+            _smsService = smsService;
+            _logger = logger;
         }
 
         // GET: Notification - For Admin/Staff
@@ -283,6 +290,12 @@ namespace HotelBooking.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Bulk(BulkNotificationViewModel viewModel)
         {
+            // Custom validation: at least one role must be selected
+            if (viewModel.SelectedRoleIds == null || !viewModel.SelectedRoleIds.Any())
+            {
+                ModelState.AddModelError("SelectedRoleIds", "Please select at least one user role to send notifications to.");
+            }
+
             if (ModelState.IsValid)
             {
                 try
@@ -312,12 +325,15 @@ namespace HotelBooking.Controllers
                             break;
                         case "SpecificRole":
                             if (viewModel.RoleID.HasValue)
-                            {
-                                userIds = await _context.Users
+                    {
+                        // Get users by selected role IDs
+                        userIds = await _context.Users
                                     .Where(u => (viewModel.IncludeInactiveUsers || u.IsActive) && u.CustomRoleId == viewModel.RoleID.Value)
-                                    .Select(u => u.Id)
-                                    .ToListAsync();
-                            }
+                            .Select(u => u.Id)
+                            .ToListAsync();
+
+                        Console.WriteLine($"🔍 DEBUG: Found {userIds.Count} users for selected roles");
+                    }
                             break;
                     }
 
@@ -523,6 +539,126 @@ namespace HotelBooking.Controllers
         public IActionResult TestSend()
         {
             return View();
+        }
+
+        // GET: Notification/Test - Test page
+        [HttpGet]
+        [AllowAnonymous]
+        public IActionResult Test()
+        {
+            return View();
+        }
+
+        // GET: Notification/TestEmail - Test email service
+        [HttpGet]
+        [AllowAnonymous]
+        public async Task<IActionResult> TestEmail()
+        {
+            try
+            {
+                await _emailService.SendEmailAsync("test@example.com", "Test Email", "This is a test email from notification system");
+                return Json(new { success = true, message = "Email sent successfully! Check application logs for details." });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = ex.Message });
+            }
+        }
+
+        // GET: Notification/TestSms - Test SMS service
+        [HttpGet]
+        [AllowAnonymous]
+        public async Task<IActionResult> TestSms()
+        {
+            try
+            {
+                await _smsService.SendSmsAsync("+1234567890", "Test SMS from Hotel Booking System");
+                return Json(new { success = true, message = "SMS sent successfully! Check application logs for details." });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = ex.Message });
+            }
+        }
+
+        // GET: Notification/TestBulkSend - Test actual bulk notification functionality
+        [HttpGet]
+        [AllowAnonymous]
+        public async Task<IActionResult> TestBulkSend()
+        {
+            try
+            {
+                // Create a test bulk notification
+                var testViewModel = new BulkNotificationViewModel
+                {
+                    Title = "Test Bulk Notification",
+                    Message = "This is a test bulk notification sent programmatically",
+                    NotificationType = "Info",
+                    Priority = "Normal",
+                    SelectedRoleIds = new List<int> { 1, 2, 3 }, // All roles
+                    IncludeInactiveUsers = false
+                };
+
+                // Get users for selected roles
+                var userIds = await _context.Users
+                    .Where(u => u.IsActive && testViewModel.SelectedRoleIds.Contains(u.CustomRoleId ?? 0))
+                    .Select(u => u.Id)
+                    .ToListAsync();
+
+                // Create notifications
+                var notifications = new List<Notification>();
+                foreach (var userId in userIds)
+                {
+                    var notification = new Notification
+                    {
+                        UserID = userId,
+                        Title = testViewModel.Title,
+                        Message = testViewModel.Message,
+                        Type = testViewModel.NotificationType,
+                        Status = "Sent",
+                        CreatedDate = DateTime.Now,
+                        SentDate = DateTime.Now,
+                        IsRead = false,
+                        CreatedBy = "System Test"
+                    };
+                    notifications.Add(notification);
+                }
+
+                _context.Notifications.AddRange(notifications);
+                await _context.SaveChangesAsync();
+
+                return Json(new {
+                    success = true,
+                    message = $"Test bulk notification sent successfully to {notifications.Count} users!",
+                    userCount = notifications.Count,
+                    userIds = userIds
+                });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = ex.Message });
+            }
+        }
+
+        // GET: Notification/TestBulk - Test bulk send functionality
+        [HttpGet]
+        [AllowAnonymous]
+        public async Task<IActionResult> TestBulk()
+        {
+            try
+            {
+                // Test email service
+                await _emailService.SendEmailAsync("test@example.com", "Test Email", "This is a test email from bulk notification system");
+
+                // Test SMS service
+                await _smsService.SendSmsAsync("+1234567890", "Test SMS from Hotel Booking System");
+
+                return Json(new { success = true, message = "Both Email and SMS services are working! Check application logs for details." });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = ex.Message });
+            }
         }
 
         // GET: Notification/QuickSend - Quick send to all users for testing

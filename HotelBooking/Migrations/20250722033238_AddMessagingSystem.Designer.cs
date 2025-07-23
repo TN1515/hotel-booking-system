@@ -4,6 +4,7 @@ using HotelBooking.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace HotelBooking.Migrations
 {
     [DbContext(typeof(HotelBookingContext))]
-    partial class HotelBookingContextModelSnapshot : ModelSnapshot
+    [Migration("20250722033238_AddMessagingSystem")]
+    partial class AddMessagingSystem
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -1552,9 +1555,6 @@ namespace HotelBooking.Migrations
                     b.Property<string>("Message")
                         .HasMaxLength(1000)
                         .HasColumnType("nvarchar(1000)");
-
-                    b.Property<DateTime?>("ReadDate")
-                        .HasColumnType("datetime2");
 
                     b.Property<DateTime?>("SentDate")
                         .HasColumnType("datetime2");

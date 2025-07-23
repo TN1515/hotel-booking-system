@@ -7,6 +7,7 @@ using HotelBooking.Models.ViewModels;
 
 namespace HotelBooking.Controllers
 {
+    [Authorize(Roles = "Admin")]
     public class SettingsController : Controller
     {
         private readonly HotelBookingContext _context;
@@ -284,8 +285,8 @@ namespace HotelBooking.Controllers
                 service.ModifiedDate = DateTime.Now;
                 await _context.SaveChangesAsync();
                 TempData["SuccessMessage"] = "Service updated successfully.";
-                return RedirectToAction(nameof(Services));
-            }
+            return RedirectToAction(nameof(Services));
+        }
             return View(model);
         }
 

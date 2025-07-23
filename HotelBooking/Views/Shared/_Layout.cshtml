@@ -6,6 +6,7 @@
     <title>@ViewData["Title"] - HotelBooking</title>
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
     <link rel="stylesheet" href="~/css/layout-responsive.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/HotelBooking.styles.css" asp-append-version="true" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
@@ -153,6 +154,7 @@
             background-color: #f8f9fa;
         }
     </style>
+    @RenderSection("Styles", required: false)
 </head>
 <body>
     <header>
@@ -229,6 +231,7 @@
                             <i class="fas fa-credit-card"></i>
                             <span>Payments</span>
                         </a>
+
                     }
                     else
                     {
@@ -849,5 +852,17 @@
     }
 
     @await RenderSectionAsync("Scripts", required: false)
+
+    <!-- AI Chat Bot -->
+    <link rel="stylesheet" href="~/css/ai-chat.css" asp-append-version="true" />
+    @await Html.PartialAsync("_AIChat")
+    <script src="~/js/ai-chat.js" asp-append-version="true"></script>
+
+    <!-- Messenger Widget -->
+    @if (User.Identity.IsAuthenticated)
+    {
+        @await Html.PartialAsync("_MessengerWidget")
+        <script src="~/js/messenger-widget.js" asp-append-version="true"></script>
+    }
 </body>
 </html>

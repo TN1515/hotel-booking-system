@@ -29,22 +29,22 @@
                             <div class="col-md-2">
                                 <div class="position-relative">
                                     <select name="categoryFilter" class="form-control pr-5">
-                                        <option value="">All Categories</option>
-                                        @foreach (var category in Model.Categories)
-                                        {
+                                    <option value="">All Categories</option>
+                                    @foreach (var category in Model.Categories)
+                                    {
                                             <option value="@category" selected="@(Model.CategoryFilter == category)">@category</option>
-                                        }
-                                    </select>
+                                    }
+                                </select>
                                     <span class="dropdown-caret"><i class="fas fa-chevron-down"></i></span>
-                                </div>
+                            </div>
                             </div>
                             <div class="col-md-2">
                                 <div class="position-relative">
                                     <select name="statusFilter" class="form-control pr-5">
-                                        <option value="">All Status</option>
-                                        <option value="Active" selected="@(Model.StatusFilter == "Active")">Active</option>
-                                        <option value="Inactive" selected="@(Model.StatusFilter == "Inactive")">Inactive</option>
-                                    </select>
+                                    <option value="">All Status</option>
+                                    <option value="Active" selected="@(Model.StatusFilter == "Active")">Active</option>
+                                    <option value="Inactive" selected="@(Model.StatusFilter == "Inactive")">Inactive</option>
+                                </select>
                                     <span class="dropdown-caret"><i class="fas fa-chevron-down"></i></span>
                                 </div>
                             </div>

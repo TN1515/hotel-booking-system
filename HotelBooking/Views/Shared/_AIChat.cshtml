@@ -1,0 +1,432 @@
+<!-- AI Chat Bot Widget -->
+<div id="aiChatWidget" class="ai-chat-widget">
+    <!-- AI Chat Toggle Button -->
+    <div id="aiChatToggle" class="ai-chat-toggle" onclick="aiChatBot.toggle()">
+        <div class="ai-avatar">
+            <div class="ai-gradient-circle">
+                <i class="fas fa-robot"></i>
+            </div>
+            <div class="ai-status-dot"></div>
+        </div>
+        <div class="ai-label">
+            <span class="ai-name">Hotel AI</span>
+            <span class="ai-status">Online</span>
+        </div>
+    </div>
+
+    <!-- AI Chat Window -->
+    <div id="aiChatWindow" class="ai-chat-window" style="display: none;">
+        <div class="ai-chat-header">
+            <div class="ai-header-info">
+                <div class="ai-avatar-small">
+                    <div class="ai-gradient-circle-small">
+                        <i class="fas fa-robot"></i>
+                    </div>
+                </div>
+                <div class="ai-header-text">
+                    <h4>Hotel AI Assistant</h4>
+                    <span class="ai-subtitle">Powered by AI • Always available</span>
+                </div>
+            </div>
+            <div class="ai-header-actions">
+                <button class="ai-action-btn" onclick="aiChatBot.minimize()" title="Minimize">
+                    <i class="fas fa-minus"></i>
+                </button>
+                <button class="ai-action-btn" onclick="aiChatBot.close()" title="Close">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+        </div>
+
+        <div class="ai-chat-body" id="aiChatBody">
+            <div class="ai-welcome-message">
+                <div class="ai-message ai-message-bot">
+                    <div class="ai-message-avatar">
+                        <div class="ai-gradient-circle-tiny">
+                            <i class="fas fa-robot"></i>
+                        </div>
+                    </div>
+                    <div class="ai-message-content">
+                        <div class="ai-message-bubble">
+                            <p>👋 Xin chào! Tôi là Hotel AI Assistant - trợ lý thông minh như ChatGPT! Tôi có thể giúp bạn:</p>
+                            <ul>
+                                <li>🏨 Đặt phòng & thông tin khách sạn</li>
+                                <li>💰 Giá cả & khuyến mãi</li>
+                                <li>🛎️ Dịch vụ & tiện ích</li>
+                                <li>🌤️ Thời tiết & thời gian</li>
+                                <li>🍽️ Ẩm thực & nhà hàng</li>
+                                <li>🗺️ Du lịch & tham quan</li>
+                                <li>🧮 Tính toán đơn giản</li>
+                                <li>💼 Business & công việc</li>
+                                <li>🎯 Giải trí & hoạt động</li>
+                                <li>📚 Học tập & văn hóa</li>
+                                <li>❓ Và nhiều câu hỏi khác!</li>
+                            </ul>
+                            <p>Hãy chat với tôi như ChatGPT! 🤖✨</p>
+                        </div>
+                        <div class="ai-message-time">Vừa xong</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="ai-chat-input">
+            <div class="ai-input-container">
+                <input type="text" id="aiChatInput" placeholder="Nhắn tin cho Hotel AI..." 
+                       onkeypress="aiChatBot.handleKeyPress(event)">
+                <button class="ai-send-btn" onclick="aiChatBot.sendMessage()">
+                    <i class="fas fa-paper-plane"></i>
+                </button>
+            </div>
+            <div class="ai-suggestions" id="aiSuggestions">
+                <button class="ai-suggestion-btn" onclick="aiChatBot.sendSuggestion('Tôi muốn đặt phòng')">
+                    🏨 Đặt phòng
+                </button>
+                <button class="ai-suggestion-btn" onclick="aiChatBot.sendSuggestion('Giá phòng bao nhiêu?')">
+                    💰 Giá phòng
+                </button>
+                <button class="ai-suggestion-btn" onclick="aiChatBot.sendSuggestion('Khách sạn có những dịch vụ gì?')">
+                    🛎️ Dịch vụ
+                </button>
+                <button class="ai-suggestion-btn" onclick="aiChatBot.sendSuggestion('Thời tiết hôm nay thế nào?')">
+                    🌤️ Thời tiết
+                </button>
+                <button class="ai-suggestion-btn" onclick="aiChatBot.sendSuggestion('Có món ăn gì ngon?')">
+                    🍽️ Ẩm thực
+                </button>
+                <button class="ai-suggestion-btn" onclick="aiChatBot.sendSuggestion('Điểm tham quan gần đây')">
+                    🗺️ Du lịch
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+/* AI Chat Widget Styles */
+.ai-chat-widget {
+    position: fixed;
+    bottom: 20px;
+    left: 20px;
+    z-index: 9999;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+.ai-chat-toggle {
+    display: flex;
+    align-items: center;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 12px 16px;
+    border-radius: 50px;
+    cursor: pointer;
+    box-shadow: 0 8px 32px rgba(102, 126, 234, 0.3);
+    transition: all 0.3s ease;
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    backdrop-filter: blur(10px);
+}
+
+.ai-chat-toggle:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 40px rgba(102, 126, 234, 0.4);
+}
+
+.ai-avatar {
+    position: relative;
+    margin-right: 12px;
+}
+
+.ai-gradient-circle {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: linear-gradient(45deg, #00d4ff, #5b86e5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    color: white;
+    box-shadow: 0 4px 15px rgba(0, 212, 255, 0.3);
+}
+
+.ai-status-dot {
+    position: absolute;
+    bottom: 2px;
+    right: 2px;
+    width: 12px;
+    height: 12px;
+    background: #00ff88;
+    border-radius: 50%;
+    border: 2px solid white;
+    animation: pulse 2s infinite;
+}
+
+/* Pulse animation will be in separate CSS file */
+
+.ai-label {
+    display: flex;
+    flex-direction: column;
+}
+
+.ai-name {
+    font-weight: 600;
+    font-size: 14px;
+    margin-bottom: 2px;
+}
+
+.ai-status {
+    font-size: 12px;
+    opacity: 0.9;
+}
+
+.ai-chat-window {
+    position: absolute;
+    bottom: 70px;
+    left: 0;
+    width: 380px;
+    height: 500px;
+    background: white;
+    border-radius: 16px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+    animation: slideUp 0.3s ease;
+}
+
+/* SlideUp animation will be in separate CSS file */
+
+.ai-chat-header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 16px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.ai-header-info {
+    display: flex;
+    align-items: center;
+}
+
+.ai-avatar-small {
+    margin-right: 12px;
+}
+
+.ai-gradient-circle-small {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: linear-gradient(45deg, #00d4ff, #5b86e5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    color: white;
+}
+
+.ai-header-text h4 {
+    margin: 0;
+    font-size: 16px;
+    font-weight: 600;
+}
+
+.ai-subtitle {
+    font-size: 12px;
+    opacity: 0.9;
+}
+
+.ai-header-actions {
+    display: flex;
+    gap: 8px;
+}
+
+.ai-action-btn {
+    background: rgba(255, 255, 255, 0.2);
+    border: none;
+    color: white;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.2s ease;
+}
+
+.ai-action-btn:hover {
+    background: rgba(255, 255, 255, 0.3);
+}
+
+.ai-chat-body {
+    height: 350px;
+    overflow-y: auto;
+    padding: 16px;
+    background: #f8f9fa;
+}
+
+.ai-welcome-message {
+    margin-bottom: 16px;
+}
+
+.ai-message {
+    display: flex;
+    margin-bottom: 16px;
+    align-items: flex-start;
+}
+
+.ai-message-bot {
+    justify-content: flex-start;
+}
+
+.ai-message-user {
+    justify-content: flex-end;
+}
+
+.ai-message-avatar {
+    margin-right: 8px;
+}
+
+.ai-gradient-circle-tiny {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: linear-gradient(45deg, #00d4ff, #5b86e5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 10px;
+    color: white;
+}
+
+.ai-message-content {
+    max-width: 280px;
+}
+
+.ai-message-bubble {
+    background: white;
+    padding: 12px 16px;
+    border-radius: 18px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    margin-bottom: 4px;
+}
+
+.ai-message-user .ai-message-bubble {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+}
+
+.ai-message-bubble p {
+    margin: 0 0 8px 0;
+    line-height: 1.4;
+}
+
+.ai-message-bubble p:last-child {
+    margin-bottom: 0;
+}
+
+.ai-message-bubble ul {
+    margin: 8px 0;
+    padding-left: 20px;
+}
+
+.ai-message-bubble li {
+    margin-bottom: 4px;
+    line-height: 1.4;
+}
+
+.ai-message-time {
+    font-size: 11px;
+    color: #666;
+    text-align: right;
+}
+
+.ai-message-user .ai-message-time {
+    text-align: left;
+}
+
+.ai-chat-input {
+    padding: 16px;
+    background: white;
+    border-top: 1px solid #e9ecef;
+}
+
+.ai-input-container {
+    display: flex;
+    align-items: center;
+    background: #f8f9fa;
+    border-radius: 24px;
+    padding: 8px 12px;
+    margin-bottom: 12px;
+}
+
+#aiChatInput {
+    flex: 1;
+    border: none;
+    background: transparent;
+    padding: 8px 12px;
+    font-size: 14px;
+    outline: none;
+}
+
+.ai-send-btn {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border: none;
+    color: white;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform 0.2s ease;
+}
+
+.ai-send-btn:hover {
+    transform: scale(1.05);
+}
+
+.ai-suggestions {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.ai-suggestion-btn {
+    background: #e9ecef;
+    border: none;
+    padding: 8px 12px;
+    border-radius: 16px;
+    font-size: 12px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    color: #495057;
+}
+
+.ai-suggestion-btn:hover {
+    background: #dee2e6;
+    transform: translateY(-1px);
+}
+
+/* Responsive styles will be in separate CSS file */
+
+/* Scrollbar */
+.ai-chat-body::-webkit-scrollbar {
+    width: 4px;
+}
+
+.ai-chat-body::-webkit-scrollbar-track {
+    background: #f1f1f1;
+}
+
+.ai-chat-body::-webkit-scrollbar-thumb {
+    background: #c1c1c1;
+    border-radius: 2px;
+}
+
+.ai-chat-body::-webkit-scrollbar-thumb:hover {
+    background: #a8a8a8;
+}
+</style>

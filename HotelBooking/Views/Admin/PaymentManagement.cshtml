@@ -1,4 +1,4 @@
-@model IEnumerable<HotelBooking.Models.QRPayment>
+﻿@model IEnumerable<HotelBooking.Models.QRPayment>
 @{
     ViewData["Title"] = "Payment Management";
     Layout = "_AdminLayout";
@@ -161,7 +161,62 @@
                                     <td>@payment.CreatedDate.ToString("dd/MM/yyyy")</td>
                                     <td>@payment.PaidDate?.ToString("dd/MM/yyyy")</td>
                                     <td>
-                                        <!-- Action buttons here -->
+                                        <strong>@payment.TransactionReference</strong>
+                                        <br>
+                                        <small class="text-muted">@payment.BankCode</small>
+                                    </td>
+                                    <td>
+                                        <div>
+                                            <strong>@payment.Reservation?.User?.UserName</strong>
+                                            <br>
+                                            <small class="text-muted">@payment.Reservation?.User?.Email</small>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <strong>@payment.Reservation?.Room?.RoomNumber</strong>
+                                        <br>
+                                        <small class="text-muted">Reservation #@payment.ReservationID</small>
+                                    </td>
+                                    <td>
+                                        <strong class="text-success">@payment.Amount.ToString("C", new System.Globalization.CultureInfo("vi-VN"))</strong>
+                                    </td>
+                                    <td>
+                                        <span class="badge @(payment.Status == "Paid" ? "bg-success" : 
+                                                              payment.Status == "Pending" ? "bg-warning" : 
+                                                              payment.Status == "Expired" ? "bg-danger" : "bg-secondary")">
+                                            @(payment.Status == "Pending" ? "Chờ thanh toán" : 
+                                              payment.Status == "Paid" ? "Đã thanh toán" : 
+                                              payment.Status == "Expired" ? "Hết hạn" : "Đã hủy")
+                                        </span>
+                                    </td>
+                                    <td>
+                                        @payment.CreatedDate.ToString("dd/MM/yyyy HH:mm")
+                                    </td>
+                                    <td>
+                                        @(payment.PaidDate?.ToString("dd/MM/yyyy HH:mm") ?? "-")
+                                    </td>
+                                    <td>
+                                        <div class="btn-group" role="group">
+                                            <a href="@Url.Action("Display", "QRPayment", new { id = payment.QRPaymentID })" 
+                                               class="btn btn-sm btn-outline-primary" title="View QR Code">
+                                                <i class="fas fa-qrcode"></i>
+                                            </a>
+                                            @if (payment.Status == "Pending")
+                                            {
+                                                <button class="btn btn-sm btn-outline-success" 
+                                                        onclick="markAsPaid(@payment.QRPaymentID)" title="Mark as Paid">
+                                                    <i class="fas fa-check"></i>
+                                                </button>
+                                                <button class="btn btn-sm btn-outline-danger" 
+                                                        onclick="cancelPayment(@payment.QRPaymentID)" title="Cancel">
+                                                    <i class="fas fa-times"></i>
+                                                </button>
+                                            }
+                                            <a href="@Url.Action("Details", "Reservations", new { id = payment.ReservationID })" 
+                                               class="btn btn-sm btn-outline-info" title="View Reservation">
+                                                <i class="fas fa-eye"></i>
+                                            </a>
+                                        </div>
                                     </td>
                                 </tr>
                             }
