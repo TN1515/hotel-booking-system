@@ -215,14 +215,6 @@
                     </a>
                 }
 
-                <!-- Payment Management -->
-                @if (User.IsInRole("Admin"))
-                {
-                <a class="nav-link px-4 py-2 mx-1 admin-nav-link" href="@Url.Action("PaymentManagement", "Admin")">
-                    <i class="fas fa-credit-card me-2"></i>Payments
-                </a>
-                }
-
                 <!-- Payments -->
                 <a class="nav-link px-4 py-2 mx-1 admin-nav-link" href="@Url.Action("Index", "PaymentProcess")">
                     <i class="fas fa-credit-card me-2"></i>Payments
@@ -318,11 +310,6 @@
                             @if (User.IsInRole("Admin"))
                             {
                             <li><a class="dropdown-item" href="@Url.Action("Profile", "Admin")"><i class="fas fa-user me-2"></i>Profile</a></li>
-                            <li><a class="dropdown-item" href="@Url.Action("Index", "Settings")"><i class="fas fa-cog me-2"></i>Settings</a></li>
-                            }
-                            else if (User.IsInRole("Staff"))
-                            {
-                                <li><a class="dropdown-item" href="@Url.Action("Profile", "Staff")"><i class="fas fa-user me-2"></i>Profile</a></li>
                             }
                             <li><hr class="dropdown-divider"></li>
                             <li>

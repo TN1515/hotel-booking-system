@@ -681,6 +681,10 @@
 
 <script src="https://unpkg.com/@@microsoft/signalr@@latest/dist/browser/signalr.min.js"></script>
 <script>
+    window.isAdmin = @User.IsInRole("Admin").ToString().ToLower();
+    window.isCustomer = @User.IsInRole("Customer").ToString().ToLower();
+</script>
+<script>
 // Global variables
 let currentChatUserId = null;
 let currentChatUserName = null;
@@ -1155,5 +1159,12 @@ $(document).ready(function() {
     setInterval(loadConversations, 30000);
 });
 </script>
+
+@section Scripts {
+    <script>
+        window.isAdmin = @User.IsInRole("Admin").ToString().ToLower();
+        window.isCustomer = @User.IsInRole("Customer").ToString().ToLower();
+    </script>
+}
 
 

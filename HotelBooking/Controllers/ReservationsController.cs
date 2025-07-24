@@ -9,7 +9,7 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 
 namespace HotelBooking.Controllers
 {
-    [Authorize(Roles = "Admin,Staff")]
+    [Authorize(Roles = "Admin,Staff,Customer")]
     public class ReservationsController : Controller
     {
         private readonly HotelBookingContext _context;
@@ -123,7 +123,7 @@ namespace HotelBooking.Controllers
         // POST: Reservations/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
-        [Authorize(Roles = "Admin,Staff")]
+        [Authorize(Roles = "Admin,Staff,Customer")]
         public async Task<IActionResult> Create(CreateReservationViewModel viewModel)
         {
             if (ModelState.IsValid)

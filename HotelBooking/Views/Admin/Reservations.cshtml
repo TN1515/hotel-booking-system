@@ -11,9 +11,7 @@
             <h1 class="page-title">Reservations</h1>
             <p class="text-muted mb-0">Manage guest bookings and reservations across all properties.</p>
         </div>
-        <button class="btn btn-primary btn-lg">
-            <i class="fas fa-plus me-2"></i>New Reservation
-        </button>
+        @* XÓA nút New Reservation cho admin *@
     </div>
 
     <!-- Search and Filter Section -->
@@ -150,19 +148,15 @@
                             <div class="col-md-1">
                                 @if (reservation.Status == "Confirmed")
                                 {
-                                    <span class="badge bg-success fs-6 px-3 py-2">
-                                        <i class="fas fa-check me-1"></i>Confirmed
-                                    </span>
+                                    <span class="badge bg-success" style="min-width: 90px; padding: 0.5em 1em; font-size: 1rem; display: inline-block;">Confirmed</span>
                                 }
                                 else if (reservation.Status == "Pending")
                                 {
-                                    <span class="badge bg-warning fs-6 px-3 py-2">
-                                        <i class="fas fa-clock me-1"></i>Pending
-                                    </span>
+                                    <span class="badge bg-warning text-dark" style="min-width: 90px; padding: 0.5em 1em; font-size: 1rem; display: inline-block;">Pending</span>
                                 }
                                 else
                                 {
-                                    <span class="badge bg-secondary fs-6 px-3 py-2">@reservation.Status</span>
+                                    <span class="badge bg-secondary" style="min-width: 90px; padding: 0.5em 1em; font-size: 1rem; display: inline-block;">@reservation.Status</span>
                                 }
                             </div>
                             <div class="col-md-1">
