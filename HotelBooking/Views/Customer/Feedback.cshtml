@@ -12,6 +12,14 @@
                     </h4>
                 </div>
                 <div class="card-body">
+                    @if (TempData["SuccessMessage"] != null)
+                    {
+                        <div class="alert alert-success alert-dismissible fade show">
+                            <i class="fas fa-check-circle me-2"></i>@TempData["SuccessMessage"]
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+                    }
+
                     @if (ViewBag.Message != null)
                     {
                         <div class="alert alert-info">
@@ -19,11 +27,26 @@
                         </div>
                     }
 
-                    <form asp-action="Feedback" method="post">
+                    @if (!ViewData.ModelState.IsValid)
+                    {
+                        <div class="alert alert-danger">
+                            <i class="fas fa-exclamation-triangle me-2"></i>
+                            <ul class="mb-0">
+                                @foreach (var error in ViewData.ModelState.Values.SelectMany(v => v.Errors))
+                                {
+                                    <li>@error.ErrorMessage</li>
+                                }
+                            </ul>
+                        </div>
+                    }
+
+                    <form asp-action="Feedback" method="post" id="feedbackForm">
+                        @Html.AntiForgeryToken()
+
                         <div class="mb-4">
-                            <label for="rating" class="form-label fw-bold">Rating:</label>
+                            <label for="rating" class="form-label fw-bold">Rating: <span class="text-danger">*</span></label>
                             <div class="rating-stars">
-                                <input type="radio" name="rating" value="5" id="star5">
+                                <input type="radio" name="rating" value="5" id="star5" required>
                                 <label for="star5" class="star">★</label>
                                 <input type="radio" name="rating" value="4" id="star4">
                                 <label for="star4" class="star">★</label>
@@ -34,17 +57,21 @@
                                 <input type="radio" name="rating" value="1" id="star1">
                                 <label for="star1" class="star">★</label>
                             </div>
-                            <small class="form-text text-muted">Click on stars to rate your experience</small>
+                            <small class="form-text text-muted">Click on stars to rate your experience (Required)</small>
+                            <div class="invalid-feedback">Please select a rating.</div>
                         </div>
 
                         <div class="mb-4">
-                            <label for="comment" class="form-label fw-bold">Your Feedback:</label>
-                            <textarea name="comment" id="comment" class="form-control" rows="5" 
-                                      placeholder="Please share your experience with us..." required></textarea>
+                            <label for="comment" class="form-label fw-bold">Your Feedback: <span class="text-danger">*</span></label>
+                            <textarea name="comment" id="comment" class="form-control" rows="5"
+                                      placeholder="Please share your experience with us..."
+                                      required minlength="10" maxlength="1000"></textarea>
+                            <small class="form-text text-muted">Minimum 10 characters, maximum 1000 characters</small>
+                            <div class="invalid-feedback">Please provide your feedback (10-1000 characters).</div>
                         </div>
 
                         <div class="text-center">
-                            <button type="submit" class="btn btn-success btn-lg">
+                            <button type="submit" class="btn btn-success btn-lg" id="submitBtn">
                                 <i class="fas fa-paper-plane me-2"></i>Submit Feedback
                             </button>
                             <a href="@Url.Action("Index", "Home")" class="btn btn-secondary btn-lg ms-2">
@@ -82,4 +109,82 @@
     .rating-stars label.star:hover ~ label.star {
         color: #ffc107;
     }
+
+    .was-validated .rating-stars input[type="radio"]:invalid ~ label.star {
+        color: #dc3545;
+    }
+
+    .was-validated .rating-stars input[type="radio"]:valid ~ label.star {
+        color: #28a745;
+    }
 </style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('feedbackForm');
+    const submitBtn = document.getElementById('submitBtn');
+    const commentTextarea = document.getElementById('comment');
+    const ratingInputs = document.querySelectorAll('input[name="rating"]');
+
+    // Character counter for comment
+    const charCounter = document.createElement('small');
+    charCounter.className = 'form-text text-muted';
+    charCounter.id = 'charCounter';
+    commentTextarea.parentNode.appendChild(charCounter);
+
+    function updateCharCounter() {
+        const length = commentTextarea.value.length;
+        charCounter.textContent = `${length}/1000 characters`;
+
+        if (length < 10) {
+            charCounter.className = 'form-text text-danger';
+        } else if (length > 900) {
+            charCounter.className = 'form-text text-warning';
+        } else {
+            charCounter.className = 'form-text text-muted';
+        }
+    }
+
+    commentTextarea.addEventListener('input', updateCharCounter);
+    updateCharCounter();
+
+    // Form validation
+    form.addEventListener('submit', function(e) {
+        const isValid = form.checkValidity();
+        const ratingSelected = Array.from(ratingInputs).some(input => input.checked);
+
+        if (!isValid || !ratingSelected) {
+            e.preventDefault();
+            e.stopPropagation();
+
+            if (!ratingSelected) {
+                alert('Please select a rating before submitting.');
+            }
+        } else {
+            // Show loading state
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Submitting...';
+            submitBtn.disabled = true;
+        }
+
+        form.classList.add('was-validated');
+    });
+
+    // Rating selection feedback
+    ratingInputs.forEach(input => {
+        input.addEventListener('change', function() {
+            const selectedRating = this.value;
+            console.log('Rating selected:', selectedRating);
+
+            // Visual feedback
+            const stars = document.querySelectorAll('.rating-stars label.star');
+            stars.forEach((star, index) => {
+                if (index >= (5 - selectedRating)) {
+                    star.style.color = '#ffc107';
+                } else {
+                    star.style.color = '#ddd';
+                }
+            });
+        });
+    });
+});
+</script>

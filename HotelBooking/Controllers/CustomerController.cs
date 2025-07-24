@@ -198,34 +198,86 @@ namespace HotelBooking.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Feedback(string comment, int rating)
         {
-            if (string.IsNullOrEmpty(comment) || rating < 1 || rating > 5)
+            try
             {
-                ModelState.AddModelError("", "Please provide a valid comment and rating (1-5 stars).");
-                return View();
-            }
+                // Validate input
+                if (string.IsNullOrWhiteSpace(comment))
+                {
+                    ModelState.AddModelError("comment", "Please provide your feedback comment.");
+                    return View();
+                }
 
-            var user = await _userManager.GetUserAsync(User);
-            var guest = await _context.Guests.FirstOrDefaultAsync(g => g.UserID == user!.Id);
+                if (rating < 1 || rating > 5)
+                {
+                    ModelState.AddModelError("rating", "Please select a rating from 1 to 5 stars.");
+                    return View();
+                }
 
-            if (guest != null)
-            {
+                // Get current user
+                var user = await _userManager.GetUserAsync(User);
+                if (user == null)
+                {
+                    ModelState.AddModelError("", "User not found. Please login again.");
+                    return View();
+                }
+
+                // Find or create guest profile
+                var guest = await _context.Guests.FirstOrDefaultAsync(g => g.UserID == user.Id);
+
+                if (guest == null)
+                {
+                    // Create guest profile if not exists
+                    guest = new Guest
+                    {
+                        UserID = user.Id,
+                        FirstName = user.UserName ?? "Guest",
+                        LastName = "",
+                        Email = user.Email ?? "",
+                        Phone = user.PhoneNumber ?? "",
+                        CreatedBy = user.UserName ?? "System",
+                        CreatedDate = DateTime.Now
+                    };
+
+                    _context.Guests.Add(guest);
+                    await _context.SaveChangesAsync();
+                }
+
+                // Create feedback record
                 var feedback = new Feedback
                 {
                     GuestID = guest.GuestID,
-                    Comment = comment,
+                    Comment = comment.Trim(),
                     Rating = rating,
-                    FeedbackDate = DateTime.Now
+                    FeedbackDate = DateTime.Now,
+                    Category = "General" // Default category
                 };
 
+                // Add to database
                 _context.Feedbacks.Add(feedback);
-                await _context.SaveChangesAsync();
+                var result = await _context.SaveChangesAsync();
 
-                TempData["Message"] = "Thank you for your feedback!";
-                return RedirectToAction("Feedback");
+                if (result > 0)
+                {
+                    TempData["SuccessMessage"] = "Thank you for your feedback! Your review has been submitted successfully.";
+
+                    // Log the feedback submission
+                    Console.WriteLine($"Feedback saved successfully - ID: {feedback.FeedbackID}, User: {user.UserName}, Rating: {rating}");
+
+                    return RedirectToAction("Feedback");
+                }
+                else
+                {
+                    ModelState.AddModelError("", "Failed to save feedback. Please try again.");
+                    return View();
+                }
             }
-
-            ModelState.AddModelError("", "Unable to submit feedback. Please try again.");
-            return View();
+            catch (Exception ex)
+            {
+                // Log the error
+                Console.WriteLine($"Error saving feedback: {ex.Message}");
+                ModelState.AddModelError("", "An error occurred while submitting your feedback. Please try again.");
+                return View();
+            }
         }
 
         // GET: Customer/Notifications
@@ -234,6 +286,56 @@ namespace HotelBooking.Controllers
             // For now, show a simple notifications page
             ViewBag.Message = "Stay updated with your booking notifications!";
             return View();
+        }
+
+        // GET: Customer/MyFeedback - View submitted feedback
+        public async Task<IActionResult> MyFeedback()
+        {
+            var user = await _userManager.GetUserAsync(User);
+            if (user == null)
+            {
+                return NotFound();
+            }
+
+            var guest = await _context.Guests.FirstOrDefaultAsync(g => g.UserID == user.Id);
+            if (guest == null)
+            {
+                ViewBag.Message = "No feedback submitted yet.";
+                return View(new List<Feedback>());
+            }
+
+            var feedbacks = await _context.Feedbacks
+                .Where(f => f.GuestID == guest.GuestID)
+                .OrderByDescending(f => f.FeedbackDate)
+                .ToListAsync();
+
+            return View(feedbacks);
+        }
+
+        // AJAX: Test database connection
+        [HttpGet]
+        public async Task<JsonResult> TestDatabaseConnection()
+        {
+            try
+            {
+                var feedbackCount = await _context.Feedbacks.CountAsync();
+                var guestCount = await _context.Guests.CountAsync();
+
+                return Json(new {
+                    success = true,
+                    message = "Database connection successful",
+                    feedbackCount = feedbackCount,
+                    guestCount = guestCount,
+                    connectionString = _context.Database.GetConnectionString()?.Substring(0, 50) + "..."
+                });
+            }
+            catch (Exception ex)
+            {
+                return Json(new {
+                    success = false,
+                    message = "Database connection failed: " + ex.Message
+                });
+            }
         }
 
         // AJAX: Get states by country

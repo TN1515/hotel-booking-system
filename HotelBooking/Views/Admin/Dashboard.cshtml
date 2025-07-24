@@ -94,6 +94,50 @@
         </div>
     </div>
 
+    <!-- Customer Feedback Section -->
+    <div class="row mb-4">
+        <div class="col-lg-4">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-header bg-white border-0 py-3">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0 fw-bold">Customer Feedback</h5>
+                        <a href="@Url.Action("Index", "FeedbackManagement")" class="btn btn-sm btn-outline-primary">
+                            View All
+                        </a>
+                    </div>
+                </div>
+                <div class="card-body" id="feedbackSummary">
+                    <div class="text-center">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                        <p class="text-muted mt-2">Loading feedback data...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-8">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-header bg-white border-0 py-3">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0 fw-bold">Recent Customer Feedback</h5>
+                        <a href="@Url.Action("Recent", "FeedbackManagement")" class="btn btn-sm btn-outline-info">
+                            View Recent
+                        </a>
+                    </div>
+                </div>
+                <div class="card-body" id="recentFeedback">
+                    <div class="text-center">
+                        <div class="spinner-border text-info" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                        <p class="text-muted mt-2">Loading recent feedback...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Recent Activity -->
     <div class="row">
         <div class="col-lg-8">
@@ -239,4 +283,111 @@
     font-size: 0.75rem;
     padding: 0.35em 0.65em;
 }
+
+.feedback-item {
+    border-left: 4px solid #007bff;
+    background: #f8f9fa;
+    margin-bottom: 10px;
+    padding: 10px;
+    border-radius: 0 6px 6px 0;
+}
+
+.rating-stars {
+    color: #ffc107;
+}
 </style>
+
+@section Scripts {
+    <script>
+        $(document).ready(function() {
+            // Load feedback summary
+            loadFeedbackSummary();
+            loadRecentFeedback();
+        });
+
+        function loadFeedbackSummary() {
+            $.get('@Url.Action("Summary", "FeedbackManagement")')
+                .done(function(data) {
+                    var html = `
+                        <div class="text-center mb-3">
+                            <h2 class="text-primary mb-1">${data.averageRating}/5.0</h2>
+                            <div class="rating-stars mb-2">
+                                ${generateStars(data.averageRating)}
+                            </div>
+                            <p class="text-muted mb-0">Average Rating</p>
+                        </div>
+                        <div class="row text-center">
+                            <div class="col-6">
+                                <h4 class="text-info mb-1">${data.totalFeedbacks}</h4>
+                                <small class="text-muted">Total Reviews</small>
+                            </div>
+                            <div class="col-6">
+                                <h4 class="text-success mb-1">${data.recentCount}</h4>
+                                <small class="text-muted">This Week</small>
+                            </div>
+                        </div>
+                        <div class="mt-3">
+                            <small class="text-muted">Rating Distribution:</small>
+                            ${generateRatingBars(data.ratingDistribution, data.totalFeedbacks)}
+                        </div>
+                    `;
+                    $('#feedbackSummary').html(html);
+                })
+                .fail(function() {
+                    $('#feedbackSummary').html('<p class="text-danger">Failed to load feedback data</p>');
+                });
+        }
+
+        function loadRecentFeedback() {
+            $.get('@Url.Action("Recent", "FeedbackManagement")')
+                .done(function(data) {
+                    // Extract feedback data from the returned HTML or make a separate API call
+                    var html = `
+                        <div class="text-center">
+                            <i class="fas fa-comments fa-2x text-muted mb-2"></i>
+                            <p class="text-muted">Recent feedback loaded successfully</p>
+                            <a href="@Url.Action("Recent", "FeedbackManagement")" class="btn btn-primary btn-sm">
+                                View All Recent Feedback
+                            </a>
+                        </div>
+                    `;
+                    $('#recentFeedback').html(html);
+                })
+                .fail(function() {
+                    $('#recentFeedback').html('<p class="text-danger">Failed to load recent feedback</p>');
+                });
+        }
+
+        function generateStars(rating) {
+            var stars = '';
+            for (var i = 1; i <= 5; i++) {
+                if (i <= rating) {
+                    stars += '<i class="fas fa-star"></i>';
+                } else if (i - 0.5 <= rating) {
+                    stars += '<i class="fas fa-star-half-alt"></i>';
+                } else {
+                    stars += '<i class="far fa-star"></i>';
+                }
+            }
+            return stars;
+        }
+
+        function generateRatingBars(distribution, total) {
+            var html = '';
+            for (var i = 5; i >= 1; i--) {
+                var count = distribution[i] || 0;
+                var percentage = total > 0 ? (count * 100 / total) : 0;
+                html += `
+                    <div class="d-flex align-items-center mb-1">
+                        <span class="me-2">${i}★</span>
+                        <div class="progress flex-grow-1 me-2" style="height: 8px;">
+                            <div class="progress-bar bg-warning" style="width: ${percentage}%"></div>
+                        </div>
+                        <small class="text-muted">${count}</small>
+                    </div>
+                `;
+            }
+            return html;
+        }
+    </script>
+}
