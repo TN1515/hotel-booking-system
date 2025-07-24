@@ -72,16 +72,16 @@ namespace HotelBooking.Controllers
                 .Select(f => new FeedbackManagementViewModel
                 {
                     FeedbackID = f.FeedbackID,
-                    ReservationID = f.ReservationID,
+                    ReservationID = f.ReservationID ?? 0,
                     GuestID = f.GuestID,
                     Rating = f.Rating,
                     Comment = f.Comment,
                     FeedbackDate = f.FeedbackDate,
-                    GuestName = f.Guest != null ? $"{f.Guest.FirstName} {f.Guest.LastName}" :
+                    GuestName = f.Guest != null ? $"{f.Guest.FirstName} {f.Guest.LastName}".Trim() :
                                (f.Reservation != null && f.Reservation.User != null ? f.Reservation.User.UserName : "Anonymous"),
                     GuestEmail = f.Guest != null ? f.Guest.Email :
                                 (f.Reservation != null && f.Reservation.User != null ? f.Reservation.User.Email : "N/A"),
-                    RoomNumber = f.Reservation != null && f.Reservation.Room != null ? f.Reservation.Room.RoomNumber : "N/A",
+                    RoomNumber = f.Reservation != null && f.Reservation.Room != null ? f.Reservation.Room.RoomNumber : "General Feedback",
                     RoomType = f.Reservation != null && f.Reservation.Room != null && f.Reservation.Room.RoomType != null ?
                               f.Reservation.Room.RoomType.TypeName : "General",
                     CheckInDate = f.Reservation != null ? f.Reservation.CheckInDate : DateTime.MinValue,
@@ -104,6 +104,63 @@ namespace HotelBooking.Controllers
             };
 
             return View(viewModel);
+        }
+
+        // GET: FeedbackManagement/Recent - Quick view of recent feedback
+        public async Task<IActionResult> Recent()
+        {
+            var recentFeedbacks = await _context.Feedbacks
+                .Include(f => f.Guest)
+                .Include(f => f.Reservation)
+                    .ThenInclude(r => r!.Room)
+                    .ThenInclude(r => r!.RoomType)
+                .OrderByDescending(f => f.FeedbackDate)
+                .Take(20)
+                .Select(f => new FeedbackManagementViewModel
+                {
+                    FeedbackID = f.FeedbackID,
+                    ReservationID = f.ReservationID ?? 0,
+                    GuestID = f.GuestID,
+                    Rating = f.Rating,
+                    Comment = f.Comment,
+                    FeedbackDate = f.FeedbackDate,
+                    GuestName = $"{f.Guest!.FirstName} {f.Guest.LastName}".Trim(),
+                    GuestEmail = f.Guest.Email,
+                    RoomNumber = f.Reservation != null ? f.Reservation.Room!.RoomNumber : "General",
+                    RoomType = f.Reservation != null ? f.Reservation.Room!.RoomType!.TypeName : "General Feedback"
+                })
+                .ToListAsync();
+
+            ViewBag.Title = "Recent Customer Feedback";
+            return View("RecentFeedback", recentFeedbacks);
+        }
+
+        // GET: FeedbackManagement/Summary - Dashboard summary
+        public async Task<JsonResult> Summary()
+        {
+            var totalFeedbacks = await _context.Feedbacks.CountAsync();
+            var averageRating = totalFeedbacks > 0 ? await _context.Feedbacks.AverageAsync(f => (double)f.Rating) : 0;
+
+            var ratingDistribution = await _context.Feedbacks
+                .GroupBy(f => f.Rating)
+                .Select(g => new { Rating = g.Key, Count = g.Count() })
+                .ToDictionaryAsync(x => x.Rating, x => x.Count);
+
+            var recentCount = await _context.Feedbacks
+                .Where(f => f.FeedbackDate >= DateTime.Now.AddDays(-7))
+                .CountAsync();
+
+            return Json(new
+            {
+                totalFeedbacks,
+                averageRating = Math.Round(averageRating, 1),
+                ratingDistribution,
+                recentCount,
+                lastWeekAverage = totalFeedbacks > 0 ?
+                    Math.Round(await _context.Feedbacks
+                        .Where(f => f.FeedbackDate >= DateTime.Now.AddDays(-7))
+                        .AverageAsync(f => (double?)f.Rating) ?? 0, 1) : 0
+            });
         }
 
         // GET: FeedbackManagement/Details/5
