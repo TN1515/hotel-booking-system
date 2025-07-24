@@ -14,14 +14,7 @@ document.addEventListener('DOMContentLoaded', function() {
         signupTab.addEventListener('click', function() {
             signupTab.classList.add('active');
             signinTab.classList.remove('active');
-            // Here you can add logic to show/hide different forms
-            // For now, we'll just show an alert since we only have login
-            alert('Sign Up functionality will be implemented soon!');
-            // Reset to Sign In tab
-            setTimeout(() => {
-                signinTab.classList.add('active');
-                signupTab.classList.remove('active');
-            }, 100);
+            // Sign up functionality is now implemented, no need for alert
         });
     }
     
