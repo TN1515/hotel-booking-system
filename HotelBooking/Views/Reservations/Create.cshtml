@@ -2,7 +2,17 @@
 @{
     ViewData["Title"] = "Create Reservation";
 }
-
+@if (User.IsInRole("Admin"))
+{
+    <div class="container py-5 text-center">
+        <div class="alert alert-danger">
+            <h2>Access Denied</h2>
+            <p>Admin does not have permission to create a new reservation.</p>
+        </div>
+    </div>
+}
+else
+{
 <div class="container-fluid">
     <div class="row">
         <div class="col-md-8 offset-md-2">
@@ -110,6 +120,7 @@
         </div>
     </div>
 </div>
+}
 
 @section Scripts {
     @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
