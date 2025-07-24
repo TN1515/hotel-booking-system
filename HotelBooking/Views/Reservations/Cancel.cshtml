@@ -77,37 +77,65 @@
                             <ul class="list-unstyled">
                                 <li class="mb-2">
                                     <i class="fas fa-check text-success me-2"></i>
-                                    <strong>Free Cancellation:</strong> Cancel up to 24 hours before check-in for a full refund.
+                                    <strong>7+ days before:</strong> 100% refund
+                                </li>
+                                <li class="mb-2">
+                                    <i class="fas fa-check text-info me-2"></i>
+                                    <strong>3-7 days before:</strong> 75% refund
                                 </li>
                                 <li class="mb-2">
                                     <i class="fas fa-exclamation-triangle text-warning me-2"></i>
-                                    <strong>Late Cancellation:</strong> Cancellations within 24 hours of check-in may incur a fee.
+                                    <strong>1-3 days before:</strong> 50% refund
                                 </li>
                                 <li class="mb-2">
                                     <i class="fas fa-times text-danger me-2"></i>
-                                    <strong>No-Show:</strong> No refund for no-shows.
+                                    <strong>Within 24 hours:</strong> No cancellation allowed
+                                </li>
+                                <li class="mb-2">
+                                    <i class="fas fa-times text-danger me-2"></i>
+                                    <strong>No-Show:</strong> No refund
                                 </li>
                             </ul>
                             
                             @{
                                 var hoursUntilCheckIn = (Model.CheckInDate - DateTime.Now).TotalHours;
-                                var canCancelFree = hoursUntilCheckIn > 24;
+                                var totalAmount = (Model.CheckOutDate - Model.CheckInDate).Days * (Model.Room?.Price ?? 0);
+                                decimal refundAmount = 0;
+                                string refundClass = "success";
+                                string refundText = "";
+
+                                if (hoursUntilCheckIn > 168) // More than 7 days
+                                {
+                                    refundAmount = totalAmount;
+                                    refundText = "100% refund";
+                                    refundClass = "success";
+                                }
+                                else if (hoursUntilCheckIn > 72) // More than 3 days
+                                {
+                                    refundAmount = totalAmount * 0.75m;
+                                    refundText = "75% refund";
+                                    refundClass = "info";
+                                }
+                                else if (hoursUntilCheckIn > 24) // More than 1 day
+                                {
+                                    refundAmount = totalAmount * 0.50m;
+                                    refundText = "50% refund";
+                                    refundClass = "warning";
+                                }
+                                else
+                                {
+                                    refundAmount = 0;
+                                    refundText = "No refund - within 24 hours";
+                                    refundClass = "danger";
+                                }
                             }
-                            
-                            @if (canCancelFree)
-                            {
-                                <div class="alert alert-success">
-                                    <i class="fas fa-check-circle me-2"></i>
-                                    <strong>Good news!</strong> You can cancel this booking for free as it's more than 24 hours before check-in.
-                                </div>
-                            }
-                            else
-                            {
-                                <div class="alert alert-warning">
-                                    <i class="fas fa-exclamation-triangle me-2"></i>
-                                    <strong>Notice:</strong> This booking is within 24 hours of check-in. Cancellation fees may apply.
-                                </div>
-                            }
+
+                            <div class="alert alert-@refundClass">
+                                <i class="fas fa-money-bill-wave me-2"></i>
+                                <strong>Refund Information:</strong><br>
+                                Total Booking Amount: @totalAmount.ToString("C")<br>
+                                Your Refund: <strong>@refundAmount.ToString("C")</strong> (@refundText)
+                            </div>
                         </div>
                     </div>
 

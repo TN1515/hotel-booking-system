@@ -24,15 +24,19 @@ namespace HotelBooking.Controllers
                 .Include(f => f.Guest)
                 .Include(f => f.Reservation!)
                     .ThenInclude(r => r.Room!)
-                    .ThenInclude(r => r.RoomType)
+                    .ThenInclude(r => r.RoomType!)
+                .Include(f => f.Reservation!)
+                    .ThenInclude(r => r.User)
                 .AsQueryable();
 
             // Search
             if (!string.IsNullOrEmpty(searchTerm))
             {
-                query = query.Where(f => f.Guest!.FirstName!.Contains(searchTerm) ||
+                query = query.Where(f => (f.Guest != null && (f.Guest.FirstName!.Contains(searchTerm) ||
                                         f.Guest.LastName!.Contains(searchTerm) ||
-                                        f.Guest.Email!.Contains(searchTerm) ||
+                                        f.Guest.Email!.Contains(searchTerm))) ||
+                                        (f.Reservation != null && f.Reservation.User != null &&
+                                        f.Reservation.User.UserName!.Contains(searchTerm)) ||
                                         f.Comment!.Contains(searchTerm));
             }
 
@@ -73,12 +77,15 @@ namespace HotelBooking.Controllers
                     Rating = f.Rating,
                     Comment = f.Comment,
                     FeedbackDate = f.FeedbackDate,
-                    GuestName = $"{f.Guest!.FirstName} {f.Guest.LastName}",
-                    GuestEmail = f.Guest.Email,
-                    RoomNumber = f.Reservation!.Room!.RoomNumber,
-                    RoomType = f.Reservation.Room.RoomType!.TypeName,
-                    CheckInDate = f.Reservation.CheckInDate,
-                    CheckOutDate = f.Reservation.CheckOutDate
+                    GuestName = f.Guest != null ? $"{f.Guest.FirstName} {f.Guest.LastName}" :
+                               (f.Reservation != null && f.Reservation.User != null ? f.Reservation.User.UserName : "Anonymous"),
+                    GuestEmail = f.Guest != null ? f.Guest.Email :
+                                (f.Reservation != null && f.Reservation.User != null ? f.Reservation.User.Email : "N/A"),
+                    RoomNumber = f.Reservation != null && f.Reservation.Room != null ? f.Reservation.Room.RoomNumber : "N/A",
+                    RoomType = f.Reservation != null && f.Reservation.Room != null && f.Reservation.Room.RoomType != null ?
+                              f.Reservation.Room.RoomType.TypeName : "General",
+                    CheckInDate = f.Reservation != null ? f.Reservation.CheckInDate : DateTime.MinValue,
+                    CheckOutDate = f.Reservation != null ? f.Reservation.CheckOutDate : DateTime.MinValue
                 })
                 .ToListAsync();
 

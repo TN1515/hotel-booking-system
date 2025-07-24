@@ -73,6 +73,29 @@ namespace HotelBooking.Controllers
             return View(reservations);
         }
 
+        // GET: Admin/ReservationDetails/5
+        public async Task<IActionResult> ReservationDetails(int? id)
+        {
+            if (id == null)
+            {
+                return NotFound();
+            }
+
+            var reservation = await _context.Reservations
+                .Include(r => r.Room)
+                    .ThenInclude(rm => rm!.RoomType)
+                .Include(r => r.User)
+                .Include(r => r.Payments)
+                .FirstOrDefaultAsync(m => m.ReservationID == id);
+
+            if (reservation == null)
+            {
+                return NotFound();
+            }
+
+            return View(reservation);
+        }
+
         // POST: Admin/UpdateReservationStatus
         [HttpPost]
         public async Task<IActionResult> UpdateReservationStatus(int id, string status)
@@ -93,28 +116,7 @@ namespace HotelBooking.Controllers
             return RedirectToAction("Reservations");
         }
 
-        // GET: Admin/ReservationDetails/5
-        public async Task<IActionResult> ReservationDetails(int? id)
-        {
-            if (id == null)
-            {
-                return NotFound();
-            }
 
-            var reservation = await _context.Reservations
-                .Include(r => r.User)
-                .Include(r => r.Room)
-                .ThenInclude(room => room!.RoomType)
-                .Include(r => r.Payments)
-                .FirstOrDefaultAsync(m => m.ReservationID == id);
-
-            if (reservation == null)
-            {
-                return NotFound();
-            }
-
-            return View(reservation);
-        }
 
         // GET: Admin/Profile
         public async Task<IActionResult> Profile()

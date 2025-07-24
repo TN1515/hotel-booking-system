@@ -70,9 +70,18 @@ namespace HotelBooking.Controllers
                 return NotFound();
             }
 
-            // Check if user owns this reservation
+            // Check if user owns this reservation OR is Admin/Staff
             var userIdClaim = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
-            if (!int.TryParse(userIdClaim, out var userId) || reservation.UserID != userId)
+            if (!int.TryParse(userIdClaim, out var userId))
+            {
+                return Forbid();
+            }
+
+            // Allow access if user owns the reservation OR is Admin/Staff
+            bool isOwner = reservation.UserID == userId;
+            bool isAdminOrStaff = User.IsInRole("Admin") || User.IsInRole("Staff");
+
+            if (!isOwner && !isAdminOrStaff)
             {
                 return Forbid();
             }
@@ -135,7 +144,8 @@ namespace HotelBooking.Controllers
                         .AnyAsync(r => r.RoomID == viewModel.RoomID &&
                                      r.CheckInDate < viewModel.CheckOutDate &&
                                      r.CheckOutDate > viewModel.CheckInDate &&
-                                     r.Status != "Cancelled");
+                                     r.Status != "Cancelled" &&
+                                     r.Status != "Pending");
 
                     if (!isAvailable)
                     {
@@ -238,9 +248,18 @@ namespace HotelBooking.Controllers
                 return NotFound();
             }
 
-            // Check if user owns this reservation
+            // Check if user owns this reservation OR is Admin/Staff
             var userIdClaim = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
-            if (!int.TryParse(userIdClaim, out var userId) || reservation.UserID != userId)
+            if (!int.TryParse(userIdClaim, out var userId))
+            {
+                return Forbid();
+            }
+
+            // Allow access if user owns the reservation OR is Admin/Staff
+            bool isOwner = reservation.UserID == userId;
+            bool isAdminOrStaff = User.IsInRole("Admin") || User.IsInRole("Staff");
+
+            if (!isOwner && !isAdminOrStaff)
             {
                 return Forbid();
             }
@@ -258,27 +277,56 @@ namespace HotelBooking.Controllers
         // POST: Reservations/Cancel/5
         [HttpPost, ActionName("Cancel")]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> CancelConfirmed(int id)
+        public async Task<IActionResult> CancelConfirmed(int id, string? cancellationReason)
         {
-            var reservation = await _context.Reservations.FindAsync(id);
-            
+            var reservation = await _context.Reservations
+                .Include(r => r.Room)
+                .FirstOrDefaultAsync(r => r.ReservationID == id);
+
             if (reservation == null)
             {
                 return NotFound();
             }
 
-            // Check if user owns this reservation
+            // Check if user owns this reservation OR is Admin/Staff
             var userIdClaim = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
-            if (!int.TryParse(userIdClaim, out var userId) || reservation.UserID != userId)
+            if (!int.TryParse(userIdClaim, out var userId))
+            {
+                return Forbid();
+            }
+
+            // Allow access if user owns the reservation OR is Admin/Staff
+            bool isOwner = reservation.UserID == userId;
+            bool isAdminOrStaff = User.IsInRole("Admin") || User.IsInRole("Staff");
+
+            if (!isOwner && !isAdminOrStaff)
             {
                 return Forbid();
             }
 
             // Check if reservation can be cancelled
-            if (reservation.CheckInDate <= DateTime.Today.AddDays(1))
+            var hoursUntilCheckIn = (reservation.CheckInDate - DateTime.Now).TotalHours;
+            if (hoursUntilCheckIn <= 24)
             {
                 TempData["Error"] = "Cannot cancel reservation within 24 hours of check-in date.";
                 return RedirectToAction("Details", new { id = reservation.ReservationID });
+            }
+
+            // Calculate refund amount based on cancellation policy
+            var totalAmount = (reservation.CheckOutDate - reservation.CheckInDate).Days * (reservation.Room?.Price ?? 0);
+            decimal refundAmount = 0;
+
+            if (hoursUntilCheckIn > 168) // More than 7 days
+            {
+                refundAmount = totalAmount; // 100% refund
+            }
+            else if (hoursUntilCheckIn > 72) // More than 3 days
+            {
+                refundAmount = totalAmount * 0.75m; // 75% refund
+            }
+            else if (hoursUntilCheckIn > 24) // More than 1 day
+            {
+                refundAmount = totalAmount * 0.50m; // 50% refund
             }
 
             // Create cancellation record
@@ -286,8 +334,8 @@ namespace HotelBooking.Controllers
             {
                 ReservationID = reservation.ReservationID,
                 CancellationDate = DateTime.Now,
-                Reason = "Cancelled by customer",
-                RefundAmount = 0, // Calculate refund based on cancellation policy
+                Reason = !string.IsNullOrEmpty(cancellationReason) ? cancellationReason : "Cancelled by customer",
+                RefundAmount = refundAmount,
                 CreatedBy = User.Identity?.Name ?? "System",
                 CreatedDate = DateTime.Now
             };
@@ -301,7 +349,23 @@ namespace HotelBooking.Controllers
 
             await _context.SaveChangesAsync();
 
-            TempData["Message"] = "Reservation cancelled successfully.";
+            // Create notification for cancellation
+            var notification = new Notification
+            {
+                UserID = userId,
+                Title = "Booking Cancelled",
+                Message = $"Your reservation #{reservation.ReservationID} has been cancelled. Refund amount: {refundAmount:C}",
+                Type = "Cancellation",
+                Status = "Sent",
+                CreatedDate = DateTime.Now,
+                SentDate = DateTime.Now,
+                IsRead = false,
+                CreatedBy = "System"
+            };
+            _context.Notifications.Add(notification);
+            await _context.SaveChangesAsync();
+
+            TempData["Message"] = $"Reservation cancelled successfully. Refund amount: {refundAmount:C}";
             return RedirectToAction("Index");
         }
 
@@ -323,9 +387,18 @@ namespace HotelBooking.Controllers
                 return NotFound();
             }
 
-            // Check if user owns this reservation
+            // Check if user owns this reservation OR is Admin/Staff
             var userIdClaim = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
-            if (!int.TryParse(userIdClaim, out var userId) || reservation.UserID != userId)
+            if (!int.TryParse(userIdClaim, out var userId))
+            {
+                return Forbid();
+            }
+
+            // Allow access if user owns the reservation OR is Admin/Staff
+            bool isOwner = reservation.UserID == userId;
+            bool isAdminOrStaff = User.IsInRole("Admin") || User.IsInRole("Staff");
+
+            if (!isOwner && !isAdminOrStaff)
             {
                 return Forbid();
             }
@@ -366,9 +439,18 @@ namespace HotelBooking.Controllers
                     return NotFound();
                 }
 
-                // Check if user owns this reservation
+                // Check if user owns this reservation OR is Admin/Staff
                 var userIdClaim = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
-                if (!int.TryParse(userIdClaim, out var userId) || reservation.UserID != userId)
+                if (!int.TryParse(userIdClaim, out var userId))
+                {
+                    return Forbid();
+                }
+
+                // Allow access if user owns the reservation OR is Admin/Staff
+                bool isOwner = reservation.UserID == userId;
+                bool isAdminOrStaff = User.IsInRole("Admin") || User.IsInRole("Staff");
+
+                if (!isOwner && !isAdminOrStaff)
                 {
                     return Forbid();
                 }
@@ -378,7 +460,9 @@ namespace HotelBooking.Controllers
                     .AnyAsync(res => res.RoomID == reservation.RoomID &&
                                    res.ReservationID != reservation.ReservationID &&
                                    res.CheckInDate < model.CheckOutDate &&
-                                   res.CheckOutDate > model.CheckInDate);
+                                   res.CheckOutDate > model.CheckInDate &&
+                                   res.Status != "Cancelled" &&
+                                   res.Status != "Pending");
 
                 if (!isAvailable)
                 {
@@ -426,9 +510,18 @@ namespace HotelBooking.Controllers
                 return NotFound();
             }
 
-            // Check if user owns this reservation
+            // Check if user owns this reservation OR is Admin/Staff
             var userIdClaim = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
-            if (!int.TryParse(userIdClaim, out var userId) || reservation.UserID != userId)
+            if (!int.TryParse(userIdClaim, out var userId))
+            {
+                return Forbid();
+            }
+
+            // Allow access if user owns the reservation OR is Admin/Staff
+            bool isOwner = reservation.UserID == userId;
+            bool isAdminOrStaff = User.IsInRole("Admin") || User.IsInRole("Staff");
+
+            if (!isOwner && !isAdminOrStaff)
             {
                 return Forbid();
             }
@@ -476,9 +569,18 @@ namespace HotelBooking.Controllers
                     return NotFound();
                 }
 
-                // Check if user owns this reservation
+                // Check if user owns this reservation OR is Admin/Staff
                 var userIdClaim = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
-                if (!int.TryParse(userIdClaim, out var userId) || reservation.UserID != userId)
+                if (!int.TryParse(userIdClaim, out var userId))
+                {
+                    return Forbid();
+                }
+
+                // Allow access if user owns the reservation OR is Admin/Staff
+                bool isOwner = reservation.UserID == userId;
+                bool isAdminOrStaff = User.IsInRole("Admin") || User.IsInRole("Staff");
+
+                if (!isOwner && !isAdminOrStaff)
                 {
                     return Forbid();
                 }
@@ -840,7 +942,10 @@ namespace HotelBooking.Controllers
         private async Task<List<Room>> GetAvailableRooms(DateTime startDate, DateTime endDate, int excludeRoomId)
         {
             var bookedRoomIds = await _context.Reservations
-                .Where(res => res.CheckInDate < endDate && res.CheckOutDate > startDate && res.Status == "Confirmed")
+                .Where(res => res.CheckInDate < endDate &&
+                             res.CheckOutDate > startDate &&
+                             res.Status != "Cancelled" &&
+                             res.Status != "Pending")
                 .Select(res => res.RoomID)
                 .ToListAsync();
 

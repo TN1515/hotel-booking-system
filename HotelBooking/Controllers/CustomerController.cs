@@ -204,17 +204,30 @@ namespace HotelBooking.Controllers
                 return View();
             }
 
-            var user = await _userManager.GetUserAsync(User);
-            var guest = await _context.Guests.FirstOrDefaultAsync(g => g.UserID == user!.Id);
-
-            if (guest != null)
+            try
             {
+                var user = await _userManager.GetUserAsync(User);
+                if (user == null)
+                {
+                    ModelState.AddModelError("", "User not found. Please login again.");
+                    return View();
+                }
+
+                // Try to find a recent reservation for this user
+                var recentReservation = await _context.Reservations
+                    .Where(r => r.UserID == user.Id)
+                    .OrderByDescending(r => r.CheckOutDate)
+                    .FirstOrDefaultAsync();
+
+                // Create feedback - use reservation if available, otherwise create general feedback
                 var feedback = new Feedback
                 {
-                    GuestID = guest.GuestID,
+                    ReservationID = recentReservation?.ReservationID ?? 0, // 0 for general feedback
+                    GuestID = 0, // We'll use UserID instead through Reservation
                     Comment = comment,
                     Rating = rating,
-                    FeedbackDate = DateTime.Now
+                    FeedbackDate = DateTime.Now,
+                    Category = "General"
                 };
 
                 _context.Feedbacks.Add(feedback);
@@ -223,9 +236,11 @@ namespace HotelBooking.Controllers
                 TempData["Message"] = "Thank you for your feedback!";
                 return RedirectToAction("Feedback");
             }
-
-            ModelState.AddModelError("", "Unable to submit feedback. Please try again.");
-            return View();
+            catch (Exception ex)
+            {
+                ModelState.AddModelError("", "Unable to submit feedback. Please try again.");
+                return View();
+            }
         }
 
         // GET: Customer/Notifications

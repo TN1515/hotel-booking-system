@@ -191,12 +191,17 @@
                                 </div>
                             </div>
 
+                            <!-- Availability Status -->
+                            <div id="availabilityStatus" class="mb-3" style="display: none;">
+                                <!-- Will be populated by JavaScript -->
+                            </div>
+
                             <!-- Action Buttons -->
                             <div class="d-grid gap-2 d-md-flex justify-content-md-end">
                                 <a asp-controller="Rooms" asp-action="Index" class="btn btn-outline-secondary btn-lg me-md-2">
                                     <i class="fas fa-arrow-left me-2"></i>Back to Rooms
                                 </a>
-                                <button type="submit" class="btn btn-primary btn-lg">
+                                <button type="submit" id="confirmBookingBtn" class="btn btn-primary btn-lg">
                                     <i class="fas fa-check me-2"></i>Confirm Booking
                                 </button>
                             </div>
@@ -225,20 +230,78 @@
             function calculateTotal() {
                 const checkIn = new Date($('#CheckInDate').val());
                 const checkOut = new Date($('#CheckOutDate').val());
-                
+
                 if (checkIn && checkOut && checkOut > checkIn) {
                     const timeDiff = checkOut.getTime() - checkIn.getTime();
                     const nights = Math.ceil(timeDiff / (1000 * 3600 * 24));
                     const total = nights * roomPrice;
-                    
+
                     $('#numberOfNights').val(nights);
                     $('#nightsDisplay').text(nights);
                     $('#totalPrice').text(total.toLocaleString('vi-VN') + ' ₫');
+
+                    // Check availability when dates change
+                    checkAvailability();
                 } else {
                     $('#numberOfNights').val('');
                     $('#nightsDisplay').text('-');
                     $('#totalPrice').text('0 ₫');
+                    hideAvailabilityStatus();
                 }
+            }
+
+            function checkAvailability() {
+                const checkIn = $('#CheckInDate').val();
+                const checkOut = $('#CheckOutDate').val();
+                const roomId = @Model.RoomID;
+
+                if (!checkIn || !checkOut) {
+                    hideAvailabilityStatus();
+                    return;
+                }
+
+                // Show loading
+                showAvailabilityStatus('info', '<i class="fas fa-spinner fa-spin me-2"></i>Checking availability...', false);
+
+                $.ajax({
+                    url: '@Url.Action("CheckAvailability", "Rooms")',
+                    type: 'POST',
+                    contentType: 'application/json',
+                    data: JSON.stringify({
+                        roomId: roomId,
+                        checkInDate: checkIn,
+                        checkOutDate: checkOut
+                    }),
+                    success: function(response) {
+                        if (response.isAvailable) {
+                            showAvailabilityStatus('success', '<i class="fas fa-check-circle me-2"></i>' + response.message, true);
+                        } else {
+                            showAvailabilityStatus('danger', '<i class="fas fa-exclamation-triangle me-2"></i>' + response.message, false);
+                        }
+                    },
+                    error: function() {
+                        showAvailabilityStatus('warning', '<i class="fas fa-exclamation-triangle me-2"></i>Unable to check availability. Please try again.', false);
+                    }
+                });
+            }
+
+            function showAvailabilityStatus(type, message, enableBooking) {
+                const statusDiv = $('#availabilityStatus');
+                statusDiv.html(`<div class="alert alert-${type} mb-0">${message}</div>`);
+                statusDiv.show();
+
+                // Enable/disable booking button
+                $('#confirmBookingBtn').prop('disabled', !enableBooking);
+                if (!enableBooking) {
+                    $('#confirmBookingBtn').addClass('disabled');
+                } else {
+                    $('#confirmBookingBtn').removeClass('disabled');
+                }
+            }
+
+            function hideAvailabilityStatus() {
+                $('#availabilityStatus').hide();
+                $('#confirmBookingBtn').prop('disabled', false).removeClass('disabled');
             }
             
             $('#CheckInDate, #CheckOutDate').on('change', calculateTotal);
@@ -258,6 +321,16 @@
             
             // Initial calculation
             calculateTotal();
+
+            // Prevent form submission if room is not available
+            $('form').on('submit', function(e) {
+                const isDisabled = $('#confirmBookingBtn').prop('disabled');
+                if (isDisabled) {
+                    e.preventDefault();
+                    alert('Please select different dates. This room is not available for the selected period.');
+                    return false;
+                }
+            });
         });
     </script>
 }

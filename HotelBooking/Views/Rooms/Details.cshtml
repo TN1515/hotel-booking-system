@@ -301,9 +301,33 @@
                 <div class="feature-card text-center">
                     <h5 class="mb-3">Ready to Book?</h5>
                     <p class="text-muted mb-3">This room is available for booking</p>
-                    <a asp-action="Book" asp-route-id="@Model.RoomID" class="btn btn-primary btn-lg w-100 mb-2">
+
+                    <!-- Quick Date Selection -->
+                    <div class="mb-3">
+                        <div class="row g-2">
+                            <div class="col-6">
+                                <label class="form-label small">Check-in</label>
+                                <input type="date" id="quickCheckIn" class="form-control form-control-sm"
+                                       value="@DateTime.Today.AddDays(1).ToString("yyyy-MM-dd")"
+                                       min="@DateTime.Today.ToString("yyyy-MM-dd")">
+                            </div>
+                            <div class="col-6">
+                                <label class="form-label small">Check-out</label>
+                                <input type="date" id="quickCheckOut" class="form-control form-control-sm"
+                                       value="@DateTime.Today.AddDays(2).ToString("yyyy-MM-dd")"
+                                       min="@DateTime.Today.AddDays(1).ToString("yyyy-MM-dd")">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Availability Status -->
+                    <div id="quickAvailabilityStatus" class="mb-3" style="display: none;">
+                        <!-- Will be populated by JavaScript -->
+                    </div>
+
+                    <button id="bookThisRoomBtn" class="btn btn-primary btn-lg w-100 mb-2">
                         <i class="fas fa-calendar-plus me-2"></i>Book This Room
-                    </a>
+                    </button>
                     <small class="text-muted">Free cancellation up to 24 hours</small>
                 </div>
             }
@@ -430,6 +454,104 @@
                     wrap: true
                 });
             }
+
+            // Quick booking functionality
+            const roomId = @Model.RoomID;
+
+            function checkQuickAvailability() {
+                const checkIn = $('#quickCheckIn').val();
+                const checkOut = $('#quickCheckOut').val();
+
+                if (!checkIn || !checkOut) {
+                    hideQuickAvailabilityStatus();
+                    return;
+                }
+
+                if (new Date(checkIn) >= new Date(checkOut)) {
+                    showQuickAvailabilityStatus('warning', '<i class="fas fa-exclamation-triangle me-2"></i>Check-out must be after check-in date.', false);
+                    return;
+                }
+
+                // Show loading
+                showQuickAvailabilityStatus('info', '<i class="fas fa-spinner fa-spin me-2"></i>Checking availability...', false);
+
+                $.ajax({
+                    url: '@Url.Action("CheckAvailability", "Rooms")',
+                    type: 'POST',
+                    contentType: 'application/json',
+                    data: JSON.stringify({
+                        roomId: roomId,
+                        checkInDate: checkIn,
+                        checkOutDate: checkOut
+                    }),
+                    success: function(response) {
+                        if (response.isAvailable) {
+                            showQuickAvailabilityStatus('success', '<i class="fas fa-check-circle me-2"></i>Available! Ready to book.', true);
+                        } else {
+                            showQuickAvailabilityStatus('danger', '<i class="fas fa-exclamation-triangle me-2"></i>' + response.message, false);
+                        }
+                    },
+                    error: function() {
+                        showQuickAvailabilityStatus('warning', '<i class="fas fa-exclamation-triangle me-2"></i>Unable to check availability.', false);
+                    }
+                });
+            }
+
+            function showQuickAvailabilityStatus(type, message, enableBooking) {
+                const statusDiv = $('#quickAvailabilityStatus');
+                statusDiv.html(`<div class="alert alert-${type} alert-sm mb-0 small">${message}</div>`);
+                statusDiv.show();
+
+                $('#bookThisRoomBtn').prop('disabled', !enableBooking);
+                if (!enableBooking) {
+                    $('#bookThisRoomBtn').addClass('disabled');
+                } else {
+                    $('#bookThisRoomBtn').removeClass('disabled');
+                }
+            }
+
+            function hideQuickAvailabilityStatus() {
+                $('#quickAvailabilityStatus').hide();
+                $('#bookThisRoomBtn').prop('disabled', false).removeClass('disabled');
+            }
+
+            // Event handlers
+            $('#quickCheckIn, #quickCheckOut').on('change', checkQuickAvailability);
+
+            $('#quickCheckIn').on('change', function() {
+                const checkInDate = $(this).val();
+                if (checkInDate) {
+                    const nextDay = new Date(checkInDate);
+                    nextDay.setDate(nextDay.getDate() + 1);
+                    $('#quickCheckOut').attr('min', nextDay.toISOString().split('T')[0]);
+
+                    // Auto-set checkout to next day if not set or invalid
+                    const currentCheckOut = $('#quickCheckOut').val();
+                    if (!currentCheckOut || new Date(currentCheckOut) <= new Date(checkInDate)) {
+                        $('#quickCheckOut').val(nextDay.toISOString().split('T')[0]);
+                    }
+                }
+            });
+
+            $('#bookThisRoomBtn').on('click', function(e) {
+                e.preventDefault();
+                const checkIn = $('#quickCheckIn').val();
+                const checkOut = $('#quickCheckOut').val();
+
+                if ($(this).prop('disabled')) {
+                    alert('Please select different dates. This room is not available for the selected period.');
+                    return;
+                }
+
+                // Redirect to booking page with selected dates
+                window.location.href = '@Url.Action("Book", "Rooms", new { id = Model.RoomID })' +
+                    '?checkIn=' + encodeURIComponent(checkIn) +
+                    '&checkOut=' + encodeURIComponent(checkOut) +
+                    '&guests=1';
+            });
+
+            // Initial check
+            checkQuickAvailability();
         });
     </script>
 }

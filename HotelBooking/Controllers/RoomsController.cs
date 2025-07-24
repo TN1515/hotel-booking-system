@@ -61,8 +61,12 @@ namespace HotelBooking.Controllers
             if (checkIn.HasValue && checkOut.HasValue)
             {
                 // Check for rooms that are not booked during the specified period
+                // Only consider confirmed reservations that haven't been cancelled
                 var bookedRoomIds = await _context.Reservations
-                    .Where(res => res.CheckInDate < checkOut && res.CheckOutDate > checkIn)
+                    .Where(res => res.CheckInDate < checkOut &&
+                                 res.CheckOutDate > checkIn &&
+                                 res.Status != "Cancelled" &&
+                                 res.Status != "Pending")
                     .Select(res => res.RoomID)
                     .ToListAsync();
 
@@ -105,9 +109,12 @@ namespace HotelBooking.Controllers
                 .Include(r => r.RoomImages)
                 .Where(r => r.IsActive && r.Status == "Available");
 
-            // Check availability
+            // Check availability - only consider confirmed reservations that haven't been cancelled
             var bookedRoomIds = await _context.Reservations
-                .Where(res => res.CheckInDate < checkOut && res.CheckOutDate > checkIn)
+                .Where(res => res.CheckInDate < checkOut &&
+                             res.CheckOutDate > checkIn &&
+                             res.Status != "Cancelled" &&
+                             res.Status != "Pending")
                 .Select(res => res.RoomID)
                 .ToListAsync();
 
@@ -157,6 +164,23 @@ namespace HotelBooking.Controllers
                 return NotFound();
             }
 
+            // Check if room is available for the specified dates
+            if (checkIn.HasValue && checkOut.HasValue)
+            {
+                var isAvailable = !await _context.Reservations
+                    .AnyAsync(res => res.RoomID == id &&
+                                   res.CheckInDate < checkOut &&
+                                   res.CheckOutDate > checkIn &&
+                                   res.Status != "Cancelled" &&
+                                   res.Status != "Pending");
+
+                if (!isAvailable)
+                {
+                    TempData["Error"] = $"Sorry, Room {room.RoomNumber} is no longer available for the selected dates ({checkIn:MMM dd} - {checkOut:MMM dd}). Please choose different dates or another room.";
+                    return RedirectToAction("Available", new { checkIn, checkOut, guests });
+                }
+            }
+
             var bookingViewModel = new BookingViewModel
             {
                 RoomID = room.RoomID,
@@ -191,11 +215,13 @@ namespace HotelBooking.Controllers
                     return RedirectToAction("Login", "Account");
                 }
 
-                // Check if room is still available
+                // Check if room is still available - only consider confirmed reservations
                 var isAvailable = !await _context.Reservations
                     .AnyAsync(res => res.RoomID == model.RoomID &&
                                    res.CheckInDate < model.CheckOutDate &&
-                                   res.CheckOutDate > model.CheckInDate);
+                                   res.CheckOutDate > model.CheckInDate &&
+                                   res.Status != "Cancelled" &&
+                                   res.Status != "Pending");
 
                 if (!isAvailable)
                 {
@@ -303,11 +329,13 @@ namespace HotelBooking.Controllers
 
                 foreach (var roomId in model.SelectedRoomIds)
                 {
-                    // Check if room is still available
+                    // Check if room is still available - only consider confirmed reservations
                     var isAvailable = !await _context.Reservations
                         .AnyAsync(res => res.RoomID == roomId &&
                                        res.CheckInDate < model.CheckOutDate &&
-                                       res.CheckOutDate > model.CheckInDate);
+                                       res.CheckOutDate > model.CheckInDate &&
+                                       res.Status != "Cancelled" &&
+                                       res.Status != "Pending");
 
                     if (isAvailable)
                     {
@@ -668,6 +696,70 @@ namespace HotelBooking.Controllers
         private bool RoomExists(int id)
         {
             return _context.Rooms.Any(e => e.RoomID == id);
+        }
+
+        // AJAX endpoint to check room availability
+        [HttpPost]
+        public async Task<IActionResult> CheckAvailability([FromBody] AvailabilityCheckRequest request)
+        {
+            try
+            {
+                if (request.CheckInDate >= request.CheckOutDate)
+                {
+                    return Json(new {
+                        isAvailable = false,
+                        message = "Check-out date must be after check-in date."
+                    });
+                }
+
+                var isAvailable = !await _context.Reservations
+                    .AnyAsync(res => res.RoomID == request.RoomId &&
+                                   res.CheckInDate < request.CheckOutDate &&
+                                   res.CheckOutDate > request.CheckInDate &&
+                                   res.Status != "Cancelled" &&
+                                   res.Status != "Pending");
+
+                if (!isAvailable)
+                {
+                    // Get the conflicting reservation details
+                    var conflictingReservation = await _context.Reservations
+                        .Where(res => res.RoomID == request.RoomId &&
+                                     res.CheckInDate < request.CheckOutDate &&
+                                     res.CheckOutDate > request.CheckInDate &&
+                                     res.Status != "Cancelled" &&
+                                     res.Status != "Pending")
+                        .Select(res => new { res.CheckInDate, res.CheckOutDate })
+                        .FirstOrDefaultAsync();
+
+                    return Json(new {
+                        isAvailable = false,
+                        message = $"This room is already booked from {conflictingReservation?.CheckInDate:MMM dd, yyyy} to {conflictingReservation?.CheckOutDate:MMM dd, yyyy}. Please choose different dates.",
+                        conflictingDates = new {
+                            checkIn = conflictingReservation?.CheckInDate,
+                            checkOut = conflictingReservation?.CheckOutDate
+                        }
+                    });
+                }
+
+                return Json(new {
+                    isAvailable = true,
+                    message = "Room is available for the selected dates!"
+                });
+            }
+            catch (Exception ex)
+            {
+                return Json(new {
+                    isAvailable = false,
+                    message = "An error occurred while checking availability. Please try again."
+                });
+            }
+        }
+
+        public class AvailabilityCheckRequest
+        {
+            public int RoomId { get; set; }
+            public DateTime CheckInDate { get; set; }
+            public DateTime CheckOutDate { get; set; }
         }
     }
 }
